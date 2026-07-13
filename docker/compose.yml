@@ -1,0 +1,21 @@
+name: centaurus
+
+services:
+
+  centaurus-ollama:
+    image: ollama/ollama:latest
+    container_name: centaurus-ollama
+    restart: unless-stopped
+
+    ports:
+      - "11434:11434"
+
+    volumes:
+      - /opt/osint-framework/runtime/ollama:/root/.ollama
+
+    networks:
+      - centaurus-network
+
+networks:
+  centaurus-network:
+    driver: bridge
