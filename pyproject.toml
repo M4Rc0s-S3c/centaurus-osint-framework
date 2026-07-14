@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "centaurus"
+version = "0.4.0-dev"
+description = "Centaurus OSINT Framework"
+requires-python = ">=3.12"
+
+authors = [
+    { name = "Marcos" }
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
