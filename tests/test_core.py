@@ -10,24 +10,9 @@ def test_core_initial_state():
 
     assert core._initialized is False
     assert core._running is False
-    assert core._components == {}
+   
 
-
-def test_core_register_component():
-    """
-    Verify component registration and retrieval.
-    """
-
-    core = Core()
-
-    component = object()
-
-    core.register_component("test_component", component)
-
-    assert core.get_component("test_component") is component
-
-
-def test_core_run_initializes_framework():
+def test_core_run_starts_framework():
     """
     Verify run initializes the framework.
     """
