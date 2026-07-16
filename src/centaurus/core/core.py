@@ -5,6 +5,7 @@ The Core is responsible for creating, initializing and coordinating
 all high-level framework components.
 """
 
+from centaurus.cli.cli import CLI
 
 class Core:
     """
@@ -18,11 +19,19 @@ class Core:
 
         self._initialized = False
         self._running = False
+
+        self._cli = None
+
+    # ==========================================================
+    # Public interface
+    # ==========================================================
         
     def initialize(self) -> None:
         """
         Initialize the framework.
         """
+
+        self._create_components()
 
         self._initialized = True
       
@@ -42,4 +51,25 @@ class Core:
         """
 
         self._running = False
+
+    # ==========================================================
+    # Internal implementation
+    # ==========================================================
+    def _create_components(self) -> None:
+        """
+        Create all framework components.
+
+        Component creation is centralized in the Core in order to
+        guarantee a deterministic framework lifecycle.
+        """
+
+        self._create_cli()
+
+    def _create_cli(self) -> None:
+        """
+        Create the CLI component.
+        """
+
+        self._cli = CLI(self)
         
+    
