@@ -6,6 +6,7 @@ all high-level framework components.
 """
 
 from centaurus.cli.cli import CLI
+from centaurus.planner.planner import Planner
 
 class Core:
     """
@@ -21,6 +22,7 @@ class Core:
         self._running = False
 
         self._cli = None
+        self._planner = None
 
     # ==========================================================
     # Public interface
@@ -64,6 +66,7 @@ class Core:
         """
 
         self._create_cli()
+        self._create_planner()
 
     def _create_cli(self) -> None:
         """
@@ -71,5 +74,14 @@ class Core:
         """
 
         self._cli = CLI(self)
+    
+    def _create_planner(self) -> None:
+        """
+        Create the Planner component.
+        """
+
+        self._planner = Planner()
+
+        
         
     
