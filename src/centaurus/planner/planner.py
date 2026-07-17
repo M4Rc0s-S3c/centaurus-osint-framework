@@ -5,6 +5,12 @@ The Planner is responsible for transforming an investigation
 request into an execution plan.
 """
 
+from centaurus.executor.execution.execution_plan import ExecutionPlan
+from centaurus.executor.execution.execution_plan import (
+    ExecutionPlan,
+    ExecutionTask,
+)
+
 
 class Planner:
     """
@@ -25,10 +31,16 @@ class Planner:
     # Public interface
     # ==========================================================
 
-    def plan(self, request):
+    def plan(self, request) -> ExecutionPlan:
         """
         Build an execution plan from an investigation request.
         """
 
-        raise NotImplementedError
+        plan = ExecutionPlan()
+
+        task = ExecutionTask()
+
+        plan.tasks.append(task)
+
+        return plan
     
