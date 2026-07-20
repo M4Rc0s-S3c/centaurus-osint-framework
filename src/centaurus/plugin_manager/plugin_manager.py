@@ -5,6 +5,7 @@ The Plugin Manager is responsible for discovering,
 loading and managing framework plugins.
 """
 
+from centaurus.executor.execution.execution_task import ExecutionTask
 
 class PluginManager:
     """
@@ -20,4 +21,15 @@ class PluginManager:
         """
 
         pass
+
+    # ==========================================================
+    # Public interface
+    # ==========================================================
+
+    def execute(self, task: ExecutionTask) -> None:
+        """
+        Execute a single execution task.
+        """
+
+        pass   
     
