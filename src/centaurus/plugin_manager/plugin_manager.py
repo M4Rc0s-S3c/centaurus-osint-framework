@@ -62,5 +62,17 @@ class PluginManager:
             if entry.is_dir()
         ]
     
+    def _validate_plugin(self, plugin_name: str) -> bool:
+        """
+        Validate the structure of a plugin package.
+        """
+
+        plugin_path = self._plugins_directory() / plugin_name
+
+        if not plugin_path.is_dir():
+            return False
+
+        return (plugin_path / "__init__.py").is_file()
+    
     
     
