@@ -5,9 +5,11 @@ The Plugin Manager is responsible for discovering,
 loading and managing framework plugins.
 """
 
+import importlib
 from pathlib import Path
 
 from centaurus.executor.execution.execution_task import ExecutionTask
+
 
 class PluginManager:
     """
@@ -73,6 +75,18 @@ class PluginManager:
             return False
 
         return (plugin_path / "__init__.py").is_file()
+    
+    def _load_plugin(self, plugin_name: str):
+        """
+        Load a validated plugin module.
+        """
+
+        module_name = f"centaurus.plugins.{plugin_name}"
+
+        return importlib.import_module(module_name)
+    
+    
+
     
     
     
