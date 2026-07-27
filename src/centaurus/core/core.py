@@ -1,17 +1,36 @@
 """
-Core framework lifecycle manager.
+Core coordination component.
 
-The Core is responsible for creating, initializing and coordinating
-all high-level framework components.
+The Core is responsible for coordinating the execution of investigations
+and governing the lifecycle of the domain objects participating in them.
+
+At this stage, the Core only builds and owns the main framework
+components. Investigation execution will be incorporated during the
+Runtime Flow implementation.
 """
 
-from centaurus.cli.cli import CLI
 from centaurus.planner.planner import Planner
 from centaurus.executor.executor import Executor
+from centaurus.plugin_manager.plugin_manager import PluginManager
+
+from centaurus.rules.rule_engine import RuleEngine
+from centaurus.report.report_manager import ReportManager
+from centaurus.llm.llm_manager import LLMManager
+
 
 class Core:
     """
-    Main lifecycle controller of the Centaurus framework.
+    Central coordination component of the CENTAURUS framework.
+
+    Responsibilities
+    ----------------
+    - Own the lifecycle of the framework components.
+    - Coordinate investigation execution.
+    - Govern the Investigation aggregate.
+    - Mediate communication between framework components.
+
+    The Core does not implement business logic belonging to any
+    specialized component.
     """
 
     def __init__(self) -> None:
@@ -20,80 +39,97 @@ class Core:
         """
 
         self._initialized = False
-        self._running = False
 
-        self._cli = None
+        #
+        # Framework components
+        #
+
         self._planner = None
         self._executor = None
+        self._plugin_manager = None
+        self._rule_engine = None
+        self._report_manager = None
+        self._llm_manager = None
 
     # ==========================================================
     # Public interface
     # ==========================================================
-        
+
     def initialize(self) -> None:
         """
-        Initialize the framework.
+        Build the framework components.
+
+        This method performs the structural initialization of the
+        framework only.
+
+        It does not start investigations or execute plugins.
         """
+
+        if self._initialized:
+            return
 
         self._create_components()
 
         self._initialized = True
-      
-    def run(self) -> None:
-        """
-        Start framework operation.
-        """
-
-        if not self._initialized:
-            self.initialize()
-
-        self._running = True
-
-    def shutdown(self) -> None:
-        """
-        Stop framework operation.
-        """
-
-        self._running = False
 
     # ==========================================================
     # Internal implementation
     # ==========================================================
+
     def _create_components(self) -> None:
         """
         Create all framework components.
 
-        Component creation is centralized in the Core in order to
-        guarantee a deterministic framework lifecycle.
+        Component creation is centralized in the Core to guarantee
+        a deterministic framework lifecycle.
         """
 
-        self._create_cli()
+        self._create_plugin_manager()
         self._create_planner()
         self._create_executor()
-        
-    def _create_cli(self) -> None:
+        self._create_rule_engine()
+        self._create_report_manager()
+        self._create_llm_manager()
+
+    def _create_plugin_manager(self) -> None:
         """
-        Create the CLI component.
+        Create the Plugin Manager.
         """
 
-        self._cli = CLI(self)
-    
+        self._plugin_manager = PluginManager()
+
     def _create_planner(self) -> None:
         """
-        Create the Planner component.
+        Create the Planner.
         """
 
         self._planner = Planner()
 
     def _create_executor(self) -> None:
         """
-        Create the Executor component.
+        Create the Executor.
         """
 
         self._executor = Executor()
 
-        
+    def _create_rule_engine(self) -> None:
+        """
+        Create the Rule Engine.
+        """
 
+        self._rule_engine = RuleEngine()
 
-        
+    def _create_report_manager(self) -> None:
+        """
+        Create the Report Manager.
+        """
+
+        self._report_manager = ReportManager()
+
+    def _create_llm_manager(self) -> None:
+        """
+        Create the LLM Manager.
+        """
+
+        self._llm_manager = LLMManager()
     
