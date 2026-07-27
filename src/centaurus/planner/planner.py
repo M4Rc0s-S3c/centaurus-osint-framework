@@ -5,7 +5,7 @@ The Planner is responsible for transforming an investigation
 intent into an execution plan.
 """
 
-from centaurus.executor.execution.execution_plan import (
+from centaurus.executor.execution import (
     ExecutionPlan,
     ExecutionTask,
 )
@@ -38,7 +38,10 @@ class Planner:
         # objects according to the investigation intent.
         #
 
-        task = ExecutionTask()
+        task = ExecutionTask(
+            plugin_id="whois",
+            parameters={},
+        )
 
         plan.tasks.append(task)
 

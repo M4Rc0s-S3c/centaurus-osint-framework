@@ -1,7 +1,13 @@
 """
 Execution Task.
 
-Represents a single unit of work within an execution plan.
+Represents a single planned execution task.
+
+An ExecutionTask only describes which plugin must be executed
+and the parameters required for its execution.
+
+It never stores execution state, results, evidence,
+reports or runtime information.
 """
 
 

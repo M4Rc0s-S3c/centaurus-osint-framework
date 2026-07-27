@@ -6,21 +6,6 @@ and consumed by the Executor.
 """
 
 
-class ExecutionTask:
-    """
-    Represents a single executable task.
-    """
-
-    def __init__(self) -> None:
-        """
-        Create an empty execution task.
-        """
-
-        self.id = None
-        self.plugin = None
-        self.parameters = None
-
-
 class ExecutionPlan:
     """
     Represents an execution plan.
@@ -36,5 +21,3 @@ class ExecutionPlan:
         self.objective = None
         self.tasks = []
         self.metadata = {}
-
-        

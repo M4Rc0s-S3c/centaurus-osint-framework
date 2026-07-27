@@ -2,13 +2,22 @@
 WHOIS plugin implementation.
 """
 
+from centaurus.plugins.base_plugin import BasePlugin
 
-class WhoisPlugin:
+
+class Plugin(BasePlugin):
     """
-    Placeholder WHOIS plugin.
-
-    The plugin contract will be completed once
-    BasePlugin is designed.
+    WHOIS plugin.
     """
 
-    pass
+    def execute(self) -> None:
+        """
+        Execute the WHOIS plugin.
+        """
+
+        #
+        # Temporary implementation.
+        # Future versions will perform the actual WHOIS query.
+        #
+
+        print("Executing WHOIS plugin")

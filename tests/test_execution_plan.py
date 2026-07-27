@@ -1,4 +1,4 @@
-from centaurus.executor.execution.execution_plan import (
+from centaurus.executor.execution import (
     ExecutionPlan,
     ExecutionTask,
 )
@@ -19,7 +19,7 @@ def test_execution_task_can_be_created() -> None:
     An ExecutionTask can be instantiated.
     """
 
-    task = ExecutionTask()
+    task = ExecutionTask(plugin_id="whois")
 
     assert isinstance(task, ExecutionTask)
 
@@ -41,9 +41,7 @@ def test_execution_task_default_values() -> None:
     ExecutionTask starts with the expected default values.
     """
 
-    task = ExecutionTask()
+    task = ExecutionTask(plugin_id="whois")
 
-    assert task.id is None
-    assert task.plugin is None
-    assert task.parameters is None
-    
+    assert task.plugin_id == "whois"
+    assert task.parameters == {}

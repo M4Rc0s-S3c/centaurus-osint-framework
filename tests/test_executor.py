@@ -1,8 +1,9 @@
 from centaurus.executor.executor import Executor
-from centaurus.executor.execution.execution_plan import (
+from centaurus.executor.execution import (
     ExecutionPlan,
     ExecutionTask,
 )
+
 
 def test_executor_creation():
     """
@@ -22,6 +23,7 @@ def test_executor_has_execute_method():
     executor = Executor()
 
     assert hasattr(executor, "execute")
+
 
 def test_executor_accepts_execution_plan():
     """
@@ -56,10 +58,12 @@ def test_executor_executes_plan_with_tasks():
 
     plan = ExecutionPlan()
 
-    plan.tasks.append(ExecutionTask())
-    plan.tasks.append(ExecutionTask())
+    plan.tasks.append(
+        ExecutionTask(plugin_id="whois")
+    )
+
+    plan.tasks.append(
+        ExecutionTask(plugin_id="whois")
+    )
 
     executor.execute(plan)
-
-
-    

@@ -1,5 +1,5 @@
 from centaurus.planner.planner import Planner
-from centaurus.executor.execution.execution_plan import (
+from centaurus.executor.execution import (
     ExecutionPlan,
     ExecutionTask,
 )

@@ -2,4 +2,8 @@
 WHOIS plugin package.
 """
 
-from .plugin import WhoisPlugin
+from .plugin import Plugin
+
+__all__ = [
+    "Plugin",
+]

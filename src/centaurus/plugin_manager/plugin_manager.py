@@ -26,19 +26,13 @@ class PluginManager:
     def execute(self, task: ExecutionTask) -> None:
         """
         Execute a single execution task.
-
-        Future versions will:
-            - locate the requested plugin;
-            - load the plugin;
-            - invoke BasePlugin.execute().
         """
 
-        #
-        # Runtime implementation will be added during
-        # the execution flow milestone.
-        #
+        module = self._load_plugin(task.plugin_id)
 
-        pass
+        plugin = module.Plugin()
+
+        plugin.execute()
 
     # ==========================================================
     # Internal helpers
