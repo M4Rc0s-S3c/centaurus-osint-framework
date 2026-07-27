@@ -13,18 +13,11 @@ from centaurus.executor.execution.execution_task import ExecutionTask
 
 class PluginManager:
     """
-    Manage the lifecycle of framework plugins.
+    Plugin Manager component.
 
     The Plugin Manager is the only component allowed
     to discover, validate, load and invoke plugins.
     """
-
-    def __init__(self) -> None:
-        """
-        Create a new Plugin Manager instance.
-        """
-
-        pass
 
     # ==========================================================
     # Public interface
@@ -33,10 +26,20 @@ class PluginManager:
     def execute(self, task: ExecutionTask) -> None:
         """
         Execute a single execution task.
+
+        Future versions will:
+            - locate the requested plugin;
+            - load the plugin;
+            - invoke BasePlugin.execute().
         """
 
+        #
+        # Runtime implementation will be added during
+        # the execution flow milestone.
+        #
+
         pass
-    
+
     # ==========================================================
     # Internal helpers
     # ==========================================================
@@ -47,7 +50,7 @@ class PluginManager:
         """
 
         return Path(__file__).resolve().parent.parent / "plugins"
-    
+
     def _discover_plugins(self) -> list[str]:
         """
         Discover plugin packages available in the plugins directory.
@@ -63,7 +66,7 @@ class PluginManager:
             for entry in plugins_path.iterdir()
             if entry.is_dir()
         ]
-    
+
     def _validate_plugin(self, plugin_name: str) -> bool:
         """
         Validate the structure of a plugin package.
@@ -74,8 +77,12 @@ class PluginManager:
         if not plugin_path.is_dir():
             return False
 
-        return (plugin_path / "__init__.py").is_file()
-    
+        return (
+            (plugin_path / "__init__.py").is_file()
+            and
+            (plugin_path / "plugin.py").is_file()
+        )
+
     def _load_plugin(self, plugin_name: str):
         """
         Load a validated plugin module.
@@ -84,9 +91,4 @@ class PluginManager:
         module_name = f"centaurus.plugins.{plugin_name}"
 
         return importlib.import_module(module_name)
-    
-    
-
-    
-    
     

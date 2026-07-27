@@ -32,7 +32,7 @@ def test_planner_returns_execution_plan():
 
     planner = Planner()
 
-    plan = planner.plan(request=None)
+    plan = planner.plan(intent=None)
 
     assert isinstance(plan, ExecutionPlan)
 
@@ -43,7 +43,7 @@ def test_planner_creates_execution_task() -> None:
 
     planner = Planner()
 
-    plan = planner.plan(request=None)
+    plan = planner.plan(intent=None)
 
     assert isinstance(plan, ExecutionPlan)
     assert len(plan.tasks) == 1

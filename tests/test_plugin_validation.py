@@ -33,6 +33,7 @@ def test_validate_plugin_returns_true_for_valid_plugin(tmp_path):
 
     plugin_dir.mkdir(parents=True)
     (plugin_dir / "__init__.py").touch()
+    (plugin_dir / "plugin.py").touch()
 
     manager = PluginManager()
     manager._plugins_directory = lambda: plugins_dir
