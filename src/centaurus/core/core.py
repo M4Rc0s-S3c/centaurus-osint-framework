@@ -72,6 +72,24 @@ class Core:
 
         self._initialized = True
 
+    def run_investigation(self, intent) -> None:
+        """
+        Coordinate the execution of an investigation.
+
+        The Core delegates planning to the Planner and execution
+        to the Executor.
+
+        The Core does not interpret the investigation intent,
+        create execution tasks or execute plugins directly.
+        """
+
+        if not self._initialized:
+            self.initialize()
+
+        plan = self._planner.plan(intent)
+
+        self._executor.execute(plan)
+
     # ==========================================================
     # Internal implementation
     # ==========================================================
@@ -110,7 +128,9 @@ class Core:
         Create the Executor.
         """
 
-        self._executor = Executor()
+        self._executor = Executor(
+            plugin_manager=self._plugin_manager,
+        )
 
     def _create_rule_engine(self) -> None:
         """

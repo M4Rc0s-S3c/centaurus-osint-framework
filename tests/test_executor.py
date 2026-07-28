@@ -5,12 +5,36 @@ from centaurus.executor.execution import (
 )
 
 
-def test_executor_creation():
+class FakePluginManager:
     """
-    Executor can be created.
+    Test double for the Plugin Manager.
     """
 
-    executor = Executor()
+    def __init__(self) -> None:
+        """
+        Create an empty fake Plugin Manager.
+        """
+
+        self.executed_tasks = []
+
+    def execute(self, task: ExecutionTask) -> None:
+        """
+        Record the task received from the Executor.
+        """
+
+        self.executed_tasks.append(task)
+
+
+def test_executor_creation():
+    """
+    Executor can be created with a Plugin Manager.
+    """
+
+    plugin_manager = FakePluginManager()
+
+    executor = Executor(
+        plugin_manager=plugin_manager,
+    )
 
     assert executor is not None
 
@@ -20,7 +44,11 @@ def test_executor_has_execute_method():
     Executor exposes the execute method.
     """
 
-    executor = Executor()
+    plugin_manager = FakePluginManager()
+
+    executor = Executor(
+        plugin_manager=plugin_manager,
+    )
 
     assert hasattr(executor, "execute")
 
@@ -30,7 +58,11 @@ def test_executor_accepts_execution_plan():
     Executor accepts an ExecutionPlan.
     """
 
-    executor = Executor()
+    plugin_manager = FakePluginManager()
+
+    executor = Executor(
+        plugin_manager=plugin_manager,
+    )
 
     plan = ExecutionPlan()
 
@@ -42,28 +74,47 @@ def test_executor_executes_empty_plan():
     Executor can execute an empty ExecutionPlan.
     """
 
-    executor = Executor()
+    plugin_manager = FakePluginManager()
+
+    executor = Executor(
+        plugin_manager=plugin_manager,
+    )
 
     plan = ExecutionPlan()
 
     executor.execute(plan)
+
+    assert plugin_manager.executed_tasks == []
 
 
 def test_executor_executes_plan_with_tasks():
     """
-    Executor can iterate over the tasks contained in an ExecutionPlan.
+    Executor delegates every task in the plan
+    to the Plugin Manager.
     """
 
-    executor = Executor()
+    plugin_manager = FakePluginManager()
+
+    executor = Executor(
+        plugin_manager=plugin_manager,
+    )
 
     plan = ExecutionPlan()
 
-    plan.tasks.append(
-        ExecutionTask(plugin_id="whois")
+    first_task = ExecutionTask(
+        plugin_id="whois",
     )
 
-    plan.tasks.append(
-        ExecutionTask(plugin_id="whois")
+    second_task = ExecutionTask(
+        plugin_id="whois",
     )
+
+    plan.tasks.append(first_task)
+    plan.tasks.append(second_task)
 
     executor.execute(plan)
+
+    assert plugin_manager.executed_tasks == [
+        first_task,
+        second_task,
+    ]
