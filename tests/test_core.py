@@ -3,6 +3,50 @@ Unit tests for the Core component.
 """
 
 from centaurus.core import Core
+from centaurus.executor.execution import ExecutionPlan
+
+
+class FakePlanner:
+    """
+    Test double for the Planner component.
+    """
+
+    def __init__(self, plan: ExecutionPlan) -> None:
+        """
+        Create a fake Planner with a predefined plan.
+        """
+
+        self._plan = plan
+        self.received_intents = []
+
+    def plan(self, intent) -> ExecutionPlan:
+        """
+        Record the intent and return the predefined plan.
+        """
+
+        self.received_intents.append(intent)
+
+        return self._plan
+
+
+class FakeExecutor:
+    """
+    Test double for the Executor component.
+    """
+
+    def __init__(self) -> None:
+        """
+        Create an empty fake Executor.
+        """
+
+        self.received_plans = []
+
+    def execute(self, plan: ExecutionPlan) -> None:
+        """
+        Record the execution plan received from the Core.
+        """
+
+        self.received_plans.append(plan)
 
 
 def test_core_initial_state():
@@ -65,3 +109,65 @@ def test_core_initialize_is_idempotent():
     assert rule_engine is core._rule_engine
     assert report_manager is core._report_manager
     assert llm_manager is core._llm_manager
+
+
+def test_core_run_investigation_initializes_framework():
+    """
+    Running an investigation initializes the framework when needed.
+    """
+
+    core = Core()
+
+    assert core._initialized is False
+
+    core.run_investigation(intent=None)
+
+    assert core._initialized is True
+
+
+def test_core_run_investigation_delegates_to_planner():
+    """
+    Core passes the investigation intent to the Planner.
+    """
+
+    core = Core()
+
+    plan = ExecutionPlan()
+    planner = FakePlanner(plan=plan)
+    executor = FakeExecutor()
+
+    core._initialized = True
+    core._planner = planner
+    core._executor = executor
+
+    intent = {
+        "target": "example.com",
+    }
+
+    core.run_investigation(intent)
+
+    assert planner.received_intents == [
+        intent,
+    ]
+
+
+def test_core_run_investigation_delegates_plan_to_executor():
+    """
+    Core passes the plan produced by the Planner to the Executor.
+    """
+
+    core = Core()
+
+    plan = ExecutionPlan()
+    planner = FakePlanner(plan=plan)
+    executor = FakeExecutor()
+
+    core._initialized = True
+    core._planner = planner
+    core._executor = executor
+
+    core.run_investigation(intent=None)
+
+    assert executor.received_plans == [
+        plan,
+    ]
