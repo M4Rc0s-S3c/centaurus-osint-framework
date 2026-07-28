@@ -10,14 +10,18 @@ class Plugin(BasePlugin):
     WHOIS plugin.
     """
 
-    def execute(self) -> None:
+    def execute(
+        self,
+        parameters: dict,
+    ) -> None:
         """
         Execute the WHOIS plugin.
+
+        The actual WHOIS query will be implemented in a future
+        runtime milestone.
         """
 
-        #
-        # Temporary implementation.
-        # Future versions will perform the actual WHOIS query.
-        #
-
-        print("Executing WHOIS plugin")
+        print(
+            "Executing WHOIS plugin",
+            parameters,
+        )

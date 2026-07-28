@@ -12,12 +12,22 @@ class ValidPlugin(BasePlugin):
     Valid test plugin implementing the BasePlugin contract.
     """
 
-    def execute(self) -> None:
+    def __init__(self) -> None:
+        """
+        Create a valid test plugin.
+        """
+
+        self.received_parameters = None
+
+    def execute(
+        self,
+        parameters: dict,
+    ) -> None:
         """
         Execute the test plugin.
         """
 
-        pass
+        self.received_parameters = parameters
 
 
 class InvalidPlugin:
@@ -25,7 +35,10 @@ class InvalidPlugin:
     Invalid test plugin that does not inherit from BasePlugin.
     """
 
-    def execute(self) -> None:
+    def execute(
+        self,
+        parameters: dict,
+    ) -> None:
         """
         Execute the invalid test plugin.
         """
@@ -68,9 +81,42 @@ def test_plugin_manager_accepts_execution_task() -> None:
 
     manager = PluginManager()
 
-    task = ExecutionTask(plugin_id="whois")
+    task = ExecutionTask(
+        plugin_id="whois",
+    )
 
     assert manager.execute(task) is None
+
+
+def test_plugin_manager_passes_task_parameters_to_plugin(
+    monkeypatch,
+) -> None:
+    """
+    Plugin Manager passes task parameters to the plugin.
+    """
+
+    manager = PluginManager()
+
+    plugin = ValidPlugin()
+
+    monkeypatch.setattr(
+        manager,
+        "_load_plugin_class",
+        lambda plugin_name: lambda: plugin,
+    )
+
+    parameters = {
+        "domain": "example.com",
+    }
+
+    task = ExecutionTask(
+        plugin_id="test_plugin",
+        parameters=parameters,
+    )
+
+    manager.execute(task)
+
+    assert plugin.received_parameters == parameters
 
 
 def test_load_plugin_class_returns_valid_plugin_class(
@@ -97,6 +143,7 @@ def test_load_plugin_class_returns_valid_plugin_class(
     )
 
     assert plugin_class is ValidPlugin
+
     assert issubclass(
         plugin_class,
         BasePlugin,

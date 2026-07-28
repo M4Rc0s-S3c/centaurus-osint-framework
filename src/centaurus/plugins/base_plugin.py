@@ -7,16 +7,17 @@ from abc import ABC, abstractmethod
 
 class BasePlugin(ABC):
     """
-    Structural contract implemented by every CENTAURUS plugin.
-
-    The operational contract (execute signature) is intentionally
-    left undefined until the runtime execution model is finalized.
+    Structural and operational contract implemented by every
+    CENTAURUS plugin.
     """
 
     @abstractmethod
-    def execute(self):
+    def execute(
+        self,
+        parameters: dict,
+    ) -> None:
         """
-        Execute the plugin.
+        Execute the plugin using the supplied task parameters.
         """
 
         pass

@@ -37,7 +37,9 @@ class PluginManager:
 
         plugin = plugin_class()
 
-        plugin.execute()
+        plugin.execute(
+            task.parameters,
+        )
 
     # ==========================================================
     # Internal helpers
