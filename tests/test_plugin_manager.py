@@ -74,18 +74,28 @@ def test_plugin_manager_has_execute_method() -> None:
     assert hasattr(manager, "execute")
 
 
-def test_plugin_manager_accepts_execution_task() -> None:
+def test_plugin_manager_returns_plugin_result() -> None:
     """
-    Plugin Manager accepts and executes an ExecutionTask.
+    Plugin Manager returns the result produced by a plugin.
     """
 
     manager = PluginManager()
 
     task = ExecutionTask(
         plugin_id="whois",
+        parameters={
+            "domain": "example.com",
+        },
     )
 
-    assert manager.execute(task) is None
+    result = manager.execute(task)
+
+    assert isinstance(result, dict)
+
+    assert result["plugin"] == "whois"
+    assert result["status"] == "completed"
+
+    assert result["data"]["domain"] == "example.com"
 
 
 def test_plugin_manager_passes_task_parameters_to_plugin(

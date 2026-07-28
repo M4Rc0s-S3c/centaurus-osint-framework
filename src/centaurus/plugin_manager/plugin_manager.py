@@ -24,21 +24,27 @@ class PluginManager:
     # Public interface
     # ==========================================================
 
-    def execute(self, task: ExecutionTask) -> None:
+    def execute(
+        self,
+        task: ExecutionTask,
+    ) -> dict:
         """
         Execute a single execution task.
 
         The Plugin Manager loads the plugin requested by the task,
         verifies that its public Plugin class implements the
-        BasePlugin contract, creates an instance and executes it.
+        BasePlugin contract, creates an instance, executes it and
+        returns the structured result produced by the plugin.
         """
 
-        plugin_class = self._load_plugin_class(task.plugin_id)
+        plugin_class = self._load_plugin_class(
+        task.plugin_id,
+        )
 
         plugin = plugin_class()
 
-        plugin.execute(
-            task.parameters,
+        return plugin.execute(
+        task.parameters,
         )
 
     # ==========================================================

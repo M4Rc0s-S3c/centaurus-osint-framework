@@ -15,9 +15,13 @@ class BasePlugin(ABC):
     def execute(
         self,
         parameters: dict,
-    ) -> None:
+    ) -> dict:
         """
         Execute the plugin using the supplied task parameters.
+
+        Returns:
+            A structured dictionary containing the result
+            produced by the plugin.
         """
 
         pass

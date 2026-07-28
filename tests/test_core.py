@@ -34,19 +34,22 @@ class FakeExecutor:
     Test double for the Executor component.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, result=None) -> None:
         """
-        Create an empty fake Executor.
+        Create a fake Executor with a predefined result.
         """
 
+        self._result = result
         self.received_plans = []
 
-    def execute(self, plan: ExecutionPlan) -> None:
+    def execute(self, plan: ExecutionPlan):
         """
-        Record the execution plan received from the Core.
+        Record the execution plan and return the predefined result.
         """
 
         self.received_plans.append(plan)
+
+        return self._result
 
 
 def test_core_initial_state():
@@ -171,3 +174,43 @@ def test_core_run_investigation_delegates_plan_to_executor():
     assert executor.received_plans == [
         plan,
     ]
+
+
+def test_core_run_investigation_returns_executor_result():
+    """
+    Core returns the result produced by the Executor.
+    """
+
+    core = Core()
+
+    plan = ExecutionPlan()
+
+    expected_result = {
+        "status": "completed",
+        "results": [
+            {
+                "plugin": "whois",
+                "data": {
+                    "domain": "example.com",
+                },
+            },
+        ],
+    }
+
+    planner = FakePlanner(plan=plan)
+
+    executor = FakeExecutor(
+        result=expected_result,
+    )
+
+    core._initialized = True
+    core._planner = planner
+    core._executor = executor
+
+    result = core.run_investigation(
+        intent={
+            "target": "example.com",
+        }
+    )
+
+    assert result == expected_result

@@ -72,7 +72,7 @@ class Core:
 
         self._initialized = True
 
-    def run_investigation(self, intent) -> None:
+    def run_investigation(self, intent):
         """
         Coordinate the execution of an investigation.
 
@@ -88,7 +88,7 @@ class Core:
 
         plan = self._planner.plan(intent)
 
-        self._executor.execute(plan)
+        return self._executor.execute(plan)
 
     # ==========================================================
     # Internal implementation

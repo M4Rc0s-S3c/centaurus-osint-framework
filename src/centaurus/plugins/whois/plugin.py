@@ -13,15 +13,25 @@ class Plugin(BasePlugin):
     def execute(
         self,
         parameters: dict,
-    ) -> None:
+    ) -> dict:
         """
-        Execute the WHOIS plugin.
+        Execute a simulated WHOIS lookup.
 
         The actual WHOIS query will be implemented in a future
         runtime milestone.
         """
 
-        print(
-            "Executing WHOIS plugin",
-            parameters,
+        domain = parameters.get(
+            "domain",
+            "unknown",
         )
+
+        return {
+            "plugin": "whois",
+            "status": "completed",
+            "data": {
+                "domain": domain,
+                "registrar": "Example Registrar",
+                "creation_date": "1995-08-14",
+            },
+        }
