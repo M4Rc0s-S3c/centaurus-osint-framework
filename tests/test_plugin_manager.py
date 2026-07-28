@@ -1,8 +1,39 @@
-from centaurus.executor.execution.execution_task import ExecutionTask
+from types import SimpleNamespace
+
+import pytest
+
+from centaurus.executor.execution import ExecutionTask
 from centaurus.plugin_manager.plugin_manager import PluginManager
+from centaurus.plugins.base_plugin import BasePlugin
 
 
-def test_plugin_manager_creation():
+class ValidPlugin(BasePlugin):
+    """
+    Valid test plugin implementing the BasePlugin contract.
+    """
+
+    def execute(self) -> None:
+        """
+        Execute the test plugin.
+        """
+
+        pass
+
+
+class InvalidPlugin:
+    """
+    Invalid test plugin that does not inherit from BasePlugin.
+    """
+
+    def execute(self) -> None:
+        """
+        Execute the invalid test plugin.
+        """
+
+        pass
+
+
+def test_plugin_manager_creation() -> None:
     """
     Plugin Manager can be created.
     """
@@ -12,14 +43,15 @@ def test_plugin_manager_creation():
     assert manager is not None
 
 
-def test_plugin_manager_class_exists():
+def test_plugin_manager_class_exists() -> None:
     """
     Plugin Manager exposes its public class.
     """
 
     assert PluginManager is not None
 
-def test_plugin_manager_has_execute_method():
+
+def test_plugin_manager_has_execute_method() -> None:
     """
     Plugin Manager exposes the execute method.
     """
@@ -29,9 +61,9 @@ def test_plugin_manager_has_execute_method():
     assert hasattr(manager, "execute")
 
 
-def test_plugin_manager_accepts_execution_task():
+def test_plugin_manager_accepts_execution_task() -> None:
     """
-    Plugin Manager accepts an ExecutionTask.
+    Plugin Manager accepts and executes an ExecutionTask.
     """
 
     manager = PluginManager()
@@ -41,3 +73,114 @@ def test_plugin_manager_accepts_execution_task():
     assert manager.execute(task) is None
 
 
+def test_load_plugin_class_returns_valid_plugin_class(
+    monkeypatch,
+) -> None:
+    """
+    Plugin Manager returns a Plugin class that implements BasePlugin.
+    """
+
+    manager = PluginManager()
+
+    module = SimpleNamespace(
+        Plugin=ValidPlugin,
+    )
+
+    monkeypatch.setattr(
+        manager,
+        "_load_plugin",
+        lambda plugin_name: module,
+    )
+
+    plugin_class = manager._load_plugin_class(
+        "test_plugin"
+    )
+
+    assert plugin_class is ValidPlugin
+    assert issubclass(
+        plugin_class,
+        BasePlugin,
+    )
+
+
+def test_load_plugin_class_rejects_missing_plugin_class(
+    monkeypatch,
+) -> None:
+    """
+    Plugin Manager rejects a module without a Plugin class.
+    """
+
+    manager = PluginManager()
+
+    module = SimpleNamespace()
+
+    monkeypatch.setattr(
+        manager,
+        "_load_plugin",
+        lambda plugin_name: module,
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="does not expose a Plugin class",
+    ):
+        manager._load_plugin_class(
+            "invalid_plugin"
+        )
+
+
+def test_load_plugin_class_rejects_non_class_plugin(
+    monkeypatch,
+) -> None:
+    """
+    Plugin Manager rejects a Plugin attribute that is not a class.
+    """
+
+    manager = PluginManager()
+
+    module = SimpleNamespace(
+        Plugin=ValidPlugin(),
+    )
+
+    monkeypatch.setattr(
+        manager,
+        "_load_plugin",
+        lambda plugin_name: module,
+    )
+
+    with pytest.raises(
+        TypeError,
+        match="must be a class",
+    ):
+        manager._load_plugin_class(
+            "invalid_plugin"
+        )
+
+
+def test_load_plugin_class_rejects_invalid_plugin_contract(
+    monkeypatch,
+) -> None:
+    """
+    Plugin Manager rejects a Plugin class that does not
+    inherit from BasePlugin.
+    """
+
+    manager = PluginManager()
+
+    module = SimpleNamespace(
+        Plugin=InvalidPlugin,
+    )
+
+    monkeypatch.setattr(
+        manager,
+        "_load_plugin",
+        lambda plugin_name: module,
+    )
+
+    with pytest.raises(
+        TypeError,
+        match="must inherit from BasePlugin",
+    ):
+        manager._load_plugin_class(
+            "invalid_plugin"
+        )

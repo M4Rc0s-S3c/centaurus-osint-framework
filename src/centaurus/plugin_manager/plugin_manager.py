@@ -2,13 +2,14 @@
 Plugin Manager component.
 
 The Plugin Manager is responsible for discovering,
-loading and managing framework plugins.
+validating, loading and executing framework plugins.
 """
 
 import importlib
 from pathlib import Path
 
-from centaurus.executor.execution.execution_task import ExecutionTask
+from centaurus.executor.execution import ExecutionTask
+from centaurus.plugins.base_plugin import BasePlugin
 
 
 class PluginManager:
@@ -26,11 +27,15 @@ class PluginManager:
     def execute(self, task: ExecutionTask) -> None:
         """
         Execute a single execution task.
+
+        The Plugin Manager loads the plugin requested by the task,
+        verifies that its public Plugin class implements the
+        BasePlugin contract, creates an instance and executes it.
         """
 
-        module = self._load_plugin(task.plugin_id)
+        plugin_class = self._load_plugin_class(task.plugin_id)
 
-        plugin = module.Plugin()
+        plugin = plugin_class()
 
         plugin.execute()
 
@@ -73,16 +78,59 @@ class PluginManager:
 
         return (
             (plugin_path / "__init__.py").is_file()
-            and
-            (plugin_path / "plugin.py").is_file()
+            and (plugin_path / "plugin.py").is_file()
         )
 
     def _load_plugin(self, plugin_name: str):
         """
-        Load a validated plugin module.
+        Load a validated plugin package.
         """
+
+        if not self._validate_plugin(plugin_name):
+            raise ValueError(
+                f"Invalid plugin: {plugin_name}"
+            )
 
         module_name = f"centaurus.plugins.{plugin_name}"
 
         return importlib.import_module(module_name)
+
+    def _load_plugin_class(
+        self,
+        plugin_name: str,
+    ) -> type[BasePlugin]:
+        """
+        Load and validate the public Plugin class.
+
+        The plugin package must expose a class named Plugin
+        that inherits from BasePlugin.
+        """
+
+        module = self._load_plugin(plugin_name)
+
+        plugin_class = getattr(
+            module,
+            "Plugin",
+            None,
+        )
+
+        if plugin_class is None:
+            raise ValueError(
+                f"Plugin '{plugin_name}' does not expose "
+                "a Plugin class"
+            )
+
+        if not isinstance(plugin_class, type):
+            raise TypeError(
+                f"Plugin '{plugin_name}'.Plugin "
+                "must be a class"
+            )
+
+        if not issubclass(plugin_class, BasePlugin):
+            raise TypeError(
+                f"Plugin '{plugin_name}'.Plugin "
+                "must inherit from BasePlugin"
+            )
+
+        return plugin_class
     
