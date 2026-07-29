@@ -27,3 +27,19 @@ class Investigation:
         self.objective = objective
 
         self.status = InvestigationStatus.CREATED
+
+        #
+        # Results produced during execution.
+        #
+
+        self.results = []
+
+    def add_result(
+        self,
+        result: dict,
+    ) -> None:
+        """
+        Store one execution result.
+        """
+
+        self.results.append(result)

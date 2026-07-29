@@ -84,8 +84,8 @@ class Core:
         The Core delegates planning to the Planner and execution
         to the Executor.
 
-        The Core governs the Investigation aggregate but does not
-        create execution plans or execute plugins directly.
+        The Core governs the Investigation aggregate, storing the
+        execution results produced during the investigation.
         """
 
         if not self._initialized:
@@ -95,7 +95,13 @@ class Core:
             investigation,
         )
 
-        return self._executor.execute(plan)
+        result = self._executor.execute(plan)
+
+        investigation.add_result(
+            result,
+        )
+
+        return result
 
     # ==========================================================
     # Internal implementation
@@ -159,4 +165,3 @@ class Core:
         """
 
         self._llm_manager = LLMManager()
-        
