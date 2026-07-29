@@ -34,6 +34,34 @@ class Investigation:
 
         self.results = []
 
+    def mark_planned(self) -> None:
+        """
+        Mark the investigation as planned.
+        """
+
+        self.status = InvestigationStatus.PLANNED
+
+    def mark_running(self) -> None:
+        """
+        Mark the investigation as running.
+        """
+
+        self.status = InvestigationStatus.RUNNING
+
+    def mark_completed(self) -> None:
+        """
+        Mark the investigation as completed.
+        """
+
+        self.status = InvestigationStatus.COMPLETED
+
+    def mark_failed(self) -> None:
+        """
+        Mark the investigation as failed.
+        """
+
+        self.status = InvestigationStatus.FAILED
+
     def register_results(
         self,
         results: list,

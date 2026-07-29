@@ -183,12 +183,7 @@ def test_core_run_investigation_delegates_to_planner():
 
     assert received.objective == "example.com"
 
-    assert (
-        received.status
-        == InvestigationStatus.CREATED
-    )
-
-
+    
 def test_core_run_investigation_delegates_plan_to_executor():
     """
     Core passes the plan produced by the Planner to the Executor.
@@ -258,29 +253,38 @@ def test_core_run_investigation_returns_executor_result():
 
     assert result == expected_result
 
-def test_core_registers_execution_results():
+    assert (
+        investigation.status
+        == InvestigationStatus.COMPLETED
+    )
+
+    assert investigation.results == [
+        {
+            "plugin": "whois",
+            "data": {
+                "domain": "example.com",
+            },
+        },
+    ]
+
+
+def test_core_marks_investigation_completed():
     """
-    Core stores executor results inside the Investigation aggregate.
+    Core completes the investigation lifecycle.
     """
 
     core = Core()
 
     plan = ExecutionPlan()
 
-    expected_result = {
-        "status": "completed",
-        "results": [
-            {
-                "plugin": "whois",
-                "data": {
-                    "domain": "example.com",
-                },
-            },
-        ],
-    }
-
     planner = FakePlanner(plan)
-    executor = FakeExecutor(expected_result)
+
+    executor = FakeExecutor(
+        {
+            "status": "completed",
+            "results": [],
+        }
+    )
 
     core._initialized = True
     core._planner = planner
@@ -290,6 +294,11 @@ def test_core_registers_execution_results():
         objective="example.com",
     )
 
-    core.run_investigation(investigation)
+    core.run_investigation(
+        investigation,
+    )
 
-    assert investigation.results == expected_result["results"]
+    assert (
+        investigation.status
+        == InvestigationStatus.COMPLETED
+    )

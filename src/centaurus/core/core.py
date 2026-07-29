@@ -84,22 +84,32 @@ class Core:
         The Core delegates planning to the Planner and execution
         to the Executor.
 
-        The Core governs the Investigation aggregate, storing the
-        execution results produced during the investigation.
+        The Core governs the Investigation aggregate, driving its
+        lifecycle through the different execution stages.
         """
 
         if not self._initialized:
             self.initialize()
 
+        #
+        # Investigation lifecycle.
+        #
+
+        investigation.mark_planned()
+
         plan = self._planner.plan(
             investigation,
         )
+
+        investigation.mark_running()
 
         result = self._executor.execute(plan)
 
         investigation.register_results(
             result["results"],
         )
+
+        investigation.mark_completed()
 
         return result
 
