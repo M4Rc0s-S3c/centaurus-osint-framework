@@ -91,10 +91,6 @@ class Core:
         if not self._initialized:
             self.initialize()
 
-        #
-        # Investigation lifecycle.
-        #
-
         investigation.mark_planned()
 
         plan = self._planner.plan(
@@ -103,15 +99,23 @@ class Core:
 
         investigation.mark_running()
 
-        result = self._executor.execute(plan)
+        try:
 
-        investigation.register_results(
-            result["results"],
-        )
+            result = self._executor.execute(plan)
 
-        investigation.mark_completed()
+            investigation.register_results(
+                result["results"],
+            )
 
-        return result
+            investigation.mark_completed()
+
+            return result
+
+        except Exception:
+
+            investigation.mark_failed()
+
+            raise
 
     # ==========================================================
     # Internal implementation

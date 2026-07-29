@@ -2,6 +2,8 @@
 Unit tests for the Core component.
 """
 
+import pytest
+
 from centaurus.core import Core
 from centaurus.executor.execution import ExecutionPlan
 from centaurus.investigation import (
@@ -68,6 +70,24 @@ class FakeExecutor:
         self.received_plans.append(plan)
 
         return self._result
+
+
+class FailingExecutor:
+    """
+    Executor that always fails.
+    """
+
+    def execute(
+        self,
+        plan: ExecutionPlan,
+    ):
+        """
+        Simulate an execution failure.
+        """
+
+        raise RuntimeError(
+            "Execution failed",
+        )
 
 
 def test_core_initial_state():
@@ -183,7 +203,7 @@ def test_core_run_investigation_delegates_to_planner():
 
     assert received.objective == "example.com"
 
-    
+
 def test_core_run_investigation_delegates_plan_to_executor():
     """
     Core passes the plan produced by the Planner to the Executor.
@@ -301,4 +321,39 @@ def test_core_marks_investigation_completed():
     assert (
         investigation.status
         == InvestigationStatus.COMPLETED
+    )
+
+
+def test_core_marks_investigation_failed():
+    """
+    Core marks the investigation as FAILED when execution fails.
+    """
+
+    core = Core()
+
+    planner = FakePlanner(
+        ExecutionPlan(),
+    )
+
+    executor = FailingExecutor()
+
+    core._initialized = True
+    core._planner = planner
+    core._executor = executor
+
+    investigation = Investigation(
+        objective="example.com",
+    )
+
+    with pytest.raises(
+        RuntimeError,
+        match="Execution failed",
+    ):
+        core.run_investigation(
+            investigation,
+        )
+
+    assert (
+        investigation.status
+        == InvestigationStatus.FAILED
     )
