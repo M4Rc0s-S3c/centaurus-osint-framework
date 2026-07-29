@@ -34,8 +34,12 @@ class Planner:
 
         #
         # Temporary planning.
-        # Future versions will generate one or more ExecutionTask
-        # objects according to the investigation intent.
+        #
+        # A fixed execution plan is currently produced so the
+        # runtime execution flow can be exercised end-to-end.
+        #
+        # Future versions will build the execution plan from the
+        # investigation intent.
         #
 
         task = ExecutionTask(
@@ -45,5 +49,4 @@ class Planner:
 
         plan.tasks.append(task)
 
-        return plan
-    
+        return plan    
