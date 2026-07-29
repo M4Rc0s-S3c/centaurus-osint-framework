@@ -34,12 +34,12 @@ class Investigation:
 
         self.results = []
 
-    def add_result(
+    def register_results(
         self,
-        result: dict,
+        results: list,
     ) -> None:
         """
-        Store one execution result.
+        Register execution results produced during the investigation.
         """
 
-        self.results.append(result)
+        self.results.extend(results)

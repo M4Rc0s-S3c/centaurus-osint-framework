@@ -97,8 +97,8 @@ class Core:
 
         result = self._executor.execute(plan)
 
-        investigation.add_result(
-            result,
+        investigation.register_results(
+            result["results"],
         )
 
         return result

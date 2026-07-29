@@ -45,12 +45,11 @@ class Executor:
     def execute(
         self,
         plan: ExecutionPlan,
-    ) -> list[dict]:
+    ) -> dict:
         """
         Execute all tasks contained in an execution plan.
 
-        Returns the structured results produced by the plugins
-        executed for each task.
+        Returns a structured execution result.
         """
 
         results = []
@@ -62,4 +61,7 @@ class Executor:
 
             results.append(result)
 
-        return results
+        return {
+            "status": "completed",
+            "results": results,
+        }

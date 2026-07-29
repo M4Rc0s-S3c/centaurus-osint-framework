@@ -81,12 +81,15 @@ def test_executor_accepts_execution_plan() -> None:
 
     results = executor.execute(plan)
 
-    assert results == []
+    assert results == {
+        "status": "completed",
+        "results": [],
+    }
 
 
 def test_executor_executes_empty_plan() -> None:
     """
-    Executor returns an empty result list for an empty plan.
+    Executor returns an empty execution report for an empty plan.
     """
 
     plugin_manager = FakePluginManager()
@@ -100,13 +103,17 @@ def test_executor_executes_empty_plan() -> None:
     results = executor.execute(plan)
 
     assert plugin_manager.executed_tasks == []
-    assert results == []
+
+    assert results == {
+        "status": "completed",
+        "results": [],
+    }
 
 
 def test_executor_executes_plan_with_tasks() -> None:
     """
     Executor delegates every task in the plan to the Plugin
-    Manager and returns the results in execution order.
+    Manager and returns the execution report.
     """
 
     plugin_manager = FakePluginManager()
@@ -141,19 +148,22 @@ def test_executor_executes_plan_with_tasks() -> None:
         second_task,
     ]
 
-    assert results == [
-        {
-            "plugin_id": "whois",
-            "status": "success",
-            "data": {
-                "domain": "example.com",
+    assert results == {
+        "status": "completed",
+        "results": [
+            {
+                "plugin_id": "whois",
+                "status": "success",
+                "data": {
+                    "domain": "example.com",
+                },
             },
-        },
-        {
-            "plugin_id": "whois",
-            "status": "success",
-            "data": {
-                "domain": "openai.com",
+            {
+                "plugin_id": "whois",
+                "status": "success",
+                "data": {
+                    "domain": "openai.com",
+                },
             },
-        },
-    ]
+        ],
+    }

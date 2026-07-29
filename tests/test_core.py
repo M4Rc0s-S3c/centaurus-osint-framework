@@ -48,10 +48,19 @@ class FakeExecutor:
         Create a fake Executor with a predefined result.
         """
 
+        if result is None:
+            result = {
+                "status": "completed",
+                "results": [],
+            }
+
         self._result = result
         self.received_plans = []
 
-    def execute(self, plan: ExecutionPlan):
+    def execute(
+        self,
+        plan: ExecutionPlan,
+    ):
         """
         Record the execution plan and return the predefined result.
         """
@@ -248,3 +257,39 @@ def test_core_run_investigation_returns_executor_result():
     )
 
     assert result == expected_result
+
+def test_core_registers_execution_results():
+    """
+    Core stores executor results inside the Investigation aggregate.
+    """
+
+    core = Core()
+
+    plan = ExecutionPlan()
+
+    expected_result = {
+        "status": "completed",
+        "results": [
+            {
+                "plugin": "whois",
+                "data": {
+                    "domain": "example.com",
+                },
+            },
+        ],
+    }
+
+    planner = FakePlanner(plan)
+    executor = FakeExecutor(expected_result)
+
+    core._initialized = True
+    core._planner = planner
+    core._executor = executor
+
+    investigation = Investigation(
+        objective="example.com",
+    )
+
+    core.run_investigation(investigation)
+
+    assert investigation.results == expected_result["results"]
