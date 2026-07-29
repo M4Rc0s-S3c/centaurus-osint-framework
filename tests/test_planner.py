@@ -3,6 +3,9 @@ from centaurus.executor.execution import (
     ExecutionPlan,
     ExecutionTask,
 )
+from centaurus.investigation import (
+    Investigation,
+)
 
 
 def test_planner_creation():
@@ -32,20 +35,51 @@ def test_planner_returns_execution_plan():
 
     planner = Planner()
 
-    plan = planner.plan(intent=None)
+    investigation = Investigation(
+        objective="example.com",
+    )
+
+    plan = planner.plan(investigation)
 
     assert isinstance(plan, ExecutionPlan)
 
-def test_planner_creates_execution_task() -> None:
+
+def test_planner_creates_execution_task():
     """
     Planner creates an execution plan containing one execution task.
     """
 
     planner = Planner()
 
-    plan = planner.plan(intent=None)
+    investigation = Investigation(
+        objective="example.com",
+    )
+
+    plan = planner.plan(investigation)
 
     assert isinstance(plan, ExecutionPlan)
     assert len(plan.tasks) == 1
     assert isinstance(plan.tasks[0], ExecutionTask)
-    
+
+
+def test_planner_passes_target_to_execution_task():
+    """
+    Planner copies the investigation objective into the
+    ExecutionTask target parameter.
+    """
+
+    planner = Planner()
+
+    investigation = Investigation(
+        objective="example.com",
+    )
+
+    plan = planner.plan(investigation)
+
+    assert len(plan.tasks) == 1
+
+    assert plan.tasks[0].parameters == {
+        "target": "example.com",
+    }
+
+    assert plan.tasks[0].plugin_id == "whois"

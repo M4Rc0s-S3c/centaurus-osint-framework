@@ -4,6 +4,10 @@ Unit tests for the Core component.
 
 from centaurus.core import Core
 from centaurus.executor.execution import ExecutionPlan
+from centaurus.investigation import (
+    Investigation,
+    InvestigationStatus,
+)
 
 
 class FakePlanner:
@@ -17,14 +21,19 @@ class FakePlanner:
         """
 
         self._plan = plan
-        self.received_intents = []
+        self.received_investigations = []
 
-    def plan(self, intent) -> ExecutionPlan:
+    def plan(
+        self,
+        investigation: Investigation,
+    ) -> ExecutionPlan:
         """
-        Record the intent and return the predefined plan.
+        Record the Investigation and return the predefined plan.
         """
 
-        self.received_intents.append(intent)
+        self.received_investigations.append(
+            investigation,
+        )
 
         return self._plan
 
@@ -121,16 +130,22 @@ def test_core_run_investigation_initializes_framework():
 
     core = Core()
 
+    investigation = Investigation(
+        objective="example.com",
+    )
+
     assert core._initialized is False
 
-    core.run_investigation(intent=None)
+    core.run_investigation(
+        investigation,
+    )
 
     assert core._initialized is True
 
 
 def test_core_run_investigation_delegates_to_planner():
     """
-    Core passes the investigation intent to the Planner.
+    Core passes the Investigation to the Planner.
     """
 
     core = Core()
@@ -143,15 +158,26 @@ def test_core_run_investigation_delegates_to_planner():
     core._planner = planner
     core._executor = executor
 
-    intent = {
-        "target": "example.com",
-    }
+    investigation = Investigation(
+        objective="example.com",
+    )
 
-    core.run_investigation(intent)
+    core.run_investigation(
+        investigation,
+    )
 
-    assert planner.received_intents == [
-        intent,
-    ]
+    assert len(planner.received_investigations) == 1
+
+    received = planner.received_investigations[0]
+
+    assert received is investigation
+
+    assert received.objective == "example.com"
+
+    assert (
+        received.status
+        == InvestigationStatus.CREATED
+    )
 
 
 def test_core_run_investigation_delegates_plan_to_executor():
@@ -169,7 +195,13 @@ def test_core_run_investigation_delegates_plan_to_executor():
     core._planner = planner
     core._executor = executor
 
-    core.run_investigation(intent=None)
+    investigation = Investigation(
+        objective="example.com",
+    )
+
+    core.run_investigation(
+        investigation,
+    )
 
     assert executor.received_plans == [
         plan,
@@ -207,10 +239,12 @@ def test_core_run_investigation_returns_executor_result():
     core._planner = planner
     core._executor = executor
 
+    investigation = Investigation(
+        objective="example.com",
+    )
+
     result = core.run_investigation(
-        intent={
-            "target": "example.com",
-        }
+        investigation,
     )
 
     assert result == expected_result

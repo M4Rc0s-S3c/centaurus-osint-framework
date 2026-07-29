@@ -2,20 +2,22 @@
 Planner component.
 
 The Planner is responsible for transforming an investigation
-intent into an execution plan.
+into an execution plan.
 """
 
 from centaurus.executor.execution import (
     ExecutionPlan,
     ExecutionTask,
 )
+from centaurus.investigation import Investigation
 
 
 class Planner:
     """
     Planner component.
 
-    The Planner builds execution plans from investigation intents.
+    The Planner builds execution plans from Investigation
+    aggregates.
 
     It never executes tasks, accesses plugins or performs
     external operations.
@@ -25,9 +27,12 @@ class Planner:
     # Public interface
     # ==========================================================
 
-    def plan(self, intent) -> ExecutionPlan:
+    def plan(
+        self,
+        investigation: Investigation,
+    ) -> ExecutionPlan:
         """
-        Build an execution plan from an investigation intent.
+        Build an execution plan from an Investigation.
         """
 
         plan = ExecutionPlan()
@@ -39,14 +44,16 @@ class Planner:
         # runtime execution flow can be exercised end-to-end.
         #
         # Future versions will build the execution plan from the
-        # investigation intent.
+        # Investigation contents.
         #
 
         task = ExecutionTask(
             plugin_id="whois",
-            parameters={},
+            parameters={
+                "target": investigation.objective,
+            },
         )
 
         plan.tasks.append(task)
 
-        return plan    
+        return plan

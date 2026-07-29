@@ -9,6 +9,8 @@ components. Investigation execution will be incorporated during the
 Runtime Flow implementation.
 """
 
+from centaurus.investigation import Investigation
+
 from centaurus.planner.planner import Planner
 from centaurus.executor.executor import Executor
 from centaurus.plugin_manager.plugin_manager import PluginManager
@@ -72,21 +74,26 @@ class Core:
 
         self._initialized = True
 
-    def run_investigation(self, intent):
+    def run_investigation(
+        self,
+        investigation: Investigation,
+    ):
         """
         Coordinate the execution of an investigation.
 
         The Core delegates planning to the Planner and execution
         to the Executor.
 
-        The Core does not interpret the investigation intent,
-        create execution tasks or execute plugins directly.
+        The Core governs the Investigation aggregate but does not
+        create execution plans or execute plugins directly.
         """
 
         if not self._initialized:
             self.initialize()
 
-        plan = self._planner.plan(intent)
+        plan = self._planner.plan(
+            investigation,
+        )
 
         return self._executor.execute(plan)
 
@@ -152,4 +159,4 @@ class Core:
         """
 
         self._llm_manager = LLMManager()
-    
+        
