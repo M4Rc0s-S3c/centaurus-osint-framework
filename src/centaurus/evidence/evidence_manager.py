@@ -3,36 +3,33 @@ Evidence Manager domain service.
 """
 
 from centaurus.evidence.evidence import Evidence
+from centaurus.evidence.raw_observation import RawObservation
 
 
 class EvidenceManager:
     """
-    Domain service responsible for transforming raw observations
-    into Evidence objects.
-
-    Responsibilities:
-        - Transform raw observations into Evidence.
-        - Preserve traceability of collected knowledge.
-        - Isolate the normalization process from the rest of
-          the domain.
-
-    This service never:
-        - Executes plugins.
-        - Applies rules.
-        - Generates findings.
-        - Produces reports.
+    Domain service responsible for transforming RawObservation
+    objects into immutable Evidence Value Objects.
     """
 
     def create_evidence(
         self,
-        raw_observation,
+        raw_observation: RawObservation,
     ) -> Evidence:
         """
-        Create an Evidence object from a raw observation.
-
-        The normalization strategy is intentionally left
-        undefined at this stage and will be implemented
-        incrementally.
+        Build an immutable Evidence from a RawObservation.
         """
 
-        raise NotImplementedError
+        if raw_observation is None:
+            raise ValueError("RawObservation cannot be None.")
+
+        if not isinstance(raw_observation, RawObservation):
+            raise ValueError(
+                "Expected a RawObservation instance."
+            )
+
+        return Evidence(
+            source=raw_observation.source,
+            data=raw_observation.data,
+            collected_at=raw_observation.collected_at,
+        )

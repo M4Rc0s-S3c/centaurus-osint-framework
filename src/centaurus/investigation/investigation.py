@@ -4,10 +4,10 @@ Investigation aggregate.
 
 from uuid import uuid4
 
+from centaurus.evidence.evidence import Evidence
 from centaurus.investigation.exceptions import (
     InvalidInvestigationState,
 )
-
 from centaurus.investigation.investigation_status import (
     InvestigationStatus,
 )
@@ -20,20 +20,62 @@ class Investigation:
 
     def __init__(
         self,
-        objective: str,
+        objective: str | None = None,
+        *,
+        target: str | None = None,
+        intent: str | None = None,
     ) -> None:
         """
-        Create a new investigation.
+        Create a new Investigation.
+
+        During the migration phase both constructors are accepted:
+
+            Investigation(objective="example.org")
+
+        and
+
+            Investigation(
+                target="example.org",
+                intent="whois",
+            )
         """
 
         self.id = str(uuid4())
 
-        self.objective = objective
+        #
+        # Transitional compatibility.
+        #
+
+        if objective is not None:
+
+            self.objective = objective
+
+            self.target = objective
+
+            self.intent = "generic"
+
+        else:
+
+            if target is None or intent is None:
+                raise ValueError(
+                    "Either 'objective' or both "
+                    "'target' and 'intent' must be provided."
+                )
+
+            self.target = target
+            self.intent = intent
+            self.objective = f"{intent}:{target}"
 
         self.status = InvestigationStatus.CREATED
 
         #
-        # Results produced during execution.
+        # Investigation owns Evidence.
+        #
+
+        self._evidences: list[Evidence] = []
+
+        #
+        # Existing execution results.
         #
 
         self._results = []
@@ -45,22 +87,55 @@ class Investigation:
     @property
     def results(self) -> tuple:
         """
-        Return the investigation results.
-
-        Results are exposed as an immutable view to prevent external
-        modification of the aggregate state.
+        Immutable execution results.
         """
 
         return tuple(self._results)
+
+    @property
+    def evidences(self) -> tuple[Evidence, ...]:
+        """
+        Immutable Evidence collection.
+        """
+
+        return tuple(self._evidences)
+
+    #
+    # Transitional compatibility.
+    #
+
+    @property
+    def evidence(self) -> tuple[Evidence, ...]:
+        """
+        Backwards-compatible alias.
+        """
+
+        return self.evidences
+
+    # ==========================================================
+    # Domain operations
+    # ==========================================================
+
+    def add_evidence(
+        self,
+        evidence: Evidence,
+    ) -> None:
+        """
+        Store one Evidence inside the Investigation.
+        """
+
+        if not isinstance(evidence, Evidence):
+            raise TypeError(
+                "Only Evidence instances can be added."
+            )
+
+        self._evidences.append(evidence)
 
     # ==========================================================
     # Lifecycle
     # ==========================================================
 
     def mark_planned(self) -> None:
-        """
-        Mark the investigation as planned.
-        """
 
         self._change_status(
             expected=InvestigationStatus.CREATED,
@@ -68,9 +143,6 @@ class Investigation:
         )
 
     def mark_running(self) -> None:
-        """
-        Mark the investigation as running.
-        """
 
         self._change_status(
             expected=InvestigationStatus.PLANNED,
@@ -78,9 +150,6 @@ class Investigation:
         )
 
     def mark_completed(self) -> None:
-        """
-        Mark the investigation as completed.
-        """
 
         self._change_status(
             expected=InvestigationStatus.RUNNING,
@@ -88,9 +157,6 @@ class Investigation:
         )
 
     def mark_failed(self) -> None:
-        """
-        Mark the investigation as failed.
-        """
 
         self._change_status(
             expected=InvestigationStatus.RUNNING,
@@ -98,16 +164,13 @@ class Investigation:
         )
 
     # ==========================================================
-    # Results
+    # Execution results
     # ==========================================================
 
     def register_results(
         self,
         results: list,
     ) -> None:
-        """
-        Register execution results produced during the investigation.
-        """
 
         self._results.extend(results)
 
@@ -120,10 +183,6 @@ class Investigation:
         expected: InvestigationStatus,
         new: InvestigationStatus,
     ) -> None:
-        """
-        Change the investigation status if the current state
-        matches the expected lifecycle stage.
-        """
 
         if self.status != expected:
             raise InvalidInvestigationState(

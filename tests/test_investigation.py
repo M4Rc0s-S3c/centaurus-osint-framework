@@ -162,3 +162,88 @@ def test_completed_investigation_cannot_run_again() -> None:
         InvalidInvestigationState,
     ):
         investigation.mark_running()
+
+from datetime import datetime
+
+from centaurus.evidence.evidence import Evidence
+from centaurus.evidence.evidence_source import EvidenceSource
+
+
+def test_investigation_can_store_evidence():
+    """
+    Investigation stores Evidence objects.
+    """
+
+    investigation = Investigation(
+        objective="Investigate example.org",
+    )
+
+    evidence = Evidence(
+        source=EvidenceSource.WHOIS,
+        data={"domain": "example.org"},
+        collected_at=datetime.now(),
+    )
+
+    investigation.add_evidence(evidence)
+
+    assert len(investigation.evidence) == 1
+
+
+def test_investigation_preserves_evidence_instance():
+    """
+    Investigation keeps the exact Evidence instance.
+    """
+
+    investigation = Investigation(
+        objective="Investigate example.org",
+    )
+
+    evidence = Evidence(
+        source=EvidenceSource.WHOIS,
+        data={"domain": "example.org"},
+        collected_at=datetime.now(),
+    )
+
+    investigation.add_evidence(evidence)
+
+    assert investigation.evidence[0] is evidence
+
+
+def test_investigation_accumulates_evidence():
+    """
+    Investigation accumulates Evidence objects.
+    """
+
+    investigation = Investigation(
+        objective="Investigate example.org",
+    )
+
+    evidence1 = Evidence(
+        source=EvidenceSource.WHOIS,
+        data={"domain": "example.org"},
+        collected_at=datetime.now(),
+    )
+
+    evidence2 = Evidence(
+        source=EvidenceSource.RDAP,
+        data={"domain": "example.org"},
+        collected_at=datetime.now(),
+    )
+
+    investigation.add_evidence(evidence1)
+    investigation.add_evidence(evidence2)
+
+    assert len(investigation.evidence) == 2
+
+
+def test_investigation_rejects_non_evidence():
+    """
+    Investigation only accepts Evidence objects.
+    """
+
+    investigation = Investigation(
+        objective="Investigate example.org",
+    )
+
+    with pytest.raises(TypeError):
+        investigation.add_evidence("not evidence")
