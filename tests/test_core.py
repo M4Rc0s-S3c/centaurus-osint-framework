@@ -278,14 +278,14 @@ def test_core_run_investigation_returns_executor_result():
         == InvestigationStatus.COMPLETED
     )
 
-    assert investigation.results == [
-        {
-            "plugin": "whois",
-            "data": {
-                "domain": "example.com",
-            },
+    assert investigation.results == (
+    {
+        "plugin": "whois",
+        "data": {
+            "domain": "example.com",
         },
-    ]
+    },
+)
 
 
 def test_core_marks_investigation_completed():

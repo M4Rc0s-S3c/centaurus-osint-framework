@@ -36,7 +36,22 @@ class Investigation:
         # Results produced during execution.
         #
 
-        self.results = []
+        self._results = []
+
+    # ==========================================================
+    # Public properties
+    # ==========================================================
+
+    @property
+    def results(self) -> tuple:
+        """
+        Return the investigation results.
+
+        Results are exposed as an immutable view to prevent external
+        modification of the aggregate state.
+        """
+
+        return tuple(self._results)
 
     # ==========================================================
     # Lifecycle
@@ -94,7 +109,7 @@ class Investigation:
         Register execution results produced during the investigation.
         """
 
-        self.results.extend(results)
+        self._results.extend(results)
 
     # ==========================================================
     # Internal helpers
