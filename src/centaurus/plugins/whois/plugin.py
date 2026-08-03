@@ -2,6 +2,8 @@
 WHOIS plugin implementation.
 """
 
+import whois
+
 from centaurus.plugins.base_plugin import BasePlugin
 
 
@@ -15,10 +17,7 @@ class Plugin(BasePlugin):
         parameters: dict,
     ) -> dict:
         """
-        Execute a simulated WHOIS lookup.
-
-        The actual WHOIS query will be implemented in a future
-        runtime milestone.
+        Execute a WHOIS lookup and return the raw result.
         """
 
         domain = parameters.get(
@@ -26,12 +25,17 @@ class Plugin(BasePlugin):
             "unknown",
         )
 
+        if domain == "unknown":
+            return {
+                "plugin": "whois",
+                "status": "completed",
+                "data": {},
+            }
+
+        result = whois.whois(domain)
+
         return {
             "plugin": "whois",
             "status": "completed",
-            "data": {
-                "domain": domain,
-                "registrar": "Example Registrar",
-                "creation_date": "1995-08-14",
-            },
+            "data": dict(result),
         }

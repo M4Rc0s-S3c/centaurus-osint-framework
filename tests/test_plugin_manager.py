@@ -22,12 +22,20 @@ class ValidPlugin(BasePlugin):
     def execute(
         self,
         parameters: dict,
-    ) -> None:
+    ) -> dict:
         """
         Execute the test plugin.
         """
 
         self.received_parameters = parameters
+
+        return {
+            "plugin": "test_plugin",
+            "status": "completed",
+            "data": {
+                "value": "test",
+            },
+        }
 
 
 class InvalidPlugin:
@@ -38,12 +46,12 @@ class InvalidPlugin:
     def execute(
         self,
         parameters: dict,
-    ) -> None:
+    ) -> dict:
         """
         Execute the invalid test plugin.
         """
 
-        pass
+        return {}
 
 
 def test_plugin_manager_creation() -> None:
@@ -94,8 +102,8 @@ def test_plugin_manager_returns_plugin_result() -> None:
 
     assert result["plugin"] == "whois"
     assert result["status"] == "completed"
-
-    assert result["data"]["domain"] == "example.com"
+    assert "data" in result
+    assert isinstance(result["data"], dict)
 
 
 def test_plugin_manager_passes_task_parameters_to_plugin(
@@ -124,9 +132,17 @@ def test_plugin_manager_passes_task_parameters_to_plugin(
         parameters=parameters,
     )
 
-    manager.execute(task)
+    result = manager.execute(task)
 
     assert plugin.received_parameters == parameters
+
+    assert result == {
+        "plugin": "test_plugin",
+        "status": "completed",
+        "data": {
+            "value": "test",
+        },
+    }
 
 
 def test_load_plugin_class_returns_valid_plugin_class(
