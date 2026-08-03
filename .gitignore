@@ -10,3 +10,4 @@ build/
 # Virtual environments
 .venv/
 venv/
+.vscode/
