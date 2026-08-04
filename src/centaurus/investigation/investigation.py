@@ -5,6 +5,7 @@ Investigation aggregate.
 from uuid import uuid4
 
 from centaurus.evidence.evidence import Evidence
+from centaurus.finding.finding import Finding
 from centaurus.investigation.exceptions import (
     InvalidInvestigationState,
 )
@@ -75,6 +76,12 @@ class Investigation:
         self._evidences: list[Evidence] = []
 
         #
+        # Investigation owns Findings.
+        #
+
+        self._findings: list[Finding] = []
+
+        #
         # Existing execution results.
         #
 
@@ -99,6 +106,14 @@ class Investigation:
         """
 
         return tuple(self._evidences)
+
+    @property
+    def findings(self) -> tuple[Finding, ...]:
+        """
+        Immutable Finding collection.
+        """
+
+        return tuple(self._findings)
 
     #
     # Transitional compatibility.
@@ -130,6 +145,21 @@ class Investigation:
             )
 
         self._evidences.append(evidence)
+
+    def add_finding(
+        self,
+        finding: Finding,
+    ) -> None:
+        """
+        Store one Finding inside the Investigation.
+        """
+
+        if not isinstance(finding, Finding):
+            raise TypeError(
+                "Only Finding instances can be added."
+            )
+
+        self._findings.append(finding)
 
     # ==========================================================
     # Lifecycle

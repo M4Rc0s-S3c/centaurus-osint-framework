@@ -1,13 +1,68 @@
+from datetime import datetime
+
+import pytest
+
+from centaurus.evidence.evidence import Evidence
+from centaurus.evidence.evidence_source import EvidenceSource
+from centaurus.finding.finding import Finding
 from centaurus.investigation import (
     Investigation,
     InvestigationStatus,
 )
-
 from centaurus.investigation.exceptions import (
     InvalidInvestigationState,
 )
+from centaurus.rules.rule import Rule
 
-import pytest
+
+def create_evidence(
+    data: dict,
+) -> Evidence:
+    """
+    Create a valid Evidence instance for testing.
+    """
+
+    return Evidence(
+        source=EvidenceSource.WHOIS,
+        data=data,
+        collected_at=datetime.now(),
+    )
+
+
+def create_rule(
+    name: str = "test_rule",
+) -> Rule:
+    """
+    Create a valid Rule instance for testing.
+    """
+
+    return Rule(
+        name=name,
+        description="Test rule.",
+    )
+
+
+def create_finding(
+    conclusion: str = "Test conclusion.",
+) -> Finding:
+    """
+    Create a valid Finding instance for testing.
+    """
+
+    evidence = create_evidence(
+        {
+            "domain": "example.org",
+        }
+    )
+
+    rule = create_rule()
+
+    return Finding(
+        conclusion=conclusion,
+        rule=rule,
+        evidences=(evidence,),
+    )
+
 
 def test_investigation_can_be_created() -> None:
     """
@@ -64,6 +119,7 @@ def test_investigation_initial_status() -> None:
         investigation.status
         is InvestigationStatus.CREATED
     )
+
 
 def test_investigation_valid_lifecycle() -> None:
     """
@@ -163,13 +219,8 @@ def test_completed_investigation_cannot_run_again() -> None:
     ):
         investigation.mark_running()
 
-from datetime import datetime
 
-from centaurus.evidence.evidence import Evidence
-from centaurus.evidence.evidence_source import EvidenceSource
-
-
-def test_investigation_can_store_evidence():
+def test_investigation_can_store_evidence() -> None:
     """
     Investigation stores Evidence objects.
     """
@@ -189,7 +240,7 @@ def test_investigation_can_store_evidence():
     assert len(investigation.evidence) == 1
 
 
-def test_investigation_preserves_evidence_instance():
+def test_investigation_preserves_evidence_instance() -> None:
     """
     Investigation keeps the exact Evidence instance.
     """
@@ -209,7 +260,7 @@ def test_investigation_preserves_evidence_instance():
     assert investigation.evidence[0] is evidence
 
 
-def test_investigation_accumulates_evidence():
+def test_investigation_accumulates_evidence() -> None:
     """
     Investigation accumulates Evidence objects.
     """
@@ -236,7 +287,7 @@ def test_investigation_accumulates_evidence():
     assert len(investigation.evidence) == 2
 
 
-def test_investigation_rejects_non_evidence():
+def test_investigation_rejects_non_evidence() -> None:
     """
     Investigation only accepts Evidence objects.
     """
@@ -247,3 +298,102 @@ def test_investigation_rejects_non_evidence():
 
     with pytest.raises(TypeError):
         investigation.add_evidence("not evidence")
+
+
+def test_investigation_findings_are_initially_empty() -> None:
+    """
+    A new Investigation starts without Findings.
+    """
+
+    investigation = Investigation(
+        objective="Investigate example.org",
+    )
+
+    assert investigation.findings == ()
+
+
+def test_investigation_can_store_finding() -> None:
+    """
+    Investigation stores Finding objects.
+    """
+
+    investigation = Investigation(
+        objective="Investigate example.org",
+    )
+
+    finding = create_finding()
+
+    investigation.add_finding(finding)
+
+    assert len(investigation.findings) == 1
+
+
+def test_investigation_preserves_finding_instance() -> None:
+    """
+    Investigation keeps the exact Finding instance.
+    """
+
+    investigation = Investigation(
+        objective="Investigate example.org",
+    )
+
+    finding = create_finding()
+
+    investigation.add_finding(finding)
+
+    assert investigation.findings[0] is finding
+
+
+def test_investigation_accumulates_findings() -> None:
+    """
+    Investigation accumulates Finding objects.
+    """
+
+    investigation = Investigation(
+        objective="Investigate example.org",
+    )
+
+    finding1 = create_finding(
+        conclusion="First conclusion.",
+    )
+
+    finding2 = create_finding(
+        conclusion="Second conclusion.",
+    )
+
+    investigation.add_finding(finding1)
+    investigation.add_finding(finding2)
+
+    assert len(investigation.findings) == 2
+
+
+def test_investigation_findings_are_immutable_collection() -> None:
+    """
+    Investigation exposes Findings as an immutable tuple.
+    """
+
+    investigation = Investigation(
+        objective="Investigate example.org",
+    )
+
+    finding = create_finding()
+
+    investigation.add_finding(finding)
+
+    assert isinstance(
+        investigation.findings,
+        tuple,
+    )
+
+
+def test_investigation_rejects_non_finding() -> None:
+    """
+    Investigation only accepts Finding objects.
+    """
+
+    investigation = Investigation(
+        objective="Investigate example.org",
+    )
+
+    with pytest.raises(TypeError):
+        investigation.add_finding("not a finding")
