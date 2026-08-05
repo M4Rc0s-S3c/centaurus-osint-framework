@@ -5,7 +5,6 @@ Represents a conclusion produced by applying a Rule to Evidence.
 """
 
 from dataclasses import dataclass
-from typing import Any
 
 from centaurus.evidence.evidence import Evidence
 from centaurus.rules.rule import Rule
@@ -29,3 +28,11 @@ class Finding:
     conclusion: str
     rule: Rule
     evidences: tuple[Evidence, ...]
+
+    @property
+    def evidence(self) -> tuple[Evidence, ...]:
+        """
+        Backwards-compatible alias for the Evidence collection.
+        """
+
+        return self.evidences
