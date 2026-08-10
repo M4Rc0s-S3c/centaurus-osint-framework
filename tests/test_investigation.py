@@ -5,6 +5,7 @@ import pytest
 from centaurus.evidence.evidence import Evidence
 from centaurus.evidence.evidence_source import EvidenceSource
 from centaurus.finding.finding import Finding
+from centaurus.rules.condition import Condition
 from centaurus.investigation import (
     Investigation,
     InvestigationStatus,
@@ -29,6 +30,18 @@ def create_evidence(
     )
 
 
+def create_condition() -> Condition:
+    """
+    Create a valid Condition for testing.
+    """
+
+    return Condition(
+        field="domain_age_days",
+        operator="less_than",
+        value=30,
+    )
+
+
 def create_rule(
     name: str = "test_rule",
 ) -> Rule:
@@ -37,8 +50,15 @@ def create_rule(
     """
 
     return Rule(
+        id="RL-TEST-001",
+        version="1.0",
         name=name,
         description="Test rule.",
+        category="whois_rdap",
+        conditions=(
+            create_condition(),
+        ),
+        conclusion="Test rule conclusion.",
     )
 
 

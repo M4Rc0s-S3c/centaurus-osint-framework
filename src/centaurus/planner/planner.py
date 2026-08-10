@@ -35,7 +35,10 @@ class Planner:
         Build an execution plan from an Investigation.
         """
 
-        plan = ExecutionPlan()
+        plan = ExecutionPlan(
+            investigation_id=investigation.id,
+            objective=investigation.objective,
+        )
 
         #
         # Temporary planning.

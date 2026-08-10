@@ -3,9 +3,7 @@ from centaurus.executor.execution import (
     ExecutionPlan,
     ExecutionTask,
 )
-from centaurus.investigation import (
-    Investigation,
-)
+from centaurus.investigation import Investigation
 
 
 def test_planner_creation():
@@ -25,7 +23,10 @@ def test_planner_has_plan_method():
 
     planner = Planner()
 
-    assert hasattr(planner, "plan")
+    assert hasattr(
+        planner,
+        "plan",
+    )
 
 
 def test_planner_returns_execution_plan():
@@ -39,9 +40,14 @@ def test_planner_returns_execution_plan():
         objective="example.com",
     )
 
-    plan = planner.plan(investigation)
+    plan = planner.plan(
+        investigation,
+    )
 
-    assert isinstance(plan, ExecutionPlan)
+    assert isinstance(
+        plan,
+        ExecutionPlan,
+    )
 
 
 def test_planner_creates_execution_task():
@@ -55,11 +61,59 @@ def test_planner_creates_execution_task():
         objective="example.com",
     )
 
-    plan = planner.plan(investigation)
+    plan = planner.plan(
+        investigation,
+    )
 
-    assert isinstance(plan, ExecutionPlan)
+    assert isinstance(
+        plan,
+        ExecutionPlan,
+    )
+
     assert len(plan.tasks) == 1
-    assert isinstance(plan.tasks[0], ExecutionTask)
+
+    assert isinstance(
+        plan.tasks[0],
+        ExecutionTask,
+    )
+
+
+def test_planner_associates_plan_with_investigation():
+    """
+    Planner associates the ExecutionPlan with the Investigation
+    that originated it.
+    """
+
+    planner = Planner()
+
+    investigation = Investigation(
+        objective="example.com",
+    )
+
+    plan = planner.plan(
+        investigation,
+    )
+
+    assert plan.investigation_id == investigation.id
+
+
+def test_planner_copies_investigation_objective_to_plan():
+    """
+    Planner copies the Investigation objective into the
+    ExecutionPlan.
+    """
+
+    planner = Planner()
+
+    investigation = Investigation(
+        objective="example.com",
+    )
+
+    plan = planner.plan(
+        investigation,
+    )
+
+    assert plan.objective == "example.com"
 
 
 def test_planner_passes_target_to_execution_task():
@@ -74,7 +128,9 @@ def test_planner_passes_target_to_execution_task():
         objective="example.com",
     )
 
-    plan = planner.plan(investigation)
+    plan = planner.plan(
+        investigation,
+    )
 
     assert len(plan.tasks) == 1
 

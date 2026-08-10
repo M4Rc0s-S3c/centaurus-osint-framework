@@ -67,7 +67,9 @@ class FakeExecutor:
         Record the execution plan and return the predefined result.
         """
 
-        self.received_plans.append(plan)
+        self.received_plans.append(
+            plan,
+        )
 
         return self._result
 
@@ -179,8 +181,14 @@ def test_core_run_investigation_delegates_to_planner():
 
     core = Core()
 
-    plan = ExecutionPlan()
-    planner = FakePlanner(plan=plan)
+    plan = ExecutionPlan(
+        investigation_id="INV-TEST",
+    )
+
+    planner = FakePlanner(
+        plan=plan,
+    )
+
     executor = FakeExecutor()
 
     core._initialized = True
@@ -195,7 +203,9 @@ def test_core_run_investigation_delegates_to_planner():
         investigation,
     )
 
-    assert len(planner.received_investigations) == 1
+    assert len(
+        planner.received_investigations,
+    ) == 1
 
     received = planner.received_investigations[0]
 
@@ -211,8 +221,14 @@ def test_core_run_investigation_delegates_plan_to_executor():
 
     core = Core()
 
-    plan = ExecutionPlan()
-    planner = FakePlanner(plan=plan)
+    plan = ExecutionPlan(
+        investigation_id="INV-TEST",
+    )
+
+    planner = FakePlanner(
+        plan=plan,
+    )
+
     executor = FakeExecutor()
 
     core._initialized = True
@@ -239,7 +255,9 @@ def test_core_run_investigation_returns_executor_result():
 
     core = Core()
 
-    plan = ExecutionPlan()
+    plan = ExecutionPlan(
+        investigation_id="INV-TEST",
+    )
 
     expected_result = {
         "status": "completed",
@@ -253,7 +271,9 @@ def test_core_run_investigation_returns_executor_result():
         ],
     }
 
-    planner = FakePlanner(plan=plan)
+    planner = FakePlanner(
+        plan=plan,
+    )
 
     executor = FakeExecutor(
         result=expected_result,
@@ -279,13 +299,13 @@ def test_core_run_investigation_returns_executor_result():
     )
 
     assert investigation.results == (
-    {
-        "plugin": "whois",
-        "data": {
-            "domain": "example.com",
+        {
+            "plugin": "whois",
+            "data": {
+                "domain": "example.com",
+            },
         },
-    },
-)
+    )
 
 
 def test_core_marks_investigation_completed():
@@ -295,9 +315,13 @@ def test_core_marks_investigation_completed():
 
     core = Core()
 
-    plan = ExecutionPlan()
+    plan = ExecutionPlan(
+        investigation_id="INV-TEST",
+    )
 
-    planner = FakePlanner(plan)
+    planner = FakePlanner(
+        plan,
+    )
 
     executor = FakeExecutor(
         {
@@ -332,7 +356,9 @@ def test_core_marks_investigation_failed():
     core = Core()
 
     planner = FakePlanner(
-        ExecutionPlan(),
+        ExecutionPlan(
+            investigation_id="INV-TEST",
+        ),
     )
 
     executor = FailingExecutor()

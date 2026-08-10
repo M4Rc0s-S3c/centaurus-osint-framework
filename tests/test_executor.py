@@ -29,7 +29,9 @@ class FakePluginManager:
         Record the received task and return a simulated result.
         """
 
-        self.executed_tasks.append(task)
+        self.executed_tasks.append(
+            task,
+        )
 
         return {
             "plugin_id": task.plugin_id,
@@ -63,7 +65,10 @@ def test_executor_has_execute_method() -> None:
         plugin_manager=plugin_manager,
     )
 
-    assert hasattr(executor, "execute")
+    assert hasattr(
+        executor,
+        "execute",
+    )
 
 
 def test_executor_accepts_execution_plan() -> None:
@@ -77,9 +82,13 @@ def test_executor_accepts_execution_plan() -> None:
         plugin_manager=plugin_manager,
     )
 
-    plan = ExecutionPlan()
+    plan = ExecutionPlan(
+        investigation_id="INV-TEST",
+    )
 
-    results = executor.execute(plan)
+    results = executor.execute(
+        plan,
+    )
 
     assert results == {
         "status": "completed",
@@ -98,9 +107,13 @@ def test_executor_executes_empty_plan() -> None:
         plugin_manager=plugin_manager,
     )
 
-    plan = ExecutionPlan()
+    plan = ExecutionPlan(
+        investigation_id="INV-TEST",
+    )
 
-    results = executor.execute(plan)
+    results = executor.execute(
+        plan,
+    )
 
     assert plugin_manager.executed_tasks == []
 
@@ -122,7 +135,9 @@ def test_executor_executes_plan_with_tasks() -> None:
         plugin_manager=plugin_manager,
     )
 
-    plan = ExecutionPlan()
+    plan = ExecutionPlan(
+        investigation_id="INV-TEST",
+    )
 
     first_task = ExecutionTask(
         plugin_id="whois",
@@ -138,10 +153,17 @@ def test_executor_executes_plan_with_tasks() -> None:
         },
     )
 
-    plan.tasks.append(first_task)
-    plan.tasks.append(second_task)
+    plan.tasks.append(
+        first_task,
+    )
 
-    results = executor.execute(plan)
+    plan.tasks.append(
+        second_task,
+    )
+
+    results = executor.execute(
+        plan,
+    )
 
     assert plugin_manager.executed_tasks == [
         first_task,
