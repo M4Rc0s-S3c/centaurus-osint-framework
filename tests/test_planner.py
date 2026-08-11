@@ -116,10 +116,10 @@ def test_planner_copies_investigation_objective_to_plan():
     assert plan.objective == "example.com"
 
 
-def test_planner_passes_target_to_execution_task():
+def test_planner_passes_domain_to_whois_execution_task():
     """
-    Planner copies the investigation objective into the
-    ExecutionTask target parameter.
+    Planner passes the Investigation target to the WHOIS
+    execution task using the plugin-specific parameter name.
     """
 
     planner = Planner()
@@ -135,7 +135,7 @@ def test_planner_passes_target_to_execution_task():
     assert len(plan.tasks) == 1
 
     assert plan.tasks[0].parameters == {
-        "target": "example.com",
+        "domain": "example.com",
     }
 
     assert plan.tasks[0].plugin_id == "whois"

@@ -53,7 +53,7 @@ class Planner:
         task = ExecutionTask(
             plugin_id="whois",
             parameters={
-                "target": investigation.objective,
+                "domain": investigation.target,
             },
         )
 
