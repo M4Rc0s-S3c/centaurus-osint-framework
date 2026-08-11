@@ -1,274 +1,429 @@
 # STORAGE.md
 
-# Arquitectura de Almacenamiento
-## CENTAURUS OSINT Framework
+# Arquitectura de almacenamiento del Framework OSINT
 
-**Versión:** MVP v1.0  
-**Estado:** Diseño congelado
+> **Estado:** Diseño revisado y actualizado\
+> **Versión:** Storage v1.1\
+> **Fecha de revisión:** 11/08/2026\
+> **Base anterior:** Diseño congelado (MVP v1.0)
 
----
+## Objetivo
 
-# 1. Objetivo
+Definir la organización física y lógica del almacenamiento del
+framework, separando el sistema operativo, la plataforma de ejecución y
+los datos generados durante las investigaciones.
 
-Este documento define la arquitectura de almacenamiento de **CENTAURUS OSINT Framework**, estableciendo la organización física y lógica del sistema, así como los criterios de persistencia de datos, separación de componentes y escalabilidad.
+Esta revisión actualiza el diseño inicial para reflejar las decisiones
+arquitectónicas posteriores relativas a trazabilidad por
+`Investigation`, Persistence Layer y organización de los artefactos
+persistibles.
 
-La arquitectura se ha diseñado siguiendo un principio fundamental:
+La unidad lógica de trazabilidad de los artefactos persistidos es la
+**Investigation**, identificada por su `investigation_id`.
 
-> **Separar completamente el sistema operativo, la plataforma del framework y los datos generados durante los análisis.**
+## Principios de diseño
 
-Esta separación facilita el mantenimiento del sistema, simplifica las tareas de actualización y permite conservar las evidencias generadas independientemente del estado del sistema operativo.
+-   Separación entre sistema operativo, plataforma y datos.
+-   `/workspace` constituye la zona persistente de datos del framework.
+-   La persistencia pertenece a la infraestructura y no al dominio.
+-   El **Core coordina el uso de la persistencia** dentro del flujo de
+    ejecución.
+-   Los componentes especializados no gobiernan el ciclo de vida de
+    `Investigation` ni gestionan directamente la infraestructura de
+    almacenamiento.
+-   Los artefactos persistibles se asocian inequívocamente a una
+    `Investigation`.
+-   La persistencia debe permitir trazabilidad y reproducibilidad.
+-   RAW y las representaciones normalizadas se conservan como artefactos
+    diferenciados.
+-   El almacenamiento debe permitir consulta y verificación posterior
+    por un analista.
+-   La solución inicial utiliza Filesystem + JSON.
+-   La plataforma debe seguir siendo portable y compatible con Docker.
 
----
+## Unidad de trazabilidad: Investigation
 
-# 2. Principios de diseño
+Cada `Investigation` posee un identificador único generado al crearse.
 
-La arquitectura de almacenamiento se basa en los siguientes principios:
+El `investigation_id` constituye la referencia de asociación de los
+artefactos persistidos durante esa investigación.
 
-- Separación física entre sistema, plataforma y datos.
-- Independencia del Core respecto al almacenamiento.
-- Persistencia de informes y evidencias.
-- Compatibilidad con Docker.
-- Portabilidad de la distribución.
-- Facilidad de ampliación.
-- Simplicidad de administración.
-- Compatibilidad con futuras versiones del framework.
-
----
-
-# 3. Arquitectura física
-
-La primera versión del framework utiliza **tres discos virtuales independientes**, cada uno destinado a una función específica.
-
-| Disco | Tamaño | Punto de montaje | Función |
-|--------|--------:|------------------|----------|
-| Disco 1 | 5 GB | `/` | Sistema operativo Debian |
-| Disco 2 | 15 GB | `/opt/osint-framework` | Plataforma del framework |
-| Disco 3 | 10 GB | `/workspace` | Datos persistentes |
-
-Esta separación permite ampliar cada volumen de forma independiente sin afectar al resto de componentes.
-
----
-
-# 4. Firmware
-
-La distribución utilizará firmware **UEFI**.
-
-Se crea una partición EFI independiente para alojar el cargador de arranque.
-
-| Partición | Tamaño | Sistema de archivos | Punto de montaje |
-|-----------|--------:|---------------------|------------------|
-| EFI | 512 MB | FAT32 | `/boot/efi` |
-
-La partición EFI se utilizará exclusivamente para el proceso de arranque del sistema.
-
----
-
-# 5. Sistemas de archivos
-
-Las particiones Linux utilizarán el sistema de archivos **ext4**.
-
-Se ha seleccionado ext4 por ofrecer:
-
-- estabilidad;
-- soporte completo de permisos POSIX;
-- journaling;
-- compatibilidad con Docker;
-- excelente rendimiento;
-- amplia madurez.
-
-La siguiente tabla resume la configuración:
-
-| Punto de montaje | Sistema de archivos | Label |
-|------------------|---------------------|--------|
-| `/boot/efi` | FAT32 | EFI |
-| `/` | ext4 | SYSTEM |
-| `/opt/osint-framework` | ext4 | PLATFORM |
-| `/workspace` | ext4 | WORKSPACE |
-
----
-
-# 6. Organización de la plataforma
-
-Toda la plataforma se instalará bajo:
-
-```text
-/opt/osint-framework/
+``` text
+Investigation
+    │
+    └── investigation_id
+            │
+            ├── RawObservation / RAW
+            ├── Evidence
+            ├── Finding*
+            └── Report
 ```
 
-La estructura inicial será:
+\* La estrategia física definitiva de persistencia de `Finding` queda
+pendiente de la decisión correspondiente del modelo conceptual y no se
+congela en este documento.
 
-```text
-/opt/osint-framework/
-├── centaurus/      ← Repositorio Git
-├── runtime/        ← Estado de ejecución de la plataforma
-│   ├── docker/
-│   ├── containerd/
-│   └── ollama/
-├── models/         ← Modelos LLM
-├── cache/          ← Caché persistente
-└── lost+found/
+No se genera un identificador paralelo para sustituir al
+`investigation_id` como referencia principal de una investigación.
+
+## Persistence Layer
+
+La persistencia se organiza mediante una **Persistence Layer / Storage
+Layer** situada en infraestructura.
+
+Su responsabilidad es proporcionar la frontera de almacenamiento de los
+artefactos persistibles de una investigación, desacoplada de los objetos
+y responsabilidades del dominio.
+
+La Persistence Layer:
+
+-   almacena y recupera artefactos persistibles;
+-   utiliza el `investigation_id` para asociarlos a una investigación;
+-   encapsula los detalles de Filesystem y serialización;
+-   mantiene separadas las representaciones RAW y normalizadas;
+-   puede incorporar stores especializados por tipo de artefacto.
+
+La Persistence Layer **no**:
+
+-   ejecuta plugins o herramientas;
+-   crea `Evidence`;
+-   evalúa Rules;
+-   genera `Finding`;
+-   genera `Report`;
+-   modifica directamente el ciclo de vida de `Investigation`;
+-   contiene lógica de orquestación del runtime.
+
+### Coordinación por Core
+
+El Core permanece como punto de coordinación del runtime.
+
+``` text
+Core
+ │
+ ├── Plugin / Executor
+ │       ↓
+ │   RawObservation
+ │       │
+ │       ├──────────────→ Persistence Layer → RAW
+ │       │
+ │       ↓
+ │   Normalización
+ │       ↓
+ │   EvidenceManager
+ │       ↓
+ │    Evidence
+ │       │
+ │       ├──────────────→ Persistence Layer → Evidence
+ │       │
+ │       ↓
+ │   RuleEngine
+ │       ↓
+ │    Finding
+ │
+ ├── ReportManager
+ │       ↓
+ │     Report
+ │       │
+ │       └──────────────→ Persistence Layer → Report
+ │
+ └── Investigation
 ```
 
-Descripción:
+Los componentes especializados realizan únicamente su responsabilidad y
+devuelven el control al Core.
 
-| Directorio | Función |
-|------------|---------|
-| centaurus | Repositorio Git del proyecto (código, documentación y configuración versionada). |
-| runtime | Estado de ejecución de la plataforma (Docker, containerd y Ollama). |
-| models | Modelos LLM persistentes utilizados por Ollama. |
-| cache | Caché persistente de la plataforma. |
----
+## Stores especializados
 
-# 7. Organización del Workspace
+La Persistence Layer puede organizarse mediante stores especializados:
 
-Toda la información generada durante los análisis se almacenará bajo:
+``` text
+Persistence Layer
+│
+├── RawObservationStore
+├── EvidenceStore
+├── FindingStore      ← estrategia física pendiente
+└── ReportStore
+```
 
-```text
+No todos los stores tienen que implementarse simultáneamente.
+
+La primera implementación corresponde a `RawObservationStore`, seguida
+de Evidence y Report conforme se complete su integración funcional.
+
+## Organización física
+
+`/workspace` continúa siendo la zona persistente.
+
+``` text
 /workspace/
-```
-
-La estructura será:
-
-```text
-/ workspace
-
-├── reports/
-├── evidence/
+└── investigations/
+    └── <investigation-id>/
+        ├── evidences/
+        │   ├── raw/
+        │   └── normalized/
+        ├── findings/
+        └── reports/
 ├── logs/
 ├── cache/
 └── tmp/
 ```
 
-Descripción:
+La carpeta de la investigación constituye la unidad física principal
+para acceder a los artefactos relacionados con ella.
 
-| Directorio | Función |
-|------------|---------|
-| reports | Informes generados |
-| evidence | Evidencias obtenidas |
-| logs | Registros del framework |
-| cache | Información temporal |
-| tmp | Archivos temporales |
+`logs/`, `cache/` y `tmp/` permanecen fuera de esta unidad porque
+representan información operacional o temporal.
 
----
+## Persistencia RAW
 
-# 8. Persistencia de datos
+RAW representa la observación original producida por un plugin antes de
+su transformación en conocimiento normalizado.
 
-El Workspace constituye la única zona persistente utilizada por el framework.
+El RAW debe conservarse íntegramente y sin sustituirlo por la
+representación normalizada.
 
-Las actualizaciones del sistema operativo o de la plataforma no deberán modificar el contenido de esta ubicación.
+El contrato mínimo previsto es conceptualmente:
 
-Los informes, evidencias y registros permanecerán disponibles independientemente de las actualizaciones realizadas.
-
-Además del Workspace, la plataforma mantiene un área de ejecución independiente en:
-
-```text
-/opt/osint-framework/runtime
-```
-Este directorio almacena el estado interno de Docker, containerd y Ollama, separándolo del sistema operativo y del repositorio Git.
-
-Los modelos de lenguaje se almacenan de forma independiente en:
-```text
-/opt/osint-framework/models
-```
-Esta organización permite reinstalar el código del framework sin afectar al runtime ni a los modelos descargados.
-
-
----
-
-# 9. Integración con Docker
-
-Los contenedores Docker accederán al Workspace mediante volúmenes persistentes.
-
-El directorio:
-
-```text
-/workspace
+``` text
+persist_raw(
+    investigation_id,
+    RawObservation
+)
 ```
 
-será montado dentro de los contenedores cuando sea necesario.
+El `investigation_id` se proporciona explícitamente como contexto de
+persistencia.
 
-De esta forma:
+`RawObservation` mantiene su contrato de aplicación y no incorpora
+conocimiento sobre Filesystem, rutas ni mecanismos de almacenamiento.
 
-- los contenedores permanecen efímeros;
-- los datos sobreviven a su eliminación;
-- la actualización de imágenes Docker no afecta a las evidencias generadas.
+### Identificación física de RAW
 
+La convención prevista es:
 
-Asimismo, Docker utiliza un directorio de datos dedicado dentro de la plataforma:
-
-```text
-/opt/osint-framework/runtime/docker
-
+``` text
+<investigation-id>_<sequence>-<source>.json
 ```
-containerd utiliza igualmente un directorio específico:
-```text
-/opt/osint-framework/runtime/containerd
 
+Ejemplo:
+
+``` text
+550e8400-e29b-41d4-a716-446655440000_0001-whois.json
+550e8400-e29b-41d4-a716-446655440000_0002-rdap.json
 ```
-De este modo, todo el estado de ejecución de la plataforma permanece fuera del sistema operativo y centralizado bajo /opt/osint-framework/runtime.
----
 
-# 10. Acceso desde Windows
+La identificación física permite reconocer:
 
-Aunque el Workspace utiliza el sistema de archivos **ext4**, será posible acceder a los informes y evidencias desde un sistema Windows utilizando herramientas de lectura de particiones Linux.
+-   la `Investigation`;
+-   la posición secuencial dentro de ella;
+-   la fuente o plugin.
 
-La utilidad recomendada es:
+La secuencia no debe provocar sobrescritura de un RAW existente.
 
-- **DiskInternals Linux Reader**
+## Persistencia de Evidence
 
-Esta herramienta permite acceder al contenido de la partición en modo de solo lectura, evitando modificaciones accidentales sobre las evidencias almacenadas.
+La representación normalizada de Evidence se conservará separada del
+RAW:
 
----
+``` text
+/workspace/investigations/<investigation-id>/evidence/
+├── raw/
+└── normalized/
+```
 
-# 11. Dimensionamiento del MVP
+La persistencia de Evidence pertenece a la Persistence Layer y será
+coordinada por Core una vez producida por `EvidenceManager`.
 
-La configuración inicial del proyecto será:
+`EvidenceManager` no conoce rutas físicas ni mecanismos de persistencia.
 
-| Elemento | Tamaño |
-|----------|--------:|
-| Partición EFI | 512 MB |
-| Sistema | 5 GB |
-| Plataforma | 15 GB |
-| Workspace | 10 GB |
+## Persistencia de Finding
 
-Capacidad total aproximada:
+`Finding` pertenece al conocimiento derivado de una investigación y
+mantiene trazabilidad hacia las Evidence que lo sustentan.
 
-**30 GB**
+La estrategia física definitiva de persistencia de `Finding` no se
+congela aquí mientras el modelo conceptual mantenga dicha decisión
+pendiente.
 
-Esta configuración permite desplegar completamente el framework en un dispositivo USB de **32 GB**.
+La Persistence Layer deberá permitir incorporar posteriormente un
+`FindingStore` sin modificar los contratos del dominio.
 
----
+## Persistencia de Report
 
-# 12. Justificación técnica
+`Report` forma parte de los artefactos persistibles de una
+Investigation.
 
-La arquitectura propuesta presenta las siguientes ventajas:
+Su persistencia será realizada por la Persistence Layer después de que
+`ReportManager` haya generado el Report y el Core haya recuperado el
+control.
 
-- separación completa entre sistema, plataforma y datos;
-- mayor facilidad de mantenimiento;
-- posibilidad de ampliar discos individualmente;
-- compatibilidad con Docker;
-- compatibilidad con Ollama;
-- protección de las evidencias;
-- facilidad para realizar copias de seguridad;
-- portabilidad del framework.
-- separación entre código fuente, runtime y modelos de IA;
-- centralización del estado de ejecución de Docker, containerd y Ollama.
+``` text
+/workspace/investigations/<investigation-id>/reports/
+```
 
----
+Los formatos concretos permanecen gobernados por el contrato de
+Reporting.
 
-# 13. Evolución futura
+## Serialización
 
-En futuras versiones podrán ampliarse los discos virtuales desde la plataforma de virtualización (VMware).
+La implementación inicial utiliza:
 
-Tras ampliar el tamaño del disco únicamente será necesario extender el sistema de archivos correspondiente mediante herramientas estándar de Linux, sin modificar la arquitectura del framework.
+``` text
+Filesystem + JSON
+```
 
-Esta estrategia garantiza la escalabilidad del sistema manteniendo la organización definida para el MVP.
+`orjson` puede utilizarse como mecanismo interno de serialización.
 
----
+El contrato de la Persistence Layer no expone la librería concreta de
+serialización.
 
-# 14. Resumen
+``` text
+Domain/Application object
+        ↓
+Persistence Layer
+        ↓
+JSON
+        ↓
+Filesystem
+```
 
-La arquitectura de almacenamiento de **CENTAURUS OSINT Framework** establece una separación clara entre sistema operativo, plataforma y datos persistentes.
+## Escritura y consistencia
 
-Este diseño proporciona una base sólida para el desarrollo del proyecto, facilita su mantenimiento, favorece la portabilidad y permite evolucionar el framework sin modificar su estructura principal.
-La separación entre repositorio Git, runtime de la plataforma, modelos LLM y Workspace garantiza una infraestructura modular, fácilmente mantenible y alineada con la filosofía de Infrastructure as Code adoptada por el proyecto.
+La persistencia de artefactos debe evitar ficheros parcialmente
+escritos.
+
+La implementación filesystem deberá utilizar un mecanismo de escritura
+segura/atómica apropiado.
+
+Los artefactos RAW son acumulativos y no deben sobrescribirse durante
+una investigación.
+
+## Puntos de montaje
+
+  ------------------------------------------------------------------------
+  Punto de montaje         Partición               Contenido
+  ------------------------ ----------------------- -----------------------
+  `/`                      Partición 1 --- Sistema Debian mínimo, GRUB y
+                                                   configuración básica
+                                                   del sistema operativo.
+
+  `/opt/osint-framework`   Partición 2 ---         Docker, Docker Compose,
+                           Plataforma              Framework OSINT,
+                                                   plugins, Rule Engine,
+                                                   Ollama, modelo Qwen3:4B
+                                                   Instruct y
+                                                   configuración.
+
+  `/workspace`             Partición 3 ---         Investigaciones,
+                           Workspace               evidencias, informes,
+                                                   logs, caché y archivos
+                                                   temporales.
+  ------------------------------------------------------------------------
+
+## Organización de la plataforma
+
+``` text
+/opt/osint-framework/
+├── framework/
+├── plugins/
+├── rules/
+├── models/
+├── config/
+├── docker/
+├── scripts/
+├── docs/
+└── docker-compose.yml
+```
+
+## Relación con Docker
+
+-   La plataforma se ejecutará mediante Docker.
+-   `/workspace` se montará como volumen persistente.
+-   La actualización de la plataforma no afectará al contenido del
+    workspace.
+-   Los artefactos de las investigaciones permanecerán disponibles
+    aunque se actualice o sustituya la plataforma.
+
+## Independencia de rutas
+
+El Core no contendrá rutas físicas codificadas.
+
+Las ubicaciones concretas del workspace y de la Persistence Layer se
+obtendrán mediante configuración.
+
+El Core coordina las operaciones de persistencia, pero no conoce
+detalles de rutas, nombres físicos, serialización ni implementación del
+almacenamiento.
+
+## Acceso del analista
+
+La organización por `investigation_id` permite localizar posteriormente
+los artefactos pertenecientes a una investigación.
+
+El objetivo es permitir el acceso y verificación de:
+
+``` text
+Investigation
+    │
+    ├── RAW
+    ├── Evidence
+    ├── Finding
+    └── Report
+```
+
+manteniendo la trazabilidad entre los artefactos cuando los contratos
+correspondientes la proporcionen.
+
+## Portabilidad y mantenimiento
+
+La separación entre sistema, plataforma y workspace permite:
+
+-   actualización independiente del sistema operativo y de la
+    plataforma;
+-   conservación de los datos generados;
+-   copias de seguridad del workspace;
+-   acceso a resultados desde otros equipos;
+-   ejecución mediante Docker;
+-   sustitución futura del mecanismo físico de almacenamiento sin
+    modificar el dominio.
+
+## Evolución prevista
+
+La Persistence Layer se define como una capacidad de infraestructura
+extensible.
+
+La implementación inicial se centra en Filesystem + JSON y en la
+persistencia de RAW.
+
+La incorporación posterior de Evidence, Report y, cuando corresponda,
+Finding reutilizará esta misma frontera de infraestructura y mantendrá
+el `investigation_id` como eje de trazabilidad.
+
+No se congela en esta versión una tecnología distinta de Filesystem +
+JSON ni una estrategia física de `Finding` que todavía no haya sido
+aprobada por el modelo conceptual.
+
+## Estado de esta revisión
+
+Esta revisión sustituye el diseño de almacenamiento MVP v1.0 de fecha
+09/07/2026.
+
+Cambios principales:
+
+-   se mantiene `/workspace` como zona persistente;
+-   se introduce formalmente la **Persistence Layer / Storage Layer**;
+-   se establece el **Core como coordinador** de las operaciones de
+    persistencia dentro del runtime;
+-   se establece `Investigation` como unidad lógica de trazabilidad;
+-   se introduce `investigation_id` como referencia explícita de los
+    artefactos persistidos;
+-   se separan físicamente RAW y Evidence normalizada;
+-   se prepara la capa para stores especializados;
+-   se mantiene abierta la estrategia física de Finding;
+-   se establece Filesystem + JSON como implementación inicial;
+-   se incorpora la organización física por `investigation_id`;
+-   se refuerzan los requisitos de trazabilidad, reproducibilidad y
+    acceso posterior por parte del analista.
+
+**Fecha de revisión:** 11/08/2026\
+**Versión:** Storage v1.1

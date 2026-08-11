@@ -2,8 +2,11 @@
 WHOIS plugin implementation.
 """
 
+from datetime import datetime, timezone
+
 import whois
 
+from centaurus.evidence import EvidenceSource, RawObservation
 from centaurus.plugins.base_plugin import BasePlugin
 
 
@@ -15,10 +18,12 @@ class Plugin(BasePlugin):
     def execute(
         self,
         parameters: dict,
-    ) -> dict:
+    ) -> RawObservation:
         """
-        Execute a WHOIS lookup and return the raw result.
+        Execute a WHOIS lookup and return the raw observation.
         """
+
+        collected_at = datetime.now(timezone.utc)
 
         domain = parameters.get(
             "domain",
@@ -26,16 +31,15 @@ class Plugin(BasePlugin):
         )
 
         if domain == "unknown":
-            return {
-                "plugin": "whois",
-                "status": "completed",
-                "data": {},
-            }
+            data = {}
+        else:
+            result = whois.whois(domain)
+            data = dict(result)
 
-        result = whois.whois(domain)
+        collected_at = datetime.now(timezone.utc)
 
-        return {
-            "plugin": "whois",
-            "status": "completed",
-            "data": dict(result),
-        }
+        return RawObservation(
+            source=EvidenceSource.WHOIS,
+            data=data,
+            collected_at=collected_at,
+        )

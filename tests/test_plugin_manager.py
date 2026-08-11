@@ -1,7 +1,9 @@
+from datetime import datetime, timezone
 from types import SimpleNamespace
 
 import pytest
 
+from centaurus.evidence import EvidenceSource, RawObservation
 from centaurus.executor.execution import ExecutionTask
 from centaurus.plugin_manager.plugin_manager import PluginManager
 from centaurus.plugins.base_plugin import BasePlugin
@@ -22,20 +24,20 @@ class ValidPlugin(BasePlugin):
     def execute(
         self,
         parameters: dict,
-    ) -> dict:
+    ) -> RawObservation:
         """
         Execute the test plugin.
         """
 
         self.received_parameters = parameters
 
-        return {
-            "plugin": "test_plugin",
-            "status": "completed",
-            "data": {
+        return RawObservation(
+            source=EvidenceSource.WHOIS,
+            data={
                 "value": "test",
             },
-        }
+            collected_at=datetime.now(timezone.utc),
+        )
 
 
 class InvalidPlugin:
@@ -98,12 +100,9 @@ def test_plugin_manager_returns_plugin_result() -> None:
 
     result = manager.execute(task)
 
-    assert isinstance(result, dict)
-
-    assert result["plugin"] == "whois"
-    assert result["status"] == "completed"
-    assert "data" in result
-    assert isinstance(result["data"], dict)
+    assert isinstance(result, RawObservation)
+    assert result.source == EvidenceSource.WHOIS
+    assert isinstance(result.data, dict)
 
 
 def test_plugin_manager_passes_task_parameters_to_plugin(
@@ -136,12 +135,10 @@ def test_plugin_manager_passes_task_parameters_to_plugin(
 
     assert plugin.received_parameters == parameters
 
-    assert result == {
-        "plugin": "test_plugin",
-        "status": "completed",
-        "data": {
-            "value": "test",
-        },
+    assert isinstance(result, RawObservation)
+    assert result.source == EvidenceSource.WHOIS
+    assert result.data == {
+        "value": "test",
     }
 
 

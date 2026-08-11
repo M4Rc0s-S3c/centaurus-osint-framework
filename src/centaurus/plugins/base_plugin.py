@@ -4,6 +4,8 @@ Base contract for every CENTAURUS plugin.
 
 from abc import ABC, abstractmethod
 
+from centaurus.evidence.raw_observation import RawObservation
+
 
 class BasePlugin(ABC):
     """
@@ -15,13 +17,12 @@ class BasePlugin(ABC):
     def execute(
         self,
         parameters: dict,
-    ) -> dict:
+    ) -> RawObservation:
         """
         Execute the plugin using the supplied task parameters.
 
         Returns:
-            A structured dictionary containing the result
-            produced by the plugin.
+            The raw observation produced by the plugin.
         """
 
         pass

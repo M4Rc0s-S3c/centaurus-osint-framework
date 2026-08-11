@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 
 import whois
 
+from centaurus.evidence import EvidenceSource, RawObservation
 from centaurus.plugins.whois.plugin import Plugin
 
 
@@ -19,7 +20,7 @@ def test_whois_plugin_can_be_created() -> None:
     assert plugin is not None
 
 
-def test_whois_plugin_returns_raw_structured_result(
+def test_whois_plugin_returns_raw_observation(
     monkeypatch,
 ) -> None:
     """
@@ -76,12 +77,11 @@ def test_whois_plugin_returns_raw_structured_result(
         }
     )
 
-    assert isinstance(result, dict)
-
-    assert result["plugin"] == "whois"
-    assert result["status"] == "completed"
-
-    assert result["data"] == raw_data
+    assert isinstance(result, RawObservation)
+    assert result.source == EvidenceSource.WHOIS
+    assert result.data == raw_data
+    assert isinstance(result.collected_at, datetime)
+    assert result.collected_at.tzinfo == timezone.utc
 
 
 def test_whois_plugin_passes_domain_to_whois_library(
@@ -132,8 +132,8 @@ def test_whois_plugin_handles_unknown_domain_by_default(
 
     result = plugin.execute({})
 
-    assert isinstance(result, dict)
-
-    assert result["plugin"] == "whois"
-    assert result["status"] == "completed"
-    assert result["data"] == {}
+    assert isinstance(result, RawObservation)
+    assert result.source == EvidenceSource.WHOIS
+    assert result.data == {}
+    assert isinstance(result.collected_at, datetime)
+    assert result.collected_at.tzinfo == timezone.utc

@@ -8,6 +8,7 @@ validating, loading and executing framework plugins.
 import importlib
 from pathlib import Path
 
+from centaurus.evidence.raw_observation import RawObservation
 from centaurus.executor.execution import ExecutionTask
 from centaurus.plugins.base_plugin import BasePlugin
 
@@ -27,14 +28,14 @@ class PluginManager:
     def execute(
         self,
         task: ExecutionTask,
-    ) -> dict:
+    ) -> RawObservation:
         """
         Execute a single execution task.
 
         The Plugin Manager loads the plugin requested by the task,
         verifies that its public Plugin class implements the
         BasePlugin contract, creates an instance, executes it and
-        returns the structured result produced by the plugin.
+        returns the RawObservation produced by the plugin.
         """
 
         plugin_class = self._load_plugin_class(
