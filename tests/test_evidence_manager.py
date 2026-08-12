@@ -1,48 +1,190 @@
 """
-Evidence Manager domain service.
+Tests for the EvidenceManager domain service.
 """
 
+from datetime import datetime, timezone
+
+import pytest
+
 from centaurus.evidence.evidence import Evidence
+from centaurus.evidence.evidence_manager import EvidenceManager
+from centaurus.evidence.evidence_source import EvidenceSource
 from centaurus.evidence.raw_observation import RawObservation
 
 
-class EvidenceManager:
+def _raw_observation(data: dict) -> RawObservation:
+    return RawObservation(
+        source=EvidenceSource.WHOIS,
+        data=data,
+        collected_at=datetime(
+            2026,
+            8,
+            12,
+            10,
+            0,
+            tzinfo=timezone.utc,
+        ),
+    )
+
+
+def test_create_evidence_returns_evidence() -> None:
     """
-    Domain service responsible for transforming RawObservation
-    objects into immutable Evidence Value Objects.
+    A valid RawObservation produces an Evidence object.
     """
 
-    def create_evidence(
-        self,
-        raw_observation: RawObservation,
-    ) -> Evidence:
-        """
-        Transform a RawObservation into an immutable Evidence.
+    evidence = EvidenceManager().create_evidence(
+        _raw_observation({"domain_name": "EXAMPLE.COM"})
+    )
 
-        Parameters
-        ----------
-        raw_observation:
-            Normalized observation produced by a plugin.
+    assert isinstance(evidence, Evidence)
 
-        Returns
-        -------
-        Evidence
-            Immutable domain representation.
 
-        Raises
-        ------
-        ValueError
-            If the supplied observation is invalid.
-        """
+def test_created_evidence_is_immutable() -> None:
+    """
+    Evidence keeps the frozen domain Value Object contract.
+    """
 
-        if raw_observation is None:
-            raise ValueError("RawObservation cannot be None.")
+    evidence = EvidenceManager().create_evidence(
+        _raw_observation({"domain_name": "EXAMPLE.COM"})
+    )
 
-        if not isinstance(raw_observation, RawObservation):
-            raise ValueError("Expected a RawObservation instance.")
+    with pytest.raises((AttributeError, TypeError)):
+        evidence.source = EvidenceSource.RDAP  # type: ignore[misc]
 
-        return Evidence(
-            source=raw_observation.source,
-            data=raw_observation.data,
-            collected_at=raw_observation.collected_at,
-        )
+
+def test_evidence_preserves_source() -> None:
+    """
+    The logical source remains traceable after normalization.
+    """
+
+    evidence = EvidenceManager().create_evidence(
+        _raw_observation({"domain_name": "EXAMPLE.COM"})
+    )
+
+    assert evidence.source is EvidenceSource.WHOIS
+
+
+def test_evidence_preserves_timestamp() -> None:
+    """
+    The collection timestamp is preserved unchanged.
+    """
+
+    observation = _raw_observation({"domain_name": "EXAMPLE.COM"})
+
+    evidence = EvidenceManager().create_evidence(observation)
+
+    assert evidence.collected_at == observation.collected_at
+
+
+def test_evidence_contains_normalized_data() -> None:
+    """
+    WHOIS data is normalized before becoming Evidence.
+    """
+
+    collected_at = datetime(
+        2026,
+        8,
+        12,
+        10,
+        0,
+        tzinfo=timezone.utc,
+    )
+    observation = RawObservation(
+        source=EvidenceSource.WHOIS,
+        data={
+            "domain_name": "EXAMPLE.COM",
+            "creation_date": datetime(
+                1995,
+                8,
+                14,
+                4,
+                0,
+                tzinfo=timezone.utc,
+            ),
+            "name_servers": (
+                "NS1.EXAMPLE.COM",
+                "NS2.EXAMPLE.COM",
+            ),
+            "registrant_name": None,
+        },
+        collected_at=collected_at,
+    )
+
+    evidence = EvidenceManager().create_evidence(observation)
+
+    assert evidence.data == {
+        "domain_name": "EXAMPLE.COM",
+        "creation_date": "1995-08-14T04:00:00+00:00",
+        "name_servers": [
+            "NS1.EXAMPLE.COM",
+            "NS2.EXAMPLE.COM",
+        ],
+        "registrant_name": None,
+    }
+
+
+def test_normalization_does_not_modify_raw_observation() -> None:
+    """
+    Normalization leaves the original RAW representation untouched.
+    """
+
+    creation_date = datetime(
+        1995,
+        8,
+        14,
+        4,
+        0,
+        tzinfo=timezone.utc,
+    )
+    raw_data = {
+        "creation_date": creation_date,
+        "name_servers": (
+            "NS1.EXAMPLE.COM",
+            "NS2.EXAMPLE.COM",
+        ),
+    }
+    observation = _raw_observation(raw_data)
+
+    EvidenceManager().create_evidence(observation)
+
+    assert observation.data["creation_date"] is creation_date
+    assert observation.data["name_servers"] == (
+        "NS1.EXAMPLE.COM",
+        "NS2.EXAMPLE.COM",
+    )
+
+
+def test_create_evidence_rejects_unsupported_source() -> None:
+    """
+    Unsupported sources cannot bypass the normalization boundary.
+    """
+
+    observation = RawObservation(
+        source=EvidenceSource.RDAP,
+        data={"domain_name": "EXAMPLE.COM"},
+        collected_at=datetime(
+            2026,
+            8,
+            12,
+            10,
+            0,
+            tzinfo=timezone.utc,
+        ),
+    )
+
+    with pytest.raises(ValueError, match="No normalizer registered"):
+        EvidenceManager().create_evidence(observation)
+
+
+def test_create_evidence_rejects_invalid_input() -> None:
+    """
+    EvidenceManager rejects missing or invalid observations.
+    """
+
+    manager = EvidenceManager()
+
+    with pytest.raises(ValueError, match="RawObservation cannot be None"):
+        manager.create_evidence(None)  # type: ignore[arg-type]
+
+    with pytest.raises(ValueError, match="Expected a RawObservation"):
+        manager.create_evidence({})  # type: ignore[arg-type]
