@@ -63,6 +63,7 @@ class Core:
         self._llm_manager = None
         self._raw_observation_store = raw_observation_store
         self._evidence_manager = None
+        self._rules = ()
 
     # ==========================================================
     # Public interface
@@ -124,6 +125,10 @@ class Core:
                 investigation,
             )
 
+            self._evaluate_rules(
+                investigation,
+            )
+
             investigation.register_results(
                 result["results"],
             )
@@ -155,6 +160,23 @@ class Core:
 
             evidence = self._evidence_manager.create_evidence(result)
             investigation.add_evidence(evidence)
+
+    def _evaluate_rules(
+        self,
+        investigation: Investigation,
+    ) -> None:
+        """Evaluate configured Rules against normalized Evidence."""
+
+        if not self._rules:
+            return
+
+        findings = self._rule_engine.evaluate(
+            rules=self._rules,
+            evidences=investigation.evidences,
+        )
+
+        for finding in findings:
+            investigation.add_finding(finding)
 
     def _persist_raw_observations(
         self,

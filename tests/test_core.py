@@ -10,6 +10,9 @@ from centaurus.core import Core
 from centaurus.evidence import EvidenceSource, RawObservation
 from centaurus.evidence.evidence_manager import EvidenceManager
 from centaurus.persistence.filesystem import FilesystemRawObservationStore
+from centaurus.rules.condition import Condition
+from centaurus.rules.rule import Rule
+from centaurus.rules.rule_engine import RuleEngine
 from centaurus.executor.execution import ExecutionPlan
 from centaurus.investigation import (
     Investigation,
@@ -133,6 +136,7 @@ def test_core_initial_state():
     assert core._llm_manager is None
     assert core._raw_observation_store is None
     assert core._evidence_manager is None
+    assert core._rules == ()
 
 
 def test_core_initialize_creates_components():
@@ -536,3 +540,91 @@ def test_core_marks_investigation_failed():
         investigation.status
         == InvestigationStatus.FAILED
     )
+
+
+def test_core_evaluates_configured_rules_against_normalized_evidence():
+    """
+    Core completes the vertical Evidence -> RuleEngine -> Finding flow.
+    """
+
+    rules = (
+        Rule(
+            id="RL-001",
+            version="1.0",
+            name="missing_registrar",
+            description="Registrar information is missing.",
+            category="whois_rdap",
+            conditions=(
+                Condition(
+                    field="registrar",
+                    operator="missing",
+                ),
+            ),
+            conclusion="WHOIS information does not contain registrar information.",
+        ),
+        Rule(
+            id="RL-002",
+            version="1.0",
+            name="missing_name_servers",
+            description="Name server information is missing.",
+            category="whois_rdap",
+            conditions=(
+                Condition(
+                    field="name_servers",
+                    operator="missing",
+                ),
+            ),
+            conclusion="WHOIS information does not contain name server information.",
+        ),
+    )
+
+    observation = RawObservation(
+        source=EvidenceSource.WHOIS,
+        data={
+            "domain_name": "EXAMPLE.COM",
+            "registrar": None,
+            "name_servers": None,
+        },
+        collected_at=datetime(
+            2026,
+            8,
+            12,
+            10,
+            0,
+            tzinfo=timezone.utc,
+        ),
+    )
+
+    core = Core()
+    core._initialized = True
+    core._planner = FakePlanner(
+        ExecutionPlan(investigation_id="INV-TEST"),
+    )
+    core._executor = FakeExecutor({
+        "status": "completed",
+        "results": [observation],
+    })
+    core._evidence_manager = EvidenceManager()
+    core._rule_engine = RuleEngine()
+    core._rules = rules
+
+    investigation = Investigation(
+        objective="example.com",
+    )
+
+    core.run_investigation(investigation)
+
+    assert len(investigation.evidences) == 1
+    assert len(investigation.findings) == 2
+
+    evidence = investigation.evidences[0]
+    findings = investigation.findings
+
+    assert evidence.data["domain_name"] == "EXAMPLE.COM"
+    assert {finding.rule.id for finding in findings} == {
+        "RL-001",
+        "RL-002",
+    }
+    assert all(finding.evidences == (evidence,) for finding in findings)
+    assert observation.data["registrar"] is None
+    assert observation.data["name_servers"] is None
