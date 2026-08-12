@@ -2,9 +2,13 @@
 Unit tests for the Core component.
 """
 
+from datetime import datetime, timezone
+
 import pytest
 
 from centaurus.core import Core
+from centaurus.evidence import EvidenceSource, RawObservation
+from centaurus.persistence.filesystem import FilesystemRawObservationStore
 from centaurus.executor.execution import ExecutionPlan
 from centaurus.investigation import (
     Investigation,
@@ -74,6 +78,25 @@ class FakeExecutor:
         return self._result
 
 
+class FakeRawObservationStore:
+    """
+    Test double for the RawObservation persistence boundary.
+    """
+
+    def __init__(self) -> None:
+        self.persisted = []
+
+    def persist_raw(
+        self,
+        investigation_id: str,
+        observation: RawObservation,
+    ):
+        self.persisted.append(
+            (investigation_id, observation),
+        )
+        return None
+
+
 class FailingExecutor:
     """
     Executor that always fails.
@@ -107,6 +130,7 @@ def test_core_initial_state():
     assert core._rule_engine is None
     assert core._report_manager is None
     assert core._llm_manager is None
+    assert core._raw_observation_store is None
 
 
 def test_core_initialize_creates_components():
@@ -154,12 +178,14 @@ def test_core_initialize_is_idempotent():
     assert llm_manager is core._llm_manager
 
 
-def test_core_run_investigation_initializes_framework():
+def test_core_run_investigation_initializes_framework(tmp_path):
     """
     Running an investigation initializes the framework when needed.
     """
 
-    core = Core()
+    core = Core(
+        raw_observation_store=FilesystemRawObservationStore(tmp_path),
+    )
 
     investigation = Investigation(
         objective="example.com",
@@ -306,6 +332,54 @@ def test_core_run_investigation_returns_executor_result():
             },
         },
     )
+
+
+def test_core_persists_raw_observations_with_investigation_id():
+    """
+    Core persists RawObservations using the Investigation identity.
+    """
+
+    core = Core()
+
+    plan = ExecutionPlan(
+        investigation_id="INV-TEST",
+    )
+
+    observation = RawObservation(
+        source=EvidenceSource.WHOIS,
+        data={"domain": "example.com"},
+        collected_at=datetime.now(timezone.utc),
+    )
+
+    planner = FakePlanner(
+        plan=plan,
+    )
+
+    executor = FakeExecutor(
+        result={
+            "status": "completed",
+            "results": [observation],
+        },
+    )
+
+    store = FakeRawObservationStore()
+
+    core._initialized = True
+    core._planner = planner
+    core._executor = executor
+    core._raw_observation_store = store
+
+    investigation = Investigation(
+        objective="example.com",
+    )
+
+    core.run_investigation(
+        investigation,
+    )
+
+    assert store.persisted == [
+        (investigation.id, observation),
+    ]
 
 
 def test_core_marks_investigation_completed():

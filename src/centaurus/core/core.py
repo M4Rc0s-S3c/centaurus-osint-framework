@@ -9,7 +9,12 @@ components. Investigation execution will be incorporated during the
 Runtime Flow implementation.
 """
 
+from centaurus.evidence.raw_observation import RawObservation
 from centaurus.investigation import Investigation
+from centaurus.persistence.filesystem.raw_observation_store import (
+    FilesystemRawObservationStore,
+)
+from centaurus.persistence.raw_observation_store import RawObservationStore
 
 from centaurus.planner.planner import Planner
 from centaurus.executor.executor import Executor
@@ -35,7 +40,10 @@ class Core:
     specialized component.
     """
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        raw_observation_store: RawObservationStore | None = None,
+    ) -> None:
         """
         Create a new Core instance.
         """
@@ -52,6 +60,7 @@ class Core:
         self._rule_engine = None
         self._report_manager = None
         self._llm_manager = None
+        self._raw_observation_store = raw_observation_store
 
     # ==========================================================
     # Public interface
@@ -103,6 +112,11 @@ class Core:
 
             result = self._executor.execute(plan)
 
+            self._persist_raw_observations(
+                investigation.id,
+                result["results"],
+            )
+
             investigation.register_results(
                 result["results"],
             )
@@ -116,6 +130,31 @@ class Core:
             investigation.mark_failed()
 
             raise
+
+    def _persist_raw_observations(
+        self,
+        investigation_id: str,
+        results: list,
+    ) -> None:
+        """Persist RawObservations produced during execution."""
+
+        raw_observations = [
+            result
+            for result in results
+            if isinstance(result, RawObservation)
+        ]
+
+        if not raw_observations:
+            return
+
+        if self._raw_observation_store is None:
+            self._raw_observation_store = FilesystemRawObservationStore()
+
+        for observation in raw_observations:
+            self._raw_observation_store.persist_raw(
+                investigation_id,
+                observation,
+            )
 
     # ==========================================================
     # Internal implementation
