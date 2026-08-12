@@ -10,6 +10,7 @@ Runtime Flow implementation.
 """
 
 from centaurus.evidence.raw_observation import RawObservation
+from centaurus.evidence.evidence_manager import EvidenceManager
 from centaurus.investigation import Investigation
 from centaurus.persistence.filesystem.raw_observation_store import (
     FilesystemRawObservationStore,
@@ -61,6 +62,7 @@ class Core:
         self._report_manager = None
         self._llm_manager = None
         self._raw_observation_store = raw_observation_store
+        self._evidence_manager = None
 
     # ==========================================================
     # Public interface
@@ -117,6 +119,11 @@ class Core:
                 result["results"],
             )
 
+            self._create_evidence_from_raw_observations(
+                result["results"],
+                investigation,
+            )
+
             investigation.register_results(
                 result["results"],
             )
@@ -130,6 +137,24 @@ class Core:
             investigation.mark_failed()
 
             raise
+
+
+    def _create_evidence_from_raw_observations(
+        self,
+        results: list,
+        investigation: Investigation,
+    ) -> None:
+        """Normalize RawObservations and integrate Evidence into Investigation."""
+
+        if self._evidence_manager is None:
+            self._evidence_manager = EvidenceManager()
+
+        for result in results:
+            if not isinstance(result, RawObservation):
+                continue
+
+            evidence = self._evidence_manager.create_evidence(result)
+            investigation.add_evidence(evidence)
 
     def _persist_raw_observations(
         self,
@@ -169,11 +194,17 @@ class Core:
         """
 
         self._create_plugin_manager()
+        self._create_evidence_manager()
         self._create_planner()
         self._create_executor()
         self._create_rule_engine()
         self._create_report_manager()
         self._create_llm_manager()
+
+    def _create_evidence_manager(self) -> None:
+        """Create the Evidence Manager."""
+
+        self._evidence_manager = EvidenceManager()
 
     def _create_plugin_manager(self) -> None:
         """

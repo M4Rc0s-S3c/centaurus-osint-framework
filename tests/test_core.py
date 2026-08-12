@@ -8,6 +8,7 @@ import pytest
 
 from centaurus.core import Core
 from centaurus.evidence import EvidenceSource, RawObservation
+from centaurus.evidence.evidence_manager import EvidenceManager
 from centaurus.persistence.filesystem import FilesystemRawObservationStore
 from centaurus.executor.execution import ExecutionPlan
 from centaurus.investigation import (
@@ -131,6 +132,7 @@ def test_core_initial_state():
     assert core._report_manager is None
     assert core._llm_manager is None
     assert core._raw_observation_store is None
+    assert core._evidence_manager is None
 
 
 def test_core_initialize_creates_components():
@@ -150,6 +152,7 @@ def test_core_initialize_creates_components():
     assert core._rule_engine is not None
     assert core._report_manager is not None
     assert core._llm_manager is not None
+    assert core._evidence_manager is not None
 
 
 def test_core_initialize_is_idempotent():
@@ -167,6 +170,7 @@ def test_core_initialize_is_idempotent():
     rule_engine = core._rule_engine
     report_manager = core._report_manager
     llm_manager = core._llm_manager
+    evidence_manager = core._evidence_manager
 
     core.initialize()
 
@@ -176,6 +180,7 @@ def test_core_initialize_is_idempotent():
     assert rule_engine is core._rule_engine
     assert report_manager is core._report_manager
     assert llm_manager is core._llm_manager
+    assert evidence_manager is core._evidence_manager
 
 
 def test_core_run_investigation_initializes_framework(tmp_path):
@@ -381,6 +386,80 @@ def test_core_persists_raw_observations_with_investigation_id():
         (investigation.id, observation),
     ]
 
+
+
+def test_core_normalizes_raw_observation_and_adds_evidence():
+    """
+    Core coordinates RawObservation normalization through EvidenceManager.
+    """
+
+    core = Core()
+
+    plan = ExecutionPlan(
+        investigation_id="INV-TEST",
+    )
+
+    observation = RawObservation(
+        source=EvidenceSource.WHOIS,
+        data={
+            "domain_name": "EXAMPLE.COM",
+            "creation_date": datetime(
+                1995,
+                8,
+                14,
+                4,
+                0,
+                tzinfo=timezone.utc,
+            ),
+            "name_servers": (
+                "NS1.EXAMPLE.COM",
+                "NS2.EXAMPLE.COM",
+            ),
+        },
+        collected_at=datetime(
+            2026,
+            8,
+            12,
+            10,
+            0,
+            tzinfo=timezone.utc,
+        ),
+    )
+
+    planner = FakePlanner(plan)
+    executor = FakeExecutor({
+        "status": "completed",
+        "results": [observation],
+    })
+
+    core._initialized = True
+    core._planner = planner
+    core._executor = executor
+    core._evidence_manager = EvidenceManager()
+
+    investigation = Investigation(
+        objective="example.com",
+    )
+
+    core.run_investigation(investigation)
+
+    assert len(investigation.evidences) == 1
+    evidence = investigation.evidences[0]
+
+    assert evidence.source is EvidenceSource.WHOIS
+    assert evidence.data == {
+        "domain_name": "EXAMPLE.COM",
+        "creation_date": "1995-08-14T04:00:00+00:00",
+        "name_servers": [
+            "NS1.EXAMPLE.COM",
+            "NS2.EXAMPLE.COM",
+        ],
+    }
+    assert observation.data["creation_date"].year == 1995
+    assert observation.data["name_servers"] == (
+        "NS1.EXAMPLE.COM",
+        "NS2.EXAMPLE.COM",
+    )
 
 def test_core_marks_investigation_completed():
     """
