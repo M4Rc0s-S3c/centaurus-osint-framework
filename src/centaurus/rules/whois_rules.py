@@ -39,8 +39,30 @@ RL_003_INCOMPLETE_REGISTRATION_INFORMATION = Rule(
     conclusion="Registration information is missing: {field}.",
 )
 
+RL_004_DNSSEC_STATUS_OBSERVED = Rule(
+    id="RL-004",
+    version="1.0",
+    name="dnssec_status_observed",
+    description="DNSSEC status is reported by the WHOIS evidence.",
+    category="whois",
+    conditions=(
+        Condition(
+            field="dnssec",
+            operator="equals",
+            value="signedDelegation",
+        ),
+        Condition(
+            field="dnssec",
+            operator="equals",
+            value="unsigned",
+        ),
+    ),
+    conclusion="DNSSEC status is reported in the WHOIS evidence.",
+)
+
 WHOIS_RULES = (
     RL_001_MISSING_REGISTRAR,
     RL_002_MISSING_NAME_SERVERS,
     RL_003_INCOMPLETE_REGISTRATION_INFORMATION,
+    RL_004_DNSSEC_STATUS_OBSERVED,
 )
