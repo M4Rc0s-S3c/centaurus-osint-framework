@@ -60,9 +60,31 @@ RL_004_DNSSEC_STATUS_OBSERVED = Rule(
     conclusion="DNSSEC status is reported in the WHOIS evidence.",
 )
 
+
+RL_005_REGISTRANT_NAME_UNAVAILABLE = Rule(
+    id="RL-005",
+    version="1.0",
+    name="registrant_name_unavailable",
+    description="Registrant name information is missing or explicitly redacted.",
+    category="whois",
+    conditions=(
+        Condition(
+            field="registrant_name",
+            operator="missing",
+        ),
+        Condition(
+            field="registrant_name",
+            operator="redacted",
+            value="[REDACTED]",
+        ),
+    ),
+    conclusion="Registrant name information is unavailable.",
+)
+
 WHOIS_RULES = (
     RL_001_MISSING_REGISTRAR,
     RL_002_MISSING_NAME_SERVERS,
     RL_003_INCOMPLETE_REGISTRATION_INFORMATION,
     RL_004_DNSSEC_STATUS_OBSERVED,
+    RL_005_REGISTRANT_NAME_UNAVAILABLE,
 )
