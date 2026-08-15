@@ -101,6 +101,33 @@ class FakeRawObservationStore:
         return None
 
 
+class FakeEvidenceStore:
+    def __init__(self) -> None:
+        self.persisted = []
+
+    def persist_evidence(self, investigation_id, evidence):
+        self.persisted.append((investigation_id, evidence))
+        return None
+
+
+class FakeReportStore:
+    def __init__(self) -> None:
+        self.persisted = []
+
+    def persist_report(self, investigation_id, report):
+        self.persisted.append((investigation_id, report))
+        return None
+
+
+class FakeFindingStore:
+    def __init__(self) -> None:
+        self.persisted = []
+
+    def persist_finding(self, investigation_id, finding):
+        self.persisted.append((investigation_id, finding))
+        return None
+
+
 class FailingExecutor:
     """
     Executor that always fails.
@@ -390,6 +417,72 @@ def test_core_persists_raw_observations_with_investigation_id():
         (investigation.id, observation),
     ]
 
+
+
+def test_core_persists_evidence_and_report_with_investigation_id():
+    core = Core()
+    plan = ExecutionPlan(investigation_id="INV-TEST")
+    observation = RawObservation(
+        source=EvidenceSource.WHOIS,
+        data={"domain_name": "EXAMPLE.COM"},
+        collected_at=datetime.now(timezone.utc),
+    )
+    evidence_store = FakeEvidenceStore()
+    finding_store = FakeFindingStore()
+    report_store = FakeReportStore()
+    core._initialized = True
+    core._planner = FakePlanner(plan)
+    core._executor = FakeExecutor({"status": "completed", "results": [observation]})
+    core._evidence_manager = EvidenceManager()
+    core._evidence_store = evidence_store
+    core._finding_store = finding_store
+    core._report_store = report_store
+
+    investigation = Investigation(objective="example.com")
+    core.run_investigation(investigation)
+
+    assert len(evidence_store.persisted) == 1
+    assert evidence_store.persisted[0][0] == investigation.id
+    assert len(report_store.persisted) == 1
+    assert report_store.persisted[0] == (investigation.id, investigation.report)
+
+
+def test_core_persists_findings_with_investigation_id() -> None:
+    rules = (
+        Rule(
+            id="RL-001",
+            version="1.0",
+            name="missing_registrar",
+            description="Registrar information is missing.",
+            category="whois_rdap",
+            conditions=(Condition(field="registrar", operator="missing"),),
+            conclusion="Registrar information is missing.",
+        ),
+    )
+    observation = RawObservation(
+        source=EvidenceSource.WHOIS,
+        data={"domain_name": "EXAMPLE.COM", "registrar": None},
+        collected_at=datetime(2026, 8, 15, 10, 0, tzinfo=timezone.utc),
+    )
+    finding_store = FakeFindingStore()
+    core = Core()
+    core._initialized = True
+    core._planner = FakePlanner(ExecutionPlan(investigation_id="INV-TEST"))
+    core._executor = FakeExecutor({"status": "completed", "results": [observation]})
+    core._evidence_manager = EvidenceManager()
+    core._rule_engine = RuleEngine()
+    core._rules = rules
+    core._finding_store = finding_store
+
+    investigation = Investigation(objective="example.com")
+    core.run_investigation(investigation)
+
+    assert len(finding_store.persisted) == 1
+    persisted_investigation_id, persisted_finding = finding_store.persisted[0]
+    assert persisted_investigation_id == investigation.id
+    assert persisted_finding is investigation.findings[0]
+    assert persisted_finding.rule.id == "RL-001"
+    assert persisted_finding.evidences == investigation.evidences
 
 
 def test_core_normalizes_raw_observation_and_adds_evidence():

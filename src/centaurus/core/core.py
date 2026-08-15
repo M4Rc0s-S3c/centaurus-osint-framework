@@ -16,6 +16,12 @@ from centaurus.persistence.filesystem.raw_observation_store import (
     FilesystemRawObservationStore,
 )
 from centaurus.persistence.raw_observation_store import RawObservationStore
+from centaurus.persistence.evidence_store import EvidenceStore
+from centaurus.persistence.report_store import ReportStore
+from centaurus.persistence.finding_store import FindingStore
+from centaurus.persistence.filesystem.evidence_store import FilesystemEvidenceStore
+from centaurus.persistence.filesystem.report_store import FilesystemReportStore
+from centaurus.persistence.filesystem.finding_store import FilesystemFindingStore
 
 from centaurus.planner.planner import Planner
 from centaurus.executor.executor import Executor
@@ -44,6 +50,9 @@ class Core:
     def __init__(
         self,
         raw_observation_store: RawObservationStore | None = None,
+        evidence_store: EvidenceStore | None = None,
+        report_store: ReportStore | None = None,
+        finding_store: FindingStore | None = None,
     ) -> None:
         """
         Create a new Core instance.
@@ -62,6 +71,9 @@ class Core:
         self._report_manager = None
         self._llm_manager = None
         self._raw_observation_store = raw_observation_store
+        self._evidence_store = evidence_store
+        self._report_store = report_store
+        self._finding_store = finding_store
         self._evidence_manager = None
         self._rules = ()
 
@@ -138,6 +150,10 @@ class Core:
             )
             investigation.add_report(report)
 
+            if self._report_store is None:
+                self._report_store = FilesystemReportStore()
+            self._report_store.persist_report(investigation.id, report)
+
             investigation.register_results(
                 result["results"],
             )
@@ -169,6 +185,9 @@ class Core:
 
             evidence = self._evidence_manager.create_evidence(result)
             investigation.add_evidence(evidence)
+            if self._evidence_store is None:
+                self._evidence_store = FilesystemEvidenceStore()
+            self._evidence_store.persist_evidence(investigation.id, evidence)
 
     def _evaluate_rules(
         self,
@@ -186,6 +205,12 @@ class Core:
 
         for finding in findings:
             investigation.add_finding(finding)
+            if self._finding_store is None:
+                self._finding_store = FilesystemFindingStore()
+            self._finding_store.persist_finding(
+                investigation.id,
+                finding,
+            )
 
     def _persist_raw_observations(
         self,
