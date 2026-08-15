@@ -12,6 +12,7 @@ from centaurus.rules.whois_rules import (
     RL_003_INCOMPLETE_REGISTRATION_INFORMATION,
     RL_004_DNSSEC_STATUS_OBSERVED,
     RL_005_REGISTRANT_NAME_UNAVAILABLE,
+    RL_006_DOMAIN_CREATED_RECENTLY,
     WHOIS_RULES,
 )
 
@@ -30,12 +31,14 @@ def test_whois_rules_are_defined() -> None:
     assert RL_003_INCOMPLETE_REGISTRATION_INFORMATION.id == "RL-003"
     assert RL_004_DNSSEC_STATUS_OBSERVED.id == "RL-004"
     assert RL_005_REGISTRANT_NAME_UNAVAILABLE.id == "RL-005"
+    assert RL_006_DOMAIN_CREATED_RECENTLY.id == "RL-006"
     assert WHOIS_RULES == (
         RL_001_MISSING_REGISTRAR,
         RL_002_MISSING_NAME_SERVERS,
         RL_003_INCOMPLETE_REGISTRATION_INFORMATION,
         RL_004_DNSSEC_STATUS_OBSERVED,
         RL_005_REGISTRANT_NAME_UNAVAILABLE,
+    RL_006_DOMAIN_CREATED_RECENTLY,
     )
 
 
@@ -250,3 +253,33 @@ def test_rl_005_does_not_change_existing_rule_count_or_semantics() -> None:
     )
 
     assert [finding.rule.id for finding in findings] == ["RL-004", "RL-005"]
+
+
+def test_rl_006_reports_domain_created_less_than_30_days_ago() -> None:
+    evidence = create_whois_evidence({
+        "domain_name": "example.org",
+        "creation_date": "2026-08-01T00:00:00+00:00",
+    })
+
+    findings = RuleEngine().evaluate(
+        rules=(RL_006_DOMAIN_CREATED_RECENTLY,),
+        evidences=(evidence,),
+    )
+
+    assert len(findings) == 1
+    assert findings[0].rule is RL_006_DOMAIN_CREATED_RECENTLY
+    assert findings[0].evidences == (evidence,)
+
+
+def test_rl_006_does_not_report_exactly_30_days_old_domain() -> None:
+    evidence = create_whois_evidence({
+        "domain_name": "example.org",
+        "creation_date": "2026-07-14T00:00:00+00:00",
+    })
+
+    findings = RuleEngine().evaluate(
+        rules=(RL_006_DOMAIN_CREATED_RECENTLY,),
+        evidences=(evidence,),
+    )
+
+    assert findings == ()

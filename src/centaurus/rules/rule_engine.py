@@ -2,6 +2,7 @@
 Rule Engine component.
 """
 
+from datetime import datetime, timedelta
 from typing import Any
 
 from centaurus.evidence.evidence import Evidence
@@ -162,9 +163,96 @@ class RuleEngine:
         if operator == "greater_than_or_equal":
             return value >= condition.value
 
+        if operator in {
+            "age_less_than",
+            "expires_within",
+            "expired",
+        }:
+            return self._temporal_condition_matches(
+                operator=operator,
+                condition=condition,
+                evidence=evidence,
+                value=value,
+            )
+
         raise ValueError(
             f"Unsupported Rule operator: {operator!r}"
         )
+
+    def _temporal_condition_matches(
+        self,
+        operator: str,
+        condition: Condition,
+        evidence: Evidence,
+        value: Any,
+    ) -> bool:
+        """
+        Evaluate the minimal temporal operators required by the project.
+
+        Temporal comparisons use Evidence.collected_at as the fixed
+        reference point. They never use the current system clock.
+        """
+
+        reference = evidence.collected_at
+        temporal_value = self._parse_datetime(value)
+
+        if temporal_value is None:
+            return False
+
+        if reference.tzinfo is None and temporal_value.tzinfo is not None:
+            temporal_value = temporal_value.replace(tzinfo=None)
+        elif reference.tzinfo is not None and temporal_value.tzinfo is None:
+            temporal_value = temporal_value.replace(tzinfo=reference.tzinfo)
+
+        if operator == "expired":
+            return temporal_value < reference
+
+        if not isinstance(condition.value, (int, float)) or isinstance(
+            condition.value, bool
+        ):
+            raise TypeError(
+                f"Temporal Rule operator {operator!r} requires a numeric day value."
+            )
+
+        if condition.value < 0:
+            raise ValueError(
+                f"Temporal Rule operator {operator!r} requires a non-negative day value."
+            )
+
+        delta = timedelta(days=condition.value)
+
+        if operator == "age_less_than":
+            age = reference - temporal_value
+            return timedelta(0) <= age < delta
+
+        if operator == "expires_within":
+            remaining = temporal_value - reference
+            return timedelta(0) <= remaining <= delta
+
+        raise ValueError(
+            f"Unsupported temporal Rule operator: {operator!r}"
+        )
+
+    @staticmethod
+    def _parse_datetime(value: Any) -> datetime | None:
+        """
+        Parse a temporal Evidence value.
+
+        The normalizer remains responsible for preserving observed values.
+        The Rule Engine accepts datetime objects and ISO-8601 strings for
+        temporal Rule evaluation.
+        """
+
+        if isinstance(value, datetime):
+            return value
+
+        if isinstance(value, str):
+            try:
+                return datetime.fromisoformat(value.replace("Z", "+00:00"))
+            except ValueError:
+                return None
+
+        return None
 
     def _build_conclusion(
         self,

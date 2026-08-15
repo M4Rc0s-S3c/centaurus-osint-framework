@@ -81,10 +81,28 @@ RL_005_REGISTRANT_NAME_UNAVAILABLE = Rule(
     conclusion="Registrant name information is unavailable.",
 )
 
+
+RL_006_DOMAIN_CREATED_RECENTLY = Rule(
+    id="RL-006",
+    version="1.0",
+    name="Domain created recently",
+    description="Reports when a domain was created less than 30 days before collection.",
+    category="whois_rdap",
+    conditions=(
+        Condition(
+            field="creation_date",
+            operator="age_less_than",
+            value=30,
+        ),
+    ),
+    conclusion="Domain was created less than 30 days before collection.",
+)
+
 WHOIS_RULES = (
     RL_001_MISSING_REGISTRAR,
     RL_002_MISSING_NAME_SERVERS,
     RL_003_INCOMPLETE_REGISTRATION_INFORMATION,
     RL_004_DNSSEC_STATUS_OBSERVED,
     RL_005_REGISTRANT_NAME_UNAVAILABLE,
+    RL_006_DOMAIN_CREATED_RECENTLY,
 )

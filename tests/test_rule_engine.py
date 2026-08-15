@@ -2,7 +2,7 @@
 Unit tests for the RuleEngine component.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 import pytest
 
@@ -531,3 +531,160 @@ def test_rule_engine_rejects_unsupported_operator() -> None:
             rules=(rule,),
             evidences=(evidence,),
         )
+
+def test_rule_engine_supports_age_less_than() -> None:
+    engine = RuleEngine()
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="creation_date",
+                operator="age_less_than",
+                value=30,
+            ),
+        )
+    )
+    evidence = Evidence(
+        source=EvidenceSource.WHOIS,
+        data={"creation_date": "2026-07-20T00:00:00+00:00"},
+        collected_at=datetime(2026, 8, 15, tzinfo=timezone.utc),
+    )
+    findings = engine.evaluate(rules=(rule,), evidences=(evidence,))
+    assert len(findings) == 1
+
+
+def test_rule_engine_age_less_than_excludes_exact_boundary() -> None:
+    engine = RuleEngine()
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="creation_date",
+                operator="age_less_than",
+                value=30,
+            ),
+        )
+    )
+    evidence = Evidence(
+        source=EvidenceSource.WHOIS,
+        data={"creation_date": "2026-07-16T00:00:00+00:00"},
+        collected_at=datetime(2026, 8, 15, tzinfo=timezone.utc),
+    )
+    findings = engine.evaluate(rules=(rule,), evidences=(evidence,))
+    assert findings == ()
+
+
+def test_rule_engine_supports_expires_within() -> None:
+    engine = RuleEngine()
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="expiration_date",
+                operator="expires_within",
+                value=60,
+            ),
+        )
+    )
+    evidence = Evidence(
+        source=EvidenceSource.WHOIS,
+        data={"expiration_date": "2026-10-14T00:00:00+00:00"},
+        collected_at=datetime(2026, 8, 15, tzinfo=timezone.utc),
+    )
+    findings = engine.evaluate(rules=(rule,), evidences=(evidence,))
+    assert len(findings) == 1
+
+
+def test_rule_engine_expires_within_includes_exact_boundary() -> None:
+    engine = RuleEngine()
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="expiration_date",
+                operator="expires_within",
+                value=60,
+            ),
+        )
+    )
+    evidence = Evidence(
+        source=EvidenceSource.WHOIS,
+        data={"expiration_date": "2026-10-14T00:00:00+00:00"},
+        collected_at=datetime(2026, 8, 15, tzinfo=timezone.utc),
+    )
+    findings = engine.evaluate(rules=(rule,), evidences=(evidence,))
+    assert len(findings) == 1
+
+
+def test_rule_engine_expires_within_does_not_flag_expired_value() -> None:
+    engine = RuleEngine()
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="expiration_date",
+                operator="expires_within",
+                value=60,
+            ),
+        )
+    )
+    evidence = Evidence(
+        source=EvidenceSource.WHOIS,
+        data={"expiration_date": "2026-08-10T00:00:00+00:00"},
+        collected_at=datetime(2026, 8, 15, tzinfo=timezone.utc),
+    )
+    findings = engine.evaluate(rules=(rule,), evidences=(evidence,))
+    assert findings == ()
+
+
+def test_rule_engine_supports_expired() -> None:
+    engine = RuleEngine()
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="expiration_date",
+                operator="expired",
+            ),
+        )
+    )
+    evidence = Evidence(
+        source=EvidenceSource.WHOIS,
+        data={"expiration_date": "2026-08-10T00:00:00+00:00"},
+        collected_at=datetime(2026, 8, 15, tzinfo=timezone.utc),
+    )
+    findings = engine.evaluate(rules=(rule,), evidences=(evidence,))
+    assert len(findings) == 1
+
+
+def test_rule_engine_expired_does_not_flag_expiration_at_collection_time() -> None:
+    engine = RuleEngine()
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="expiration_date",
+                operator="expired",
+            ),
+        )
+    )
+    evidence = Evidence(
+        source=EvidenceSource.WHOIS,
+        data={"expiration_date": "2026-08-15T00:00:00+00:00"},
+        collected_at=datetime(2026, 8, 15, tzinfo=timezone.utc),
+    )
+    findings = engine.evaluate(rules=(rule,), evidences=(evidence,))
+    assert findings == ()
+
+
+def test_rule_engine_age_less_than_does_not_flag_future_creation_date() -> None:
+    engine = RuleEngine()
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="creation_date",
+                operator="age_less_than",
+                value=30,
+            ),
+        )
+    )
+    evidence = Evidence(
+        source=EvidenceSource.WHOIS,
+        data={"creation_date": "2026-08-20T00:00:00+00:00"},
+        collected_at=datetime(2026, 8, 15, tzinfo=timezone.utc),
+    )
+    findings = engine.evaluate(rules=(rule,), evidences=(evidence,))
+    assert findings == ()
