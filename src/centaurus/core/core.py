@@ -30,6 +30,7 @@ from centaurus.plugin_manager.plugin_manager import PluginManager
 from centaurus.rules.rule_engine import RuleEngine
 from centaurus.report.report_manager import ReportManager
 from centaurus.llm.llm_manager import LLMManager
+from centaurus.llm.exceptions import LLMError
 
 
 class Core:
@@ -53,6 +54,7 @@ class Core:
         evidence_store: EvidenceStore | None = None,
         report_store: ReportStore | None = None,
         finding_store: FindingStore | None = None,
+        llm_manager: LLMManager | None = None,
     ) -> None:
         """
         Create a new Core instance.
@@ -69,7 +71,8 @@ class Core:
         self._plugin_manager = None
         self._rule_engine = None
         self._report_manager = None
-        self._llm_manager = None
+        self._llm_manager = llm_manager
+        self._last_llm_output: str | None = None
         self._raw_observation_store = raw_observation_store
         self._evidence_store = evidence_store
         self._report_store = report_store
@@ -153,6 +156,15 @@ class Core:
             if self._report_store is None:
                 self._report_store = FilesystemReportStore()
             self._report_store.persist_report(investigation.id, report)
+
+            if self._llm_manager is None:
+                self._create_llm_manager()
+            try:
+                self._last_llm_output = self._llm_manager.generate(report)
+            except LLMError:
+                # LLM presentation is operational and must not invalidate
+                # the completed domain investigation or its persisted Report.
+                self._last_llm_output = None
 
             investigation.register_results(
                 result["results"],
@@ -300,8 +312,13 @@ class Core:
         self._report_manager = ReportManager()
 
     def _create_llm_manager(self) -> None:
-        """
-        Create the LLM Manager.
-        """
+        """Create the LLM Manager if one was not injected."""
 
-        self._llm_manager = LLMManager()
+        if self._llm_manager is None:
+            self._llm_manager = LLMManager()
+
+    @property
+    def last_llm_output(self) -> str | None:
+        """Return the latest ephemeral LLM presentation, if one exists."""
+
+        return self._last_llm_output

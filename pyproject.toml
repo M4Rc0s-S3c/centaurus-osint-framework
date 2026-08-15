@@ -13,7 +13,8 @@ authors = [
 ]
 
 dependencies = [
-"python-whois==0.9.6"
+"python-whois==0.9.6",
+"httpx>=0.27,<1"
 ]
 
 [tool.setuptools.packages.find]

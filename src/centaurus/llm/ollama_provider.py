@@ -1,0 +1,74 @@
+"""Ollama implementation of the LLM provider contract."""
+
+import os
+
+import httpx
+
+from centaurus.report.report import Report
+from centaurus.llm.exceptions import LLMProviderError, LLMResponseError
+from centaurus.llm.prompt import SYSTEM_PROMPT
+from centaurus.llm.serialization import serialize_report
+
+
+class OllamaProvider:
+    """Generate Report presentations through the local Ollama HTTP API."""
+
+    def __init__(
+        self,
+        base_url: str | None = None,
+        model: str | None = None,
+        timeout: float | None = None,
+        client: httpx.Client | None = None,
+    ) -> None:
+        self._base_url = (
+            base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        ).rstrip("/")
+        self._model = model or os.getenv("OLLAMA_MODEL", "qwen3:4b")
+        self._timeout = (
+            timeout
+            if timeout is not None
+            else float(os.getenv("OLLAMA_TIMEOUT", "60"))
+        )
+        self._client = client
+        self._owns_client = client is None
+
+    def generate(self, report: Report) -> str:
+        """Generate a non-empty linguistic presentation for a Report."""
+
+        if not isinstance(report, Report):
+            raise TypeError("report must be a Report instance")
+
+        payload = {
+            "model": self._model,
+            "system": SYSTEM_PROMPT,
+            "prompt": serialize_report(report),
+            "stream": False,
+        }
+
+        client = self._client or httpx.Client(timeout=self._timeout)
+        try:
+            response = client.post(
+                f"{self._base_url}/api/generate",
+                json=payload,
+            )
+            response.raise_for_status()
+        except (httpx.HTTPError, OSError) as exc:
+            raise LLMProviderError(
+                "Unable to obtain a response from Ollama"
+            ) from exc
+        finally:
+            if self._owns_client:
+                client.close()
+
+        try:
+            data = response.json()
+        except ValueError as exc:
+            raise LLMResponseError("Ollama returned invalid JSON") from exc
+
+        text = data.get("response") if isinstance(data, dict) else None
+        if not isinstance(text, str) or not text.strip():
+            raise LLMResponseError(
+                "Ollama returned an empty or invalid response"
+            )
+
+        return text.strip()

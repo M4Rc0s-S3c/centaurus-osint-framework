@@ -1,3 +1,7 @@
-from .llm_manager import LLMManager
+"""LLM application and infrastructure components."""
 
-__all__ = ["LLMManager"]
+from .llm_manager import LLMManager
+from .ollama_provider import OllamaProvider
+from .provider import LLMProvider
+
+__all__ = ["LLMManager", "LLMProvider", "OllamaProvider"]

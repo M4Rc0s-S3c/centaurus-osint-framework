@@ -128,6 +128,30 @@ class FakeFindingStore:
         return None
 
 
+class FakeLLMManager:
+    """Test double for the LLM presentation boundary."""
+
+    def __init__(self, response="Generated presentation") -> None:
+        self.response = response
+        self.received = []
+
+    def generate(self, report):
+        self.received.append(report)
+        return self.response
+
+
+@pytest.fixture(autouse=True)
+def isolate_llm_from_core_unit_tests(monkeypatch):
+    """Keep Core tests independent from an external Ollama service."""
+
+    monkeypatch.setattr(
+        Core,
+        "_create_llm_manager",
+        lambda self: setattr(self, "_llm_manager", FakeLLMManager()),
+    )
+
+
+
 class FailingExecutor:
     """
     Executor that always fails.
