@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from centaurus.evidence.evidence import Evidence
 from centaurus.finding.finding import Finding
+from centaurus.report.report import Report
 from centaurus.investigation.exceptions import (
     InvalidInvestigationState,
 )
@@ -80,6 +81,9 @@ class Investigation:
         #
 
         self._findings: list[Finding] = []
+
+        # Investigation owns one final Report.
+        self._report: Report | None = None
 
         #
         # Existing execution results.
@@ -160,6 +164,43 @@ class Investigation:
             )
 
         self._findings.append(finding)
+
+    @property
+    def report(self) -> Report | None:
+        """
+        Return the final Report integrated into the Investigation, if any.
+        """
+
+        return self._report
+
+    def add_report(
+        self,
+        report: Report,
+    ) -> None:
+        """
+        Integrate the final Report into the Investigation.
+
+        Core owns this integration boundary. A Report can only belong to the
+        Investigation whose identifier it carries, and an Investigation can
+        have at most one integrated Report.
+        """
+
+        if not isinstance(report, Report):
+            raise TypeError(
+                "Only Report instances can be added."
+            )
+
+        if report.investigation_id != self.id:
+            raise ValueError(
+                "Report belongs to a different Investigation."
+            )
+
+        if self._report is not None:
+            raise InvalidInvestigationState(
+                "Investigation already contains a Report."
+            )
+
+        self._report = report
 
     # ==========================================================
     # Lifecycle

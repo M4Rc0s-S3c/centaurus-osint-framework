@@ -628,3 +628,63 @@ def test_core_evaluates_configured_rules_against_normalized_evidence():
     assert all(finding.evidences == (evidence,) for finding in findings)
     assert observation.data["registrar"] is None
     assert observation.data["name_servers"] is None
+
+
+def test_core_generates_and_integrates_report_after_findings() -> None:
+    """Core integrates a Report after evaluating Findings."""
+
+    rules = (
+        Rule(
+            id="RL-001",
+            version="1.0",
+            name="missing_registrar",
+            description="Registrar information is missing.",
+            category="whois_rdap",
+            conditions=(Condition(field="registrar", operator="missing"),),
+            conclusion="Registrar information is missing.",
+        ),
+    )
+    observation = RawObservation(
+        source=EvidenceSource.WHOIS,
+        data={
+            "domain_name": "EXAMPLE.COM",
+            "registrar": None,
+        },
+        collected_at=datetime(2026, 8, 15, 10, 0, tzinfo=timezone.utc),
+    )
+
+    core = Core()
+    core._initialized = True
+    core._planner = FakePlanner(ExecutionPlan(investigation_id="INV-TEST"))
+    core._executor = FakeExecutor({"status": "completed", "results": [observation]})
+    core._evidence_manager = EvidenceManager()
+    core._rule_engine = RuleEngine()
+    core._rules = rules
+
+    investigation = Investigation(objective="example.com")
+
+    core.run_investigation(investigation)
+
+    assert investigation.report is not None
+    assert investigation.report.investigation_id == investigation.id
+    assert investigation.report.findings == investigation.findings
+    assert investigation.status is InvestigationStatus.COMPLETED
+
+
+def test_core_generates_empty_report_when_no_findings_exist() -> None:
+    """A completed investigation may have a valid empty Report."""
+
+    core = Core()
+    core._initialized = True
+    core._planner = FakePlanner(ExecutionPlan(investigation_id="INV-TEST"))
+    core._executor = FakeExecutor({"status": "completed", "results": []})
+    core._rules = ()
+
+    investigation = Investigation(objective="example.com")
+
+    core.run_investigation(investigation)
+
+    assert investigation.findings == ()
+    assert investigation.report is not None
+    assert investigation.report.findings == ()
+    assert investigation.status is InvestigationStatus.COMPLETED

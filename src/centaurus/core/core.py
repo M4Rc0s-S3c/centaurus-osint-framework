@@ -129,6 +129,15 @@ class Core:
                 investigation,
             )
 
+            if self._report_manager is None:
+                self._create_report_manager()
+
+            report = self._report_manager.generate(
+                investigation=investigation,
+                findings=investigation.findings,
+            )
+            investigation.add_report(report)
+
             investigation.register_results(
                 result["results"],
             )
