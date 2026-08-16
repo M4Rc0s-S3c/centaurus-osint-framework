@@ -38,4 +38,50 @@ def test_cli_stop():
     cli.stop()
 
     assert cli._running is False
-    
+
+
+def test_cli_submit_interprets_and_forwards_structured_request():
+    from centaurus.request import PUBLIC_EXPOSURE_ASSESSMENT, StructuredRequest
+
+    expected_request = StructuredRequest(
+        target="example.com",
+        target_type="DOMAIN",
+        intent=PUBLIC_EXPOSURE_ASSESSMENT,
+    )
+
+    class FakeInterpreter:
+        def __init__(self):
+            self.received = []
+
+        def interpret(self, text):
+            self.received.append(text)
+            return expected_request
+
+    class FakeCore:
+        def __init__(self):
+            self.received = []
+
+        def submit_request(self, request):
+            self.received.append(request)
+            return "investigation"
+
+    core = FakeCore()
+    interpreter = FakeInterpreter()
+    cli = CLI(core, request_interpreter=interpreter)
+
+    result = cli.submit("Investiga example.com")
+
+    assert result == "investigation"
+    assert interpreter.received == ["Investiga example.com"]
+    assert core.received == [expected_request]
+
+
+def test_cli_submit_requires_configured_interpreter():
+    cli = CLI(Core())
+
+    try:
+        cli.submit("Investiga example.com")
+    except RuntimeError as exc:
+        assert "interpreter" in str(exc)
+    else:
+        raise AssertionError("CLI.submit() should require an interpreter")

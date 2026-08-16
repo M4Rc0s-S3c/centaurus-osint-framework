@@ -805,3 +805,39 @@ def test_core_generates_empty_report_when_no_findings_exist() -> None:
     assert investigation.report is not None
     assert investigation.report.findings == ()
     assert investigation.status is InvestigationStatus.COMPLETED
+
+
+def test_core_submit_request_creates_and_executes_investigation():
+    from centaurus.request import PUBLIC_EXPOSURE_ASSESSMENT, StructuredRequest
+
+    plan = ExecutionPlan(investigation_id="INV-PLACEHOLDER")
+    planner = FakePlanner(plan=plan)
+    executor = FakeExecutor()
+
+    core = Core()
+    core._initialized = True
+    core._planner = planner
+    core._executor = executor
+    core._rules = ()
+
+    request = StructuredRequest(
+        target="example.com",
+        target_type="DOMAIN",
+        intent=PUBLIC_EXPOSURE_ASSESSMENT,
+    )
+
+    investigation = core.submit_request(request)
+
+    assert isinstance(investigation, Investigation)
+    assert investigation.target == "example.com"
+    assert investigation.target_type == "DOMAIN"
+    assert investigation.intent == PUBLIC_EXPOSURE_ASSESSMENT
+    assert investigation.status is InvestigationStatus.COMPLETED
+    assert planner.received_investigations == [investigation]
+
+
+def test_core_submit_request_rejects_unstructured_input():
+    core = Core()
+
+    with pytest.raises(TypeError, match="StructuredRequest"):
+        core.submit_request("investiga example.com")  # type: ignore[arg-type]

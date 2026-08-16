@@ -26,6 +26,7 @@ class Investigation:
         *,
         target: str | None = None,
         intent: str | None = None,
+        target_type: str | None = None,
     ) -> None:
         """
         Create a new Investigation.
@@ -53,6 +54,7 @@ class Investigation:
             self.objective = objective
 
             self.target = objective
+            self.target_type = target_type or "DOMAIN"
 
             self.intent = "generic"
 
@@ -65,6 +67,7 @@ class Investigation:
                 )
 
             self.target = target
+            self.target_type = (target_type or "DOMAIN").upper()
             self.intent = intent
             self.objective = f"{intent}:{target}"
 

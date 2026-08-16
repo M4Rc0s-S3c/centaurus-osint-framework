@@ -31,6 +31,7 @@ from centaurus.rules.rule_engine import RuleEngine
 from centaurus.report.report_manager import ReportManager
 from centaurus.llm.llm_manager import LLMManager
 from centaurus.llm.exceptions import LLMError
+from centaurus.request import StructuredRequest
 
 
 class Core:
@@ -100,6 +101,23 @@ class Core:
         self._create_components()
 
         self._initialized = True
+
+    def submit_request(
+        self,
+        request: StructuredRequest,
+    ) -> Investigation:
+        """Create and execute an Investigation from a validated request."""
+
+        if not isinstance(request, StructuredRequest):
+            raise TypeError("request must be a StructuredRequest instance")
+
+        investigation = Investigation(
+            target=request.target,
+            target_type=request.target_type,
+            intent=request.intent,
+        )
+        self.run_investigation(investigation)
+        return investigation
 
     def run_investigation(
         self,

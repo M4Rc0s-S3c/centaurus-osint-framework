@@ -15,7 +15,7 @@ class CLI:
     with the Core.
     """
 
-    def __init__(self, core) -> None:
+    def __init__(self, core, request_interpreter=None) -> None:
         """
         Create a new CLI instance.
 
@@ -24,6 +24,7 @@ class CLI:
         """
 
         self._core = core
+        self._request_interpreter = request_interpreter
         self._running = False
 
     def start(self) -> None:
@@ -32,6 +33,15 @@ class CLI:
         """
 
         self._running = True
+
+    def submit(self, user_input: str):
+        """Interpret one user request and submit it to the Core."""
+
+        if self._request_interpreter is None:
+            raise RuntimeError("CLI request interpreter has not been configured")
+
+        request = self._request_interpreter.interpret(user_input)
+        return self._core.submit_request(request)
 
     def stop(self) -> None:
         """
