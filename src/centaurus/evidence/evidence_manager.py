@@ -5,6 +5,7 @@ Evidence Manager domain service.
 from centaurus.evidence.evidence import Evidence
 from centaurus.evidence.evidence_source import EvidenceSource
 from centaurus.evidence.raw_observation import RawObservation
+from centaurus.normalization.crtsh_normalizer import normalize_crtsh_data
 from centaurus.normalization.dnsrecon_normalizer import normalize_dnsrecon_data
 from centaurus.normalization.rdap_normalizer import normalize_rdap_data
 from centaurus.normalization.sublist3r_normalizer import normalize_sublist3r_data
@@ -68,6 +69,9 @@ class EvidenceManager:
 
         if source is EvidenceSource.SUBLIST3R:
             return normalize_sublist3r_data(data)
+
+        if source is EvidenceSource.CRTSH:
+            return normalize_crtsh_data(data)
 
         raise ValueError(
             f"No normalizer registered for evidence source: {source.value}"

@@ -95,6 +95,20 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
         },
     ]
 
+    crtsh_result = [
+        {
+            "issuer_ca_id": 123,
+            "issuer_name": "Example CA",
+            "common_name": "www.example.com",
+            "name_value": "www.example.com\napi.example.com",
+            "id": 456,
+            "entry_timestamp": "2026-08-16T10:00:00",
+            "not_before": "2026-08-16T09:00:00",
+            "not_after": "2026-11-14T09:00:00",
+            "serial_number": "01AB",
+        }
+    ]
+
     # Keep the real PluginManager -> WhoisPlugin path while replacing only
     # the external python-whois/network boundary with deterministic data.
     monkeypatch.setitem(
@@ -110,6 +124,7 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
         lambda domain: whois_result,
     )
 
+    from centaurus.plugins.crtsh import plugin as crtsh_plugin
     from centaurus.plugins.rdap import plugin as rdap_plugin
 
     class FakeRdapResponse:
@@ -122,17 +137,25 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
         def json(self):
             return self._data
 
-    def fake_rdap_get(url: str, **kwargs):
+    def fake_http_get(url: str, **kwargs):
         if url == "https://data.iana.org/rdap/dns.json":
             return FakeRdapResponse({
                 "services": [
                     [["com"], ["https://rdap.example/registry/"]],
                 ]
             })
-        assert url == "https://rdap.example/registry/domain/example.com"
-        return FakeRdapResponse(rdap_result)
+        if url == "https://rdap.example/registry/domain/example.com":
+            return FakeRdapResponse(rdap_result)
+        if url == "https://crt.sh/":
+            assert kwargs["params"] == {
+                "q": "%.example.com",
+                "output": "json",
+            }
+            return FakeRdapResponse(crtsh_result)
+        raise AssertionError(f"Unexpected HTTP request: {url}")
 
-    monkeypatch.setattr(rdap_plugin.httpx, "get", fake_rdap_get)
+    monkeypatch.setattr(rdap_plugin.httpx, "get", fake_http_get)
+    assert crtsh_plugin.httpx.get is fake_http_get
 
     from centaurus.plugins.dnsrecon import plugin as dnsrecon_plugin
 
@@ -176,8 +199,8 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
     assert investigation.target_type == "DOMAIN"
     assert investigation.intent == PUBLIC_EXPOSURE_ASSESSMENT
 
-    assert len(investigation.results) == 4
-    assert len(investigation.evidences) == 4
+    assert len(investigation.results) == 5
+    assert len(investigation.evidences) == 5
     assert {finding.rule.id for finding in investigation.findings} == {
         "RL-001",
         "RL-002",
@@ -196,8 +219,8 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
     finding_files = list((root / "findings").glob("*.json"))
     report_files = list((root / "reports").glob("*.json"))
 
-    assert len(raw_files) == 4
-    assert len(evidence_files) == 4
+    assert len(raw_files) == 5
+    assert len(evidence_files) == 5
     assert len(finding_files) == 4
     assert len(report_files) == 1
 

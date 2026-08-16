@@ -239,6 +239,41 @@ def test_create_evidence_normalizes_sublist3r_observation() -> None:
         "www.example.com",
     ]
 
+def test_create_evidence_normalizes_crtsh_observation() -> None:
+    """crt.sh observations use their tool-specific normalizer."""
+
+    observation = RawObservation(
+        source=EvidenceSource.CRTSH,
+        data={
+            "domain": "Example.COM.",
+            "certificates": [
+                {
+                    "issuer_ca_id": 123,
+                    "issuer_name": "Example CA",
+                    "common_name": "WWW.EXAMPLE.COM",
+                    "name_value": "www.example.com\napi.example.com",
+                    "id": 456,
+                    "entry_timestamp": "2026-08-16T10:00:00",
+                    "not_before": "2026-08-16T09:00:00",
+                    "not_after": "2026-11-14T09:00:00",
+                    "serial_number": "01AB",
+                }
+            ],
+        },
+        collected_at=datetime(2026, 8, 16, 10, 0, tzinfo=timezone.utc),
+    )
+
+    evidence = EvidenceManager().create_evidence(observation)
+
+    assert evidence.source is EvidenceSource.CRTSH
+    assert evidence.data["domain_name"] == "example.com"
+    assert evidence.data["subdomains"] == [
+        "api.example.com",
+        "www.example.com",
+    ]
+    assert evidence.data["certificates"][0]["certificate_id"] == 456
+
+
 def test_create_evidence_rejects_invalid_input() -> None:
     """
     EvidenceManager rejects missing or invalid observations.
