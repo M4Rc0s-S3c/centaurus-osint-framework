@@ -7,14 +7,41 @@ services:
     container_name: centaurus-ollama
     restart: unless-stopped
 
+    # Ollama is reachable by the framework through the private Compose network.
+    # Host publication is restricted to loopback for local administration only.
     ports:
-      - "11434:11434"
+      - "127.0.0.1:11434:11434"
 
     volumes:
       - /opt/osint-framework/runtime/ollama:/root/.ollama
 
     networks:
       - centaurus-network
+
+  centaurus-core:
+    # Built from the transient release bundle on the OVA.
+    # The OVA does not keep a Git checkout or permanent source build context.
+    image: centaurus-core:local
+    container_name: centaurus-core
+
+    environment:
+      CENTAURUS_WORKSPACE: /workspace
+      OLLAMA_BASE_URL: http://centaurus-ollama:11434
+      OLLAMA_MODEL: qwen3:4b
+
+    volumes:
+      - /workspace:/workspace
+
+    depends_on:
+      - centaurus-ollama
+
+    networks:
+      - centaurus-network
+
+    # The framework is invoked on demand. Keeping it behind a profile avoids
+    # pretending that the current CLI is a long-running daemon service.
+    profiles:
+      - framework
 
 networks:
   centaurus-network:
