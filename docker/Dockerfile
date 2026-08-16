@@ -12,6 +12,8 @@ COPY src ./src
 
 RUN python -m pip install --no-cache-dir \
         "https://github.com/darkoperator/dnsrecon/archive/refs/tags/1.6.3.tar.gz" \
+    && python -m pip install --no-cache-dir \
+        "https://github.com/aboul3la/Sublist3r/archive/6af1b8c22b5ca035818fbb04c54890896f9b181a.tar.gz" \
     && python -m pip install --no-cache-dir .
 
 VOLUME ["/workspace"]

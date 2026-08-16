@@ -70,7 +70,7 @@ def test_planner_creates_execution_task():
         ExecutionPlan,
     )
 
-    assert len(plan.tasks) == 3
+    assert len(plan.tasks) == 4
 
     assert all(isinstance(task, ExecutionTask) for task in plan.tasks)
 
@@ -129,7 +129,7 @@ def test_planner_passes_domain_to_whois_execution_task():
         investigation,
     )
 
-    assert len(plan.tasks) == 3
+    assert len(plan.tasks) == 4
 
     assert plan.tasks[0].parameters == {
         "domain": "example.com",
@@ -145,6 +145,11 @@ def test_planner_passes_domain_to_whois_execution_task():
         "domain": "example.com",
     }
     assert plan.tasks[2].plugin_id == "dnsrecon"
+
+    assert plan.tasks[3].parameters == {
+        "domain": "example.com",
+    }
+    assert plan.tasks[3].plugin_id == "sublist3r"
 
 def test_planner_uses_rdap_for_ip_target() -> None:
     """IP investigations use RDAP without creating an invalid WHOIS task."""

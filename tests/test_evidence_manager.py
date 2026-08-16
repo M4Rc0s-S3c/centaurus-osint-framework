@@ -213,6 +213,32 @@ def test_create_evidence_normalizes_dnsrecon_observation() -> None:
     assert evidence.data["domain_name"] == "example.com"
     assert evidence.data["a_records"] == ["192.0.2.10"]
 
+
+def test_create_evidence_normalizes_sublist3r_observation() -> None:
+    """Sublist3r observations use their tool-specific normalizer."""
+
+    observation = RawObservation(
+        source=EvidenceSource.SUBLIST3R,
+        data={
+            "domain": "Example.COM.",
+            "subdomains": [
+                "WWW.EXAMPLE.COM",
+                "api.example.com.",
+                "www.example.com",
+            ],
+        },
+        collected_at=datetime(2026, 8, 16, 10, 0, tzinfo=timezone.utc),
+    )
+
+    evidence = EvidenceManager().create_evidence(observation)
+
+    assert evidence.source is EvidenceSource.SUBLIST3R
+    assert evidence.data["domain_name"] == "example.com"
+    assert evidence.data["subdomains"] == [
+        "api.example.com",
+        "www.example.com",
+    ]
+
 def test_create_evidence_rejects_invalid_input() -> None:
     """
     EvidenceManager rejects missing or invalid observations.

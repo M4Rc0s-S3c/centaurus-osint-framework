@@ -41,3 +41,14 @@ def test_core_dockerfile_installs_pinned_dnsrecon_runtime() -> None:
 
     assert "darkoperator/dnsrecon/archive/refs/tags/1.6.3.tar.gz" in dockerfile
     assert "dnsrecon==1.6.3" not in dockerfile
+
+
+def test_core_dockerfile_installs_pinned_sublist3r_runtime() -> None:
+    """The Linux runtime image pins the official Sublist3r 1.1 commit."""
+
+    dockerfile = (Path(__file__).resolve().parents[1] / "docker" / "Dockerfile").read_text(encoding="utf-8")
+
+    assert (
+        "aboul3la/Sublist3r/archive/"
+        "6af1b8c22b5ca035818fbb04c54890896f9b181a.tar.gz"
+    ) in dockerfile

@@ -136,13 +136,26 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
 
     from centaurus.plugins.dnsrecon import plugin as dnsrecon_plugin
 
-    def fake_dnsrecon_run(command, **kwargs):
-        output_path = command[command.index("-j") + 1]
-        with open(output_path, "w", encoding="utf-8") as output:
-            json.dump(dnsrecon_result, output)
-        return SimpleNamespace(returncode=0, stdout="", stderr="")
+    from centaurus.plugins.sublist3r import plugin as sublist3r_plugin
 
-    monkeypatch.setattr(dnsrecon_plugin.subprocess, "run", fake_dnsrecon_run)
+    def fake_tool_run(command, **kwargs):
+        if command[0] == "dnsrecon":
+            output_path = command[command.index("-j") + 1]
+            with open(output_path, "w", encoding="utf-8") as output:
+                json.dump(dnsrecon_result, output)
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        if command[0] == "sublist3r":
+            output_path = command[command.index("-o") + 1]
+            with open(output_path, "w", encoding="utf-8") as output:
+                output.write("www.example.com\n")
+                output.write("api.example.com\n")
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+        raise AssertionError(f"Unexpected external command: {command[0]}")
+
+    monkeypatch.setattr(dnsrecon_plugin.subprocess, "run", fake_tool_run)
+    assert sublist3r_plugin.subprocess.run is fake_tool_run
 
     report_provider = CapturingReportProvider()
     core = Core(
@@ -163,8 +176,8 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
     assert investigation.target_type == "DOMAIN"
     assert investigation.intent == PUBLIC_EXPOSURE_ASSESSMENT
 
-    assert len(investigation.results) == 3
-    assert len(investigation.evidences) == 3
+    assert len(investigation.results) == 4
+    assert len(investigation.evidences) == 4
     assert {finding.rule.id for finding in investigation.findings} == {
         "RL-001",
         "RL-002",
@@ -183,8 +196,8 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
     finding_files = list((root / "findings").glob("*.json"))
     report_files = list((root / "reports").glob("*.json"))
 
-    assert len(raw_files) == 3
-    assert len(evidence_files) == 3
+    assert len(raw_files) == 4
+    assert len(evidence_files) == 4
     assert len(finding_files) == 4
     assert len(report_files) == 1
 
