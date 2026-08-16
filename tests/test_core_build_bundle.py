@@ -52,3 +52,11 @@ def test_core_dockerfile_installs_pinned_sublist3r_runtime() -> None:
         "aboul3la/Sublist3r/archive/"
         "6af1b8c22b5ca035818fbb04c54890896f9b181a.tar.gz"
     ) in dockerfile
+
+
+def test_core_dockerfile_installs_pinned_theharvester_runtime() -> None:
+    """The Linux runtime image pins the official theHarvester 4.11.1 release."""
+
+    dockerfile = (Path(__file__).resolve().parents[1] / "docker" / "Dockerfile").read_text(encoding="utf-8")
+
+    assert "laramies/theHarvester/archive/refs/tags/4.11.1.tar.gz" in dockerfile

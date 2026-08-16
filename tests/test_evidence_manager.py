@@ -274,6 +274,41 @@ def test_create_evidence_normalizes_crtsh_observation() -> None:
     assert evidence.data["certificates"][0]["certificate_id"] == 456
 
 
+def test_create_evidence_normalizes_theharvester_observation() -> None:
+    """theHarvester observations use their tool-specific normalizer."""
+
+    observation = RawObservation(
+        source=EvidenceSource.THEHARVESTER,
+        data={
+            "domain": "Example.COM.",
+            "sources": ["duckduckgo", "urlscan"],
+            "limit": 100,
+            "report": {
+                "hosts": ["WWW.EXAMPLE.COM", "api.example.com"],
+                "emails": ["Security@Example.COM"],
+                "ips": ["192.0.2.10"],
+                "interesting_urls": ["https://www.example.com/login"],
+                "asns": ["AS64500"],
+            },
+        },
+        collected_at=datetime(2026, 8, 17, 0, 0, tzinfo=timezone.utc),
+    )
+
+    evidence = EvidenceManager().create_evidence(observation)
+
+    assert evidence.source is EvidenceSource.THEHARVESTER
+    assert evidence.data["domain_name"] == "example.com"
+    assert evidence.data["subdomains"] == [
+        "api.example.com",
+        "www.example.com",
+    ]
+    assert evidence.data["emails"] == ["security@example.com"]
+    assert evidence.data["ips"] == ["192.0.2.10"]
+    assert evidence.data["urls"] == ["https://www.example.com/login"]
+    assert evidence.data["asns"] == ["AS64500"]
+
+
+
 def test_create_evidence_rejects_invalid_input() -> None:
     """
     EvidenceManager rejects missing or invalid observations.

@@ -109,6 +109,16 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
         }
     ]
 
+    theharvester_result = {
+        "cmd": "theHarvester -d example.com ...",
+        "hosts": ["mail.example.com", "www.example.com"],
+        "emails": ["security@example.com"],
+        "ips": ["192.0.2.20"],
+        "interesting_urls": ["https://mail.example.com/login"],
+        "asns": ["AS64500"],
+        "shodan": [],
+    }
+
     # Keep the real PluginManager -> WhoisPlugin path while replacing only
     # the external python-whois/network boundary with deterministic data.
     monkeypatch.setitem(
@@ -160,6 +170,7 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
     from centaurus.plugins.dnsrecon import plugin as dnsrecon_plugin
 
     from centaurus.plugins.sublist3r import plugin as sublist3r_plugin
+    from centaurus.plugins.theharvester import plugin as theharvester_plugin
 
     def fake_tool_run(command, **kwargs):
         if command[0] == "dnsrecon":
@@ -175,10 +186,17 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
                 output.write("api.example.com\n")
             return SimpleNamespace(returncode=0, stdout="", stderr="")
 
+        if command[0] == "theHarvester":
+            report_base = command[command.index("-f") + 1]
+            with open(f"{report_base}.json", "w", encoding="utf-8") as output:
+                json.dump(theharvester_result, output)
+            return SimpleNamespace(returncode=0, stdout="", stderr="")
+
         raise AssertionError(f"Unexpected external command: {command[0]}")
 
     monkeypatch.setattr(dnsrecon_plugin.subprocess, "run", fake_tool_run)
     assert sublist3r_plugin.subprocess.run is fake_tool_run
+    assert theharvester_plugin.subprocess.run is fake_tool_run
 
     report_provider = CapturingReportProvider()
     core = Core(
@@ -199,8 +217,8 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
     assert investigation.target_type == "DOMAIN"
     assert investigation.intent == PUBLIC_EXPOSURE_ASSESSMENT
 
-    assert len(investigation.results) == 5
-    assert len(investigation.evidences) == 5
+    assert len(investigation.results) == 6
+    assert len(investigation.evidences) == 6
     assert {finding.rule.id for finding in investigation.findings} == {
         "RL-001",
         "RL-002",
@@ -219,8 +237,8 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
     finding_files = list((root / "findings").glob("*.json"))
     report_files = list((root / "reports").glob("*.json"))
 
-    assert len(raw_files) == 5
-    assert len(evidence_files) == 5
+    assert len(raw_files) == 6
+    assert len(evidence_files) == 6
     assert len(finding_files) == 4
     assert len(report_files) == 1
 

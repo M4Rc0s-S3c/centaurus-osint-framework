@@ -9,6 +9,7 @@ from centaurus.normalization.crtsh_normalizer import normalize_crtsh_data
 from centaurus.normalization.dnsrecon_normalizer import normalize_dnsrecon_data
 from centaurus.normalization.rdap_normalizer import normalize_rdap_data
 from centaurus.normalization.sublist3r_normalizer import normalize_sublist3r_data
+from centaurus.normalization.theharvester_normalizer import normalize_theharvester_data
 from centaurus.normalization.whois_normalizer import normalize_whois_data
 
 
@@ -72,6 +73,9 @@ class EvidenceManager:
 
         if source is EvidenceSource.CRTSH:
             return normalize_crtsh_data(data)
+
+        if source is EvidenceSource.THEHARVESTER:
+            return normalize_theharvester_data(data)
 
         raise ValueError(
             f"No normalizer registered for evidence source: {source.value}"
