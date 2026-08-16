@@ -27,6 +27,7 @@ from centaurus.planner.planner import Planner
 from centaurus.executor.executor import Executor
 from centaurus.plugin_manager.plugin_manager import PluginManager
 
+from centaurus.rules.rule import Rule
 from centaurus.rules.rule_engine import RuleEngine
 from centaurus.report.report_manager import ReportManager
 from centaurus.llm.llm_manager import LLMManager
@@ -56,6 +57,7 @@ class Core:
         report_store: ReportStore | None = None,
         finding_store: FindingStore | None = None,
         llm_manager: LLMManager | None = None,
+        rules: tuple[Rule, ...] | None = None,
     ) -> None:
         """
         Create a new Core instance.
@@ -79,7 +81,7 @@ class Core:
         self._report_store = report_store
         self._finding_store = finding_store
         self._evidence_manager = None
-        self._rules = ()
+        self._rules = rules if rules is not None else ()
 
     # ==========================================================
     # Public interface
