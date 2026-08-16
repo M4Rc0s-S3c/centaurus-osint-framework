@@ -112,15 +112,15 @@ def test_evidence_contains_normalized_data() -> None:
 
     evidence = EvidenceManager().create_evidence(observation)
 
-    assert evidence.data == {
-        "domain_name": "EXAMPLE.COM",
-        "creation_date": "1995-08-14T04:00:00+00:00",
-        "name_servers": [
-            "NS1.EXAMPLE.COM",
-            "NS2.EXAMPLE.COM",
-        ],
-        "registrant_name": None,
-    }
+    assert evidence.data["domain_name"] == "EXAMPLE.COM"
+    assert evidence.data["creation_date"] == "1995-08-14T04:00:00+00:00"
+    assert evidence.data["name_servers"] == [
+        "NS1.EXAMPLE.COM",
+        "NS2.EXAMPLE.COM",
+    ]
+    assert evidence.data["registrant_name"] is None
+    assert evidence.data["registrar"] is None
+    assert evidence.data["expiration_date"] is None
 
 
 def test_normalization_does_not_modify_raw_observation() -> None:
@@ -186,6 +186,32 @@ def test_create_evidence_normalizes_rdap_observation() -> None:
     assert evidence.data["domain_name"] == "example.com"
     assert evidence.data["creation_date"] == "1995-08-14T04:00:00Z"
 
+
+
+def test_create_evidence_normalizes_dnsrecon_observation() -> None:
+    """DNSRecon observations use their tool-specific normalizer."""
+
+    observation = RawObservation(
+        source=EvidenceSource.DNSRECON,
+        data={
+            "records": [
+                {"type": "ScanInfo", "arguments": "dnsrecon", "date": "2026-08-16"},
+                {
+                    "domain": "example.com",
+                    "type": "A",
+                    "name": "example.com",
+                    "address": "192.0.2.10",
+                },
+            ]
+        },
+        collected_at=datetime(2026, 8, 16, 10, 0, tzinfo=timezone.utc),
+    )
+
+    evidence = EvidenceManager().create_evidence(observation)
+
+    assert evidence.source is EvidenceSource.DNSRECON
+    assert evidence.data["domain_name"] == "example.com"
+    assert evidence.data["a_records"] == ["192.0.2.10"]
 
 def test_create_evidence_rejects_invalid_input() -> None:
     """

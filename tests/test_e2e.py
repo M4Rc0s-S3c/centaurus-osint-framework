@@ -79,6 +79,22 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
         ],
     }
 
+    dnsrecon_result = [
+        {"type": "ScanInfo", "arguments": "dnsrecon -d example.com -t std", "date": "2026-08-16"},
+        {
+            "domain": "example.com",
+            "type": "A",
+            "name": "example.com",
+            "address": "192.0.2.10",
+        },
+        {
+            "domain": "example.com",
+            "type": "TXT",
+            "name": "example.com",
+            "text": "v=spf1 -all",
+        },
+    ]
+
     # Keep the real PluginManager -> WhoisPlugin path while replacing only
     # the external python-whois/network boundary with deterministic data.
     monkeypatch.setitem(
@@ -118,6 +134,16 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
 
     monkeypatch.setattr(rdap_plugin.httpx, "get", fake_rdap_get)
 
+    from centaurus.plugins.dnsrecon import plugin as dnsrecon_plugin
+
+    def fake_dnsrecon_run(command, **kwargs):
+        output_path = command[command.index("-j") + 1]
+        with open(output_path, "w", encoding="utf-8") as output:
+            json.dump(dnsrecon_result, output)
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr(dnsrecon_plugin.subprocess, "run", fake_dnsrecon_run)
+
     report_provider = CapturingReportProvider()
     core = Core(
         raw_observation_store=FilesystemRawObservationStore(tmp_path),
@@ -137,8 +163,8 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
     assert investigation.target_type == "DOMAIN"
     assert investigation.intent == PUBLIC_EXPOSURE_ASSESSMENT
 
-    assert len(investigation.results) == 2
-    assert len(investigation.evidences) == 2
+    assert len(investigation.results) == 3
+    assert len(investigation.evidences) == 3
     assert {finding.rule.id for finding in investigation.findings} == {
         "RL-001",
         "RL-002",
@@ -157,8 +183,8 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
     finding_files = list((root / "findings").glob("*.json"))
     report_files = list((root / "reports").glob("*.json"))
 
-    assert len(raw_files) == 2
-    assert len(evidence_files) == 2
+    assert len(raw_files) == 3
+    assert len(evidence_files) == 3
     assert len(finding_files) == 4
     assert len(report_files) == 1
 

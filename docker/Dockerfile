@@ -10,7 +10,9 @@ WORKDIR /opt/centaurus
 COPY pyproject.toml ./
 COPY src ./src
 
-RUN python -m pip install --no-cache-dir .
+RUN python -m pip install --no-cache-dir \
+        "https://github.com/darkoperator/dnsrecon/archive/refs/tags/1.6.3.tar.gz" \
+    && python -m pip install --no-cache-dir .
 
 VOLUME ["/workspace"]
 

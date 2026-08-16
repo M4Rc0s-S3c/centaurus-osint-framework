@@ -50,6 +50,7 @@ def test_minimal_whois_rules_evaluate_normalized_evidence() -> None:
         "creation_date": "2020-01-01T00:00:00+00:00",
         "expiration_date": "2030-01-01T00:00:00+00:00",
         "dnssec": "signedDelegation",
+        "registrant_name": None,
     })
     evidence_two = create_whois_evidence({
         "domain_name": "example.net",
@@ -58,6 +59,7 @@ def test_minimal_whois_rules_evaluate_normalized_evidence() -> None:
         "creation_date": "2020-01-01T00:00:00+00:00",
         "expiration_date": "2030-01-01T00:00:00+00:00",
         "dnssec": "unsigned",
+        "registrant_name": None,
     })
     evidence_three = create_whois_evidence({
         "domain_name": "example.com",
@@ -66,6 +68,7 @@ def test_minimal_whois_rules_evaluate_normalized_evidence() -> None:
         "creation_date": None,
         "expiration_date": None,
         "dnssec": None,
+        "registrant_name": None,
     })
 
     findings = RuleEngine().evaluate(

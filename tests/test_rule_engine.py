@@ -332,6 +332,8 @@ def test_rule_engine_can_return_multiple_findings_from_one_rule() -> None:
     evidence = create_evidence(
         {
             "domain": "example.org",
+            "registrar": None,
+            "creation_date": None,
         }
     )
 
@@ -396,6 +398,7 @@ def test_rule_engine_supports_missing() -> None:
     evidence = create_evidence(
         {
             "domain": "example.org",
+            "registrar": None,
         }
     )
 
@@ -687,4 +690,29 @@ def test_rule_engine_age_less_than_does_not_flag_future_creation_date() -> None:
         collected_at=datetime(2026, 8, 15, tzinfo=timezone.utc),
     )
     findings = engine.evaluate(rules=(rule,), evidences=(evidence,))
+    assert findings == ()
+
+
+def test_missing_condition_ignores_evidence_without_that_schema_field() -> None:
+    """A Rule must not treat an unrelated Evidence schema as a missing value."""
+
+    from centaurus.evidence import EvidenceSource
+
+    evidence = Evidence(
+        source=EvidenceSource.DNSRECON,
+        data={"domain_name": "example.com", "a_records": ["192.0.2.10"]},
+        collected_at=datetime(2026, 8, 16, tzinfo=timezone.utc),
+    )
+    rule = Rule(
+        id="TEST-MISSING",
+        version="1.0",
+        name="registration field missing",
+        description="test",
+        category="test",
+        conditions=(Condition(field="registrar", operator="missing"),),
+        conclusion="registrar missing",
+    )
+
+    findings = RuleEngine().evaluate(rules=(rule,), evidences=(evidence,))
+
     assert findings == ()

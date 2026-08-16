@@ -32,3 +32,12 @@ def test_core_build_bundle_is_deterministic(tmp_path: Path) -> None:
     create_bundle(project_root, second)
 
     assert first.read_bytes() == second.read_bytes()
+
+
+def test_core_dockerfile_installs_pinned_dnsrecon_runtime() -> None:
+    """The Linux runtime image installs DNSRecon from its upstream 1.6.3 tag."""
+
+    dockerfile = (Path(__file__).resolve().parents[1] / "docker" / "Dockerfile").read_text(encoding="utf-8")
+
+    assert "darkoperator/dnsrecon/archive/refs/tags/1.6.3.tar.gz" in dockerfile
+    assert "dnsrecon==1.6.3" not in dockerfile

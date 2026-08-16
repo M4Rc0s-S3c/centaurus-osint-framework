@@ -583,14 +583,14 @@ def test_core_normalizes_raw_observation_and_adds_evidence():
     evidence = investigation.evidences[0]
 
     assert evidence.source is EvidenceSource.WHOIS
-    assert evidence.data == {
-        "domain_name": "EXAMPLE.COM",
-        "creation_date": "1995-08-14T04:00:00+00:00",
-        "name_servers": [
-            "NS1.EXAMPLE.COM",
-            "NS2.EXAMPLE.COM",
-        ],
-    }
+    assert evidence.data["domain_name"] == "EXAMPLE.COM"
+    assert evidence.data["creation_date"] == "1995-08-14T04:00:00+00:00"
+    assert evidence.data["name_servers"] == [
+        "NS1.EXAMPLE.COM",
+        "NS2.EXAMPLE.COM",
+    ]
+    assert evidence.data["registrar"] is None
+    assert evidence.data["expiration_date"] is None
     assert observation.data["creation_date"].year == 1995
     assert observation.data["name_servers"] == (
         "NS1.EXAMPLE.COM",

@@ -181,7 +181,9 @@ def test_normalizer_preserves_all_input_fields() -> None:
 
     result = normalize_whois_data(data)
 
-    assert set(result.keys()) == set(data.keys())
+    assert set(data.keys()).issubset(result.keys())
+    assert result["expiration_date"] is None
+    assert result["registrant_name"] is None
 
 
 def test_normalizer_does_not_modify_input() -> None:
@@ -252,3 +254,15 @@ def test_normalizer_does_not_interpret_none_values() -> None:
     assert result["registrant_name"] is None
     assert result["registrant_org"] is None
     assert result["country"] is None
+
+def test_normalizer_materializes_canonical_registration_fields() -> None:
+    """Absent registration fields become explicit None values."""
+
+    result = normalize_whois_data({"domain_name": "EXAMPLE.COM"})
+
+    assert result["registrar"] is None
+    assert result["name_servers"] is None
+    assert result["creation_date"] is None
+    assert result["expiration_date"] is None
+    assert result["dnssec"] is None
+    assert result["registrant_name"] is None

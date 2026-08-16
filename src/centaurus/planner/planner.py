@@ -67,6 +67,14 @@ class Planner:
                     },
                 )
             )
+            plan.tasks.append(
+                ExecutionTask(
+                    plugin_id="dnsrecon",
+                    parameters={
+                        "domain": investigation.target,
+                    },
+                )
+            )
 
         elif investigation.target_type == "IP":
             plan.tasks.append(

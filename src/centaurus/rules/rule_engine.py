@@ -141,8 +141,8 @@ class RuleEngine:
 
         if operator == "missing":
             return (
-                condition.field not in evidence.data
-                or value is None
+                condition.field in evidence.data
+                and value is None
             )
 
         if operator == "redacted":

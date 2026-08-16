@@ -23,7 +23,21 @@ def normalize_whois_data(
     No semantic interpretation is performed.
     """
 
-    return _normalize_value(data)
+    normalized = _normalize_value(data)
+
+    for field in (
+        "domain_name",
+        "registrar",
+        "name_servers",
+        "creation_date",
+        "expiration_date",
+        "updated_date",
+        "dnssec",
+        "registrant_name",
+    ):
+        normalized.setdefault(field, None)
+
+    return normalized
 
 
 def _normalize_value(
