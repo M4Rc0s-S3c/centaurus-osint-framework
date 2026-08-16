@@ -52,7 +52,7 @@ def test_planner_returns_execution_plan():
 
 def test_planner_creates_execution_task():
     """
-    Planner creates an execution plan containing one execution task.
+    Planner creates the domain execution tasks supported by the current TFM increment.
     """
 
     planner = Planner()
@@ -70,12 +70,9 @@ def test_planner_creates_execution_task():
         ExecutionPlan,
     )
 
-    assert len(plan.tasks) == 1
+    assert len(plan.tasks) == 2
 
-    assert isinstance(
-        plan.tasks[0],
-        ExecutionTask,
-    )
+    assert all(isinstance(task, ExecutionTask) for task in plan.tasks)
 
 
 def test_planner_associates_plan_with_investigation():
@@ -132,10 +129,45 @@ def test_planner_passes_domain_to_whois_execution_task():
         investigation,
     )
 
-    assert len(plan.tasks) == 1
+    assert len(plan.tasks) == 2
 
     assert plan.tasks[0].parameters == {
         "domain": "example.com",
     }
-
     assert plan.tasks[0].plugin_id == "whois"
+
+    assert plan.tasks[1].parameters == {
+        "domain": "example.com",
+    }
+    assert plan.tasks[1].plugin_id == "rdap"
+
+def test_planner_uses_rdap_for_ip_target() -> None:
+    """IP investigations use RDAP without creating an invalid WHOIS task."""
+
+    planner = Planner()
+    investigation = Investigation(
+        target="192.0.2.10",
+        target_type="IP",
+        intent="public_exposure_assessment",
+    )
+
+    plan = planner.plan(investigation)
+
+    assert len(plan.tasks) == 1
+    assert plan.tasks[0].plugin_id == "rdap"
+    assert plan.tasks[0].parameters == {"ip": "192.0.2.10"}
+
+
+def test_planner_does_not_invent_tool_for_email_target() -> None:
+    """EMAIL remains unsupported until its declared tool block is implemented."""
+
+    planner = Planner()
+    investigation = Investigation(
+        target="analyst@example.com",
+        target_type="EMAIL",
+        intent="public_exposure_assessment",
+    )
+
+    plan = planner.plan(investigation)
+
+    assert plan.tasks == []

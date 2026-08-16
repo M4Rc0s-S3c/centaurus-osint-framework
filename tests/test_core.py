@@ -8,6 +8,7 @@ import pytest
 
 from centaurus.core import Core
 from centaurus.evidence import EvidenceSource, RawObservation
+from centaurus.plugin_manager.plugin_manager import PluginManager
 from centaurus.evidence.evidence_manager import EvidenceManager
 from centaurus.persistence.filesystem import FilesystemRawObservationStore
 from centaurus.rules.condition import Condition
@@ -238,10 +239,24 @@ def test_core_initialize_is_idempotent():
     assert evidence_manager is core._evidence_manager
 
 
-def test_core_run_investigation_initializes_framework(tmp_path):
+def test_core_run_investigation_initializes_framework(tmp_path, monkeypatch):
     """
-    Running an investigation initializes the framework when needed.
+    Running an investigation initializes the framework without external I/O.
     """
+
+    def fake_execute(self, task):
+        source = (
+            EvidenceSource.RDAP
+            if task.plugin_id == "rdap"
+            else EvidenceSource.WHOIS
+        )
+        return RawObservation(
+            source=source,
+            data={},
+            collected_at=datetime(2026, 8, 16, tzinfo=timezone.utc),
+        )
+
+    monkeypatch.setattr(PluginManager, "execute", fake_execute)
 
     core = Core(
         raw_observation_store=FilesystemRawObservationStore(tmp_path),

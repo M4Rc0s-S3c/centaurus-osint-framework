@@ -154,14 +154,22 @@ def test_normalization_does_not_modify_raw_observation() -> None:
     )
 
 
-def test_create_evidence_rejects_unsupported_source() -> None:
+def test_create_evidence_normalizes_rdap_observation() -> None:
     """
-    Unsupported sources cannot bypass the normalization boundary.
+    RDAP observations use their tool-specific normalizer before Evidence.
     """
 
     observation = RawObservation(
         source=EvidenceSource.RDAP,
-        data={"domain_name": "EXAMPLE.COM"},
+        data={
+            "ldhName": "example.com",
+            "events": [
+                {
+                    "eventAction": "registration",
+                    "eventDate": "1995-08-14T04:00:00Z",
+                }
+            ],
+        },
         collected_at=datetime(
             2026,
             8,
@@ -172,8 +180,11 @@ def test_create_evidence_rejects_unsupported_source() -> None:
         ),
     )
 
-    with pytest.raises(ValueError, match="No normalizer registered"):
-        EvidenceManager().create_evidence(observation)
+    evidence = EvidenceManager().create_evidence(observation)
+
+    assert evidence.source is EvidenceSource.RDAP
+    assert evidence.data["domain_name"] == "example.com"
+    assert evidence.data["creation_date"] == "1995-08-14T04:00:00Z"
 
 
 def test_create_evidence_rejects_invalid_input() -> None:

@@ -5,6 +5,7 @@ Evidence Manager domain service.
 from centaurus.evidence.evidence import Evidence
 from centaurus.evidence.evidence_source import EvidenceSource
 from centaurus.evidence.raw_observation import RawObservation
+from centaurus.normalization.rdap_normalizer import normalize_rdap_data
 from centaurus.normalization.whois_normalizer import normalize_whois_data
 
 
@@ -56,6 +57,9 @@ class EvidenceManager:
 
         if source is EvidenceSource.WHOIS:
             return normalize_whois_data(data)
+
+        if source is EvidenceSource.RDAP:
+            return normalize_rdap_data(data)
 
         raise ValueError(
             f"No normalizer registered for evidence source: {source.value}"

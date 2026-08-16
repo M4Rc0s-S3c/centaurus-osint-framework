@@ -50,13 +50,33 @@ class Planner:
         # Investigation contents.
         #
 
-        task = ExecutionTask(
-            plugin_id="whois",
-            parameters={
-                "domain": investigation.target,
-            },
-        )
+        if investigation.target_type == "DOMAIN":
+            plan.tasks.append(
+                ExecutionTask(
+                    plugin_id="whois",
+                    parameters={
+                        "domain": investigation.target,
+                    },
+                )
+            )
+            plan.tasks.append(
+                ExecutionTask(
+                    plugin_id="rdap",
+                    parameters={
+                        "domain": investigation.target,
+                    },
+                )
+            )
 
-        plan.tasks.append(task)
+        elif investigation.target_type == "IP":
+            plan.tasks.append(
+                ExecutionTask(
+                    plugin_id="rdap",
+                    parameters={
+                        "ip": investigation.target,
+                    },
+                )
+            )
+
 
         return plan

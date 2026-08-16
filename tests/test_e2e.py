@@ -35,7 +35,7 @@ class CapturingReportProvider:
 
     def generate(self, report) -> str:
         self.reports.append(report)
-        return "WHOIS findings presented for the analyst."
+        return "Registration findings presented for the analyst."
 
 
 def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
@@ -54,6 +54,31 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
         "registrant_name": None,
     }
 
+    rdap_result = {
+        "objectClassName": "domain",
+        "handle": "EXAMPLE-1",
+        "ldhName": "example.com",
+        "status": ["active"],
+        "events": [
+            {"eventAction": "registration", "eventDate": "1995-08-14T04:00:00Z"},
+            {"eventAction": "expiration", "eventDate": "2030-08-14T04:00:00Z"},
+        ],
+        "nameservers": [
+            {"ldhName": "ns1.example.com"},
+            {"ldhName": "ns2.example.com"},
+        ],
+        "entities": [
+            {
+                "roles": ["registrar"],
+                "vcardArray": ["vcard", [["fn", {}, "text", "Example Registrar"]]],
+            },
+            {
+                "roles": ["registrant"],
+                "vcardArray": ["vcard", [["fn", {}, "text", "Example Registrant"]]],
+            },
+        ],
+    }
+
     # Keep the real PluginManager -> WhoisPlugin path while replacing only
     # the external python-whois/network boundary with deterministic data.
     monkeypatch.setitem(
@@ -68,6 +93,30 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
         "whois",
         lambda domain: whois_result,
     )
+
+    from centaurus.plugins.rdap import plugin as rdap_plugin
+
+    class FakeRdapResponse:
+        def __init__(self, data):
+            self._data = data
+
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return self._data
+
+    def fake_rdap_get(url: str, **kwargs):
+        if url == "https://data.iana.org/rdap/dns.json":
+            return FakeRdapResponse({
+                "services": [
+                    [["com"], ["https://rdap.example/registry/"]],
+                ]
+            })
+        assert url == "https://rdap.example/registry/domain/example.com"
+        return FakeRdapResponse(rdap_result)
+
+    monkeypatch.setattr(rdap_plugin.httpx, "get", fake_rdap_get)
 
     report_provider = CapturingReportProvider()
     core = Core(
@@ -88,8 +137,8 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
     assert investigation.target_type == "DOMAIN"
     assert investigation.intent == PUBLIC_EXPOSURE_ASSESSMENT
 
-    assert len(investigation.results) == 1
-    assert len(investigation.evidences) == 1
+    assert len(investigation.results) == 2
+    assert len(investigation.evidences) == 2
     assert {finding.rule.id for finding in investigation.findings} == {
         "RL-001",
         "RL-002",
@@ -100,7 +149,7 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
     assert investigation.report is not None
     assert investigation.report.findings == investigation.findings
     assert report_provider.reports == [investigation.report]
-    assert core.last_llm_output == "WHOIS findings presented for the analyst."
+    assert core.last_llm_output == "Registration findings presented for the analyst."
 
     root = tmp_path / "investigations" / investigation.id
     raw_files = list((root / "evidences" / "raw").glob("*.json"))
@@ -108,8 +157,8 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
     finding_files = list((root / "findings").glob("*.json"))
     report_files = list((root / "reports").glob("*.json"))
 
-    assert len(raw_files) == 1
-    assert len(evidence_files) == 1
+    assert len(raw_files) == 2
+    assert len(evidence_files) == 2
     assert len(finding_files) == 4
     assert len(report_files) == 1
 
