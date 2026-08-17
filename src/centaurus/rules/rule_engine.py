@@ -163,6 +163,12 @@ class RuleEngine:
         if operator == "greater_than_or_equal":
             return value >= condition.value
 
+        if operator == "collection_size_greater_than":
+            return self._collection_size_greater_than(
+                condition=condition,
+                value=value,
+            )
+
         if operator in {
             "age_less_than",
             "expires_within",
@@ -178,6 +184,37 @@ class RuleEngine:
         raise ValueError(
             f"Unsupported Rule operator: {operator!r}"
         )
+
+    @staticmethod
+    def _collection_size_greater_than(
+        condition: Condition,
+        value: Any,
+    ) -> bool:
+        """Evaluate collection cardinality against an integer threshold.
+
+        The operator is intentionally limited to concrete collection types
+        used by normalized Evidence. Strings and mappings are not treated as
+        collections for Rule evaluation.
+        """
+
+        threshold = condition.value
+
+        if not isinstance(threshold, int) or isinstance(threshold, bool):
+            raise TypeError(
+                "Rule operator 'collection_size_greater_than' "
+                "requires a non-negative integer value."
+            )
+
+        if threshold < 0:
+            raise ValueError(
+                "Rule operator 'collection_size_greater_than' "
+                "requires a non-negative integer value."
+            )
+
+        if not isinstance(value, (list, tuple, set, frozenset)):
+            return False
+
+        return len(value) > threshold
 
     def _temporal_condition_matches(
         self,

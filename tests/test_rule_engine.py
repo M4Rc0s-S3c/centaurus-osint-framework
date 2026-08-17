@@ -503,6 +503,138 @@ def test_rule_engine_supports_greater_than_or_equal() -> None:
     assert len(findings) == 1
 
 
+def test_rule_engine_supports_collection_size_greater_than() -> None:
+    """RuleEngine supports cardinality checks for normalized collections."""
+
+    engine = RuleEngine()
+
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="subdomains",
+                operator="collection_size_greater_than",
+                value=1,
+            ),
+        )
+    )
+
+    evidence = create_evidence(
+        {
+            "subdomains": ["api.example.com", "www.example.com"],
+        }
+    )
+
+    findings = engine.evaluate(
+        rules=(rule,),
+        evidences=(evidence,),
+    )
+
+    assert len(findings) == 1
+
+
+def test_rule_engine_collection_size_greater_than_excludes_boundary() -> None:
+    """Exactly the configured collection size does not satisfy > N."""
+
+    engine = RuleEngine()
+
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="subdomains",
+                operator="collection_size_greater_than",
+                value=1,
+            ),
+        )
+    )
+
+    evidence = create_evidence(
+        {
+            "subdomains": ["www.example.com"],
+        }
+    )
+
+    findings = engine.evaluate(
+        rules=(rule,),
+        evidences=(evidence,),
+    )
+
+    assert findings == ()
+
+
+def test_rule_engine_collection_size_greater_than_ignores_non_collection() -> None:
+    """Scalar or mapping values are not interpreted as normalized collections."""
+
+    engine = RuleEngine()
+
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="subdomains",
+                operator="collection_size_greater_than",
+                value=1,
+            ),
+        )
+    )
+
+    for value in ("api.example.com", {"api.example.com": True}, None):
+        findings = engine.evaluate(
+            rules=(rule,),
+            evidences=(create_evidence({"subdomains": value}),),
+        )
+
+        assert findings == ()
+
+
+@pytest.mark.parametrize(
+    "threshold",
+    (1.0, True, "1"),
+)
+def test_rule_engine_collection_size_greater_than_requires_integer_threshold(
+    threshold,
+) -> None:
+    """Collection cardinality uses a non-negative integer threshold."""
+
+    engine = RuleEngine()
+
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="subdomains",
+                operator="collection_size_greater_than",
+                value=threshold,
+            ),
+        )
+    )
+
+    with pytest.raises(TypeError):
+        engine.evaluate(
+            rules=(rule,),
+            evidences=(create_evidence({"subdomains": ["a", "b"]}),),
+        )
+
+
+def test_rule_engine_collection_size_greater_than_rejects_negative_threshold() -> None:
+    """Collection cardinality rejects negative thresholds."""
+
+    engine = RuleEngine()
+
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="subdomains",
+                operator="collection_size_greater_than",
+                value=-1,
+            ),
+        )
+    )
+
+    with pytest.raises(ValueError):
+        engine.evaluate(
+            rules=(rule,),
+            evidences=(create_evidence({"subdomains": []}),),
+        )
+
+
 def test_rule_engine_rejects_unsupported_operator() -> None:
     """
     RuleEngine rejects unsupported operators.

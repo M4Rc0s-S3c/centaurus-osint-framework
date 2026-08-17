@@ -1,5 +1,6 @@
 """End-to-end validation of the complete CENTAURUS MVP flow."""
 
+from collections import Counter
 from datetime import datetime, timezone
 import json
 import sys
@@ -19,6 +20,7 @@ from centaurus.persistence.filesystem import (
 )
 from centaurus.request import PUBLIC_EXPOSURE_ASSESSMENT
 from centaurus.rules.dns_rules import DNS_RULES
+from centaurus.rules.exposure_rules import EXPOSURE_RULES
 from centaurus.rules.whois_rules import WHOIS_RULES
 
 
@@ -108,7 +110,7 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
     theharvester_result = {
         "cmd": "theHarvester -d example.com ...",
         "hosts": ["mail.example.com", "www.example.com"],
-        "emails": ["security@example.com"],
+        "emails": ["admin@example.com", "security@example.com"],
         "ips": ["192.0.2.20"],
         "interesting_urls": ["https://mail.example.com/login"],
         "asns": ["AS64500"],
@@ -201,7 +203,7 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
         finding_store=FilesystemFindingStore(tmp_path),
         report_store=FilesystemReportStore(tmp_path),
         llm_manager=LLMManager(provider=report_provider),
-        rules=WHOIS_RULES + DNS_RULES,
+        rules=WHOIS_RULES + DNS_RULES + EXPOSURE_RULES,
     )
     interpreter = RequestInterpreter(provider=FixedIntentProvider())
     cli = CLI(core=core, request_interpreter=interpreter)
@@ -254,20 +256,29 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
         "www.example.com",
     ]
     assert evidence_by_source[EvidenceSource.THEHARVESTER]["emails"] == [
-        "security@example.com"
+        "admin@example.com",
+        "security@example.com",
+    ]
+    assert evidence_by_source[EvidenceSource.THEHARVESTER]["subdomains"] == [
+        "mail.example.com",
+        "www.example.com",
     ]
 
-    # Registral Evidence keeps producing the existing Findings while DNSRecon
-    # produces the factual SPF Finding. Other schemas must not create false
-    # registration or SPF Findings merely because unrelated fields are absent.
-    assert len(investigation.findings) == 5
-    assert {finding.rule.id for finding in investigation.findings} == {
-        "RL-001",
-        "RL-002",
-        "RL-004",
-        "RL-005",
-        "RL-007",
-    }
+    # Registral Evidence keeps producing the existing Findings, DNSRecon
+    # produces the factual SPF Finding, and collection Rules reuse normalized
+    # fields across compatible sources without filtering on tool identity.
+    finding_counts = Counter(finding.rule.id for finding in investigation.findings)
+    assert finding_counts == Counter(
+        {
+            "RL-001": 1,
+            "RL-002": 1,
+            "RL-004": 1,
+            "RL-005": 1,
+            "RL-007": 1,
+            "RL-008": 3,
+            "RL-009": 1,
+        }
+    )
 
     assert investigation.report is not None
     assert investigation.report.findings == investigation.findings
@@ -282,7 +293,7 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
 
     assert len(raw_files) == 6
     assert len(evidence_files) == 6
-    assert len(finding_files) == 5
+    assert len(finding_files) == 9
     assert len(report_files) == 1
 
     # Filesystem persistence must preserve the same six-source execution order
@@ -301,10 +312,8 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
 
     persisted_report = json.loads(report_files[0].read_text(encoding="utf-8"))
     assert persisted_report["investigation_id"] == investigation.id
-    assert {item["rule"]["id"] for item in persisted_report["findings"]} == {
-        "RL-001",
-        "RL-002",
-        "RL-004",
-        "RL-005",
-        "RL-007",
-    }
+    persisted_finding_counts = Counter(
+        item["rule"]["id"]
+        for item in persisted_report["findings"]
+    )
+    assert persisted_finding_counts == finding_counts
