@@ -67,6 +67,22 @@ def test_persist_raw_allocates_monotonic_sequence(tmp_path, observation):
     assert first.read_bytes() == second.read_bytes()
 
 
+def test_persist_raw_sequence_is_global_across_sources(tmp_path, observation):
+    """Sequence numbers advance across different tools in one Investigation."""
+
+    store = FilesystemRawObservationStore(tmp_path)
+    rdap_observation = RawObservation(
+        source=EvidenceSource.RDAP,
+        data={"ldhName": "example.com"},
+        collected_at=observation.collected_at,
+    )
+
+    first = store.persist_raw("INV-001", observation)
+    second = store.persist_raw("INV-001", rdap_observation)
+
+    assert first.name == "INV-001_0001-whois.json"
+    assert second.name == "INV-001_0002-rdap.json"
+
 def test_persist_raw_never_overwrites_existing_artifact(tmp_path, observation):
     store = FilesystemRawObservationStore(tmp_path)
     raw_dir = tmp_path / "investigations" / "INV-001" / "evidences" / "raw"

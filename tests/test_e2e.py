@@ -7,6 +7,7 @@ from types import SimpleNamespace
 
 from centaurus.cli import CLI
 from centaurus.core.core import Core
+from centaurus.evidence import EvidenceSource
 from centaurus.investigation import InvestigationStatus
 from centaurus.llm.llm_manager import LLMManager
 from centaurus.llm.request_interpreter import RequestInterpreter
@@ -38,11 +39,11 @@ class CapturingReportProvider:
         return "Registration findings presented for the analyst."
 
 
-def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
+def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_presentation(
     tmp_path,
     monkeypatch,
 ) -> None:
-    """Exercise the complete deterministic pipeline with only external I/O stubbed."""
+    """Validate the six-tool TFM catalog through the complete deterministic pipeline."""
 
     whois_result = {
         "domain_name": "EXAMPLE.COM",
@@ -217,8 +218,54 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
     assert investigation.target_type == "DOMAIN"
     assert investigation.intent == PUBLIC_EXPOSURE_ASSESSMENT
 
+    expected_sources = [
+        EvidenceSource.WHOIS,
+        EvidenceSource.RDAP,
+        EvidenceSource.DNSRECON,
+        EvidenceSource.SUBLIST3R,
+        EvidenceSource.CRTSH,
+        EvidenceSource.THEHARVESTER,
+    ]
+
+    # The full DOMAIN catalog must execute in Planner order and every tool must
+    # cross both the RawObservation and normalized Evidence boundaries.
     assert len(investigation.results) == 6
+    assert [result.source for result in investigation.results] == expected_sources
     assert len(investigation.evidences) == 6
+    assert [evidence.source for evidence in investigation.evidences] == expected_sources
+
+    evidence_by_source = {
+        evidence.source: evidence.data
+        for evidence in investigation.evidences
+    }
+    assert evidence_by_source[EvidenceSource.WHOIS]["registrar"] is None
+    assert evidence_by_source[EvidenceSource.WHOIS]["creation_date"] == (
+        "2020-01-01T00:00:00+00:00"
+    )
+    assert evidence_by_source[EvidenceSource.RDAP]["domain_name"] == "example.com"
+    assert evidence_by_source[EvidenceSource.RDAP]["registrar"] == "Example Registrar"
+    assert evidence_by_source[EvidenceSource.DNSRECON]["a_records"] == ["192.0.2.10"]
+    assert evidence_by_source[EvidenceSource.DNSRECON]["spf_records"] == ["v=spf1 -all"]
+    assert evidence_by_source[EvidenceSource.SUBLIST3R]["subdomains"] == [
+        "api.example.com",
+        "www.example.com",
+    ]
+    assert evidence_by_source[EvidenceSource.CRTSH]["certificate_names"] == [
+        "api.example.com",
+        "www.example.com",
+    ]
+    assert evidence_by_source[EvidenceSource.THEHARVESTER]["hosts"] == [
+        "mail.example.com",
+        "www.example.com",
+    ]
+    assert evidence_by_source[EvidenceSource.THEHARVESTER]["emails"] == [
+        "security@example.com"
+    ]
+
+    # Only the registral Evidence matches the current Rule catalog. Evidence from
+    # DNSRecon, Sublist3r, crt.sh and TheHarvester must not create false
+    # registration Findings simply because their schemas omit registral fields.
+    assert len(investigation.findings) == 4
     assert {finding.rule.id for finding in investigation.findings} == {
         "RL-001",
         "RL-002",
@@ -232,15 +279,29 @@ def test_complete_mvp_flow_from_cli_to_persisted_report_and_llm_presentation(
     assert core.last_llm_output == "Registration findings presented for the analyst."
 
     root = tmp_path / "investigations" / investigation.id
-    raw_files = list((root / "evidences" / "raw").glob("*.json"))
-    evidence_files = list((root / "evidences" / "normalized").glob("*.json"))
-    finding_files = list((root / "findings").glob("*.json"))
-    report_files = list((root / "reports").glob("*.json"))
+    raw_files = sorted((root / "evidences" / "raw").glob("*.json"))
+    evidence_files = sorted((root / "evidences" / "normalized").glob("*.json"))
+    finding_files = sorted((root / "findings").glob("*.json"))
+    report_files = sorted((root / "reports").glob("*.json"))
 
     assert len(raw_files) == 6
     assert len(evidence_files) == 6
     assert len(finding_files) == 4
     assert len(report_files) == 1
+
+    # Filesystem persistence must preserve the same six-source execution order
+    # at both RAW and normalized levels.
+    persisted_raw_sources = [
+        json.loads(path.read_text(encoding="utf-8"))["source"]
+        for path in raw_files
+    ]
+    persisted_evidence_sources = [
+        json.loads(path.read_text(encoding="utf-8"))["source"]
+        for path in evidence_files
+    ]
+    expected_source_values = [source.value for source in expected_sources]
+    assert persisted_raw_sources == expected_source_values
+    assert persisted_evidence_sources == expected_source_values
 
     persisted_report = json.loads(report_files[0].read_text(encoding="utf-8"))
     assert persisted_report["investigation_id"] == investigation.id

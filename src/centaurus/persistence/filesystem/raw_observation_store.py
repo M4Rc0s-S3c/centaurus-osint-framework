@@ -15,7 +15,7 @@ from centaurus.evidence.raw_observation import RawObservation
 from centaurus.persistence.raw_observation_store import RawObservationStore
 
 
-_SEQUENCE_PATTERN = re.compile(r"^(?P<investigation>.+)_(?P<sequence>\\d+)-.+\\.json$")
+_SEQUENCE_PATTERN = re.compile(r"^(?P<investigation>.+)_(?P<sequence>\d+)-.+\.json$")
 _SAFE_SOURCE = re.compile(r"[^A-Za-z0-9_.-]+")
 
 
