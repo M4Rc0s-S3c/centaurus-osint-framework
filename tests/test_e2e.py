@@ -18,6 +18,7 @@ from centaurus.persistence.filesystem import (
     FilesystemReportStore,
 )
 from centaurus.request import PUBLIC_EXPOSURE_ASSESSMENT
+from centaurus.rules.dns_rules import DNS_RULES
 from centaurus.rules.whois_rules import WHOIS_RULES
 
 
@@ -87,12 +88,6 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
             "type": "A",
             "name": "example.com",
             "address": "192.0.2.10",
-        },
-        {
-            "domain": "example.com",
-            "type": "TXT",
-            "name": "example.com",
-            "text": "v=spf1 -all",
         },
     ]
 
@@ -206,7 +201,7 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
         finding_store=FilesystemFindingStore(tmp_path),
         report_store=FilesystemReportStore(tmp_path),
         llm_manager=LLMManager(provider=report_provider),
-        rules=WHOIS_RULES,
+        rules=WHOIS_RULES + DNS_RULES,
     )
     interpreter = RequestInterpreter(provider=FixedIntentProvider())
     cli = CLI(core=core, request_interpreter=interpreter)
@@ -245,7 +240,7 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
     assert evidence_by_source[EvidenceSource.RDAP]["domain_name"] == "example.com"
     assert evidence_by_source[EvidenceSource.RDAP]["registrar"] == "Example Registrar"
     assert evidence_by_source[EvidenceSource.DNSRECON]["a_records"] == ["192.0.2.10"]
-    assert evidence_by_source[EvidenceSource.DNSRECON]["spf_records"] == ["v=spf1 -all"]
+    assert evidence_by_source[EvidenceSource.DNSRECON]["spf_records"] == []
     assert evidence_by_source[EvidenceSource.SUBLIST3R]["subdomains"] == [
         "api.example.com",
         "www.example.com",
@@ -262,15 +257,16 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
         "security@example.com"
     ]
 
-    # Only the registral Evidence matches the current Rule catalog. Evidence from
-    # DNSRecon, Sublist3r, crt.sh and TheHarvester must not create false
-    # registration Findings simply because their schemas omit registral fields.
-    assert len(investigation.findings) == 4
+    # Registral Evidence keeps producing the existing Findings while DNSRecon
+    # produces the factual SPF Finding. Other schemas must not create false
+    # registration or SPF Findings merely because unrelated fields are absent.
+    assert len(investigation.findings) == 5
     assert {finding.rule.id for finding in investigation.findings} == {
         "RL-001",
         "RL-002",
         "RL-004",
         "RL-005",
+        "RL-007",
     }
 
     assert investigation.report is not None
@@ -286,7 +282,7 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
 
     assert len(raw_files) == 6
     assert len(evidence_files) == 6
-    assert len(finding_files) == 4
+    assert len(finding_files) == 5
     assert len(report_files) == 1
 
     # Filesystem persistence must preserve the same six-source execution order
@@ -310,4 +306,5 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
         "RL-002",
         "RL-004",
         "RL-005",
+        "RL-007",
     }
