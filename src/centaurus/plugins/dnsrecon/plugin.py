@@ -12,23 +12,42 @@ from centaurus.plugins.base_plugin import BasePlugin
 
 _DNSRECON_EXECUTABLE = "dnsrecon"
 _DNSRECON_TIMEOUT_SECONDS = 120
+_DNSRECON_STANDARD_MODE = "standard"
+_DNSRECON_DMARC_MODE = "dmarc"
 
 
 class Plugin(BasePlugin):
-    """DNSRecon standard DNS-enumeration plugin for domain targets."""
+    """DNSRecon DNS-enumeration plugin for domain targets."""
 
     def execute(
         self,
         parameters: dict,
     ) -> RawObservation:
-        """Execute DNSRecon and return its original JSON records."""
+        """Execute the requested DNSRecon profile and return its RAW records."""
 
         domain = str(parameters.get("domain", "")).strip().rstrip(".").lower()
+        mode = str(parameters.get("mode", _DNSRECON_STANDARD_MODE)).strip().lower()
+
+        if mode not in {
+            _DNSRECON_STANDARD_MODE,
+            _DNSRECON_DMARC_MODE,
+        }:
+            raise ValueError(f"Unsupported DNSRecon execution mode: {mode}")
 
         if not domain:
             data = {}
+        elif mode == _DNSRECON_DMARC_MODE:
+            query_name = f"_dmarc.{domain}"
+            data = {
+                "scan_kind": _DNSRECON_DMARC_MODE,
+                "domain_name": domain,
+                "query_name": query_name,
+                "records": self._run_dnsrecon(query_name),
+            }
         else:
-            data = self._run_dnsrecon(domain)
+            data = {
+                "records": self._run_dnsrecon(domain),
+            }
 
         return RawObservation(
             source=EvidenceSource.DNSRECON,
@@ -37,7 +56,7 @@ class Plugin(BasePlugin):
         )
 
     @staticmethod
-    def _run_dnsrecon(domain: str) -> dict:
+    def _run_dnsrecon(domain: str) -> list:
         """Run one bounded DNSRecon standard scan using a temporary JSON file."""
 
         with tempfile.TemporaryDirectory(prefix="centaurus-dnsrecon-") as temp_dir:
@@ -87,4 +106,4 @@ class Plugin(BasePlugin):
             if not isinstance(records, list):
                 raise RuntimeError("DNSRecon JSON output must be a list of records.")
 
-            return {"records": records}
+            return records

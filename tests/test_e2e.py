@@ -46,7 +46,7 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
     tmp_path,
     monkeypatch,
 ) -> None:
-    """Validate the six-tool TFM catalog through the complete deterministic pipeline."""
+    """Validate the six-tool catalog plus direct DMARC acquisition end to end."""
 
     whois_result = {
         "domain_name": "EXAMPLE.COM",
@@ -90,6 +90,14 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
             "type": "A",
             "name": "example.com",
             "address": "192.0.2.10",
+        },
+    ]
+
+    dmarc_dnsrecon_result = [
+        {
+            "type": "ScanInfo",
+            "arguments": "dnsrecon -d _dmarc.example.com -t std",
+            "date": "2026-08-18",
         },
     ]
 
@@ -172,9 +180,15 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
 
     def fake_tool_run(command, **kwargs):
         if command[0] == "dnsrecon":
+            query_name = command[command.index("-d") + 1]
             output_path = command[command.index("-j") + 1]
+            records = (
+                dmarc_dnsrecon_result
+                if query_name == "_dmarc.example.com"
+                else dnsrecon_result
+            )
             with open(output_path, "w", encoding="utf-8") as output:
-                json.dump(dnsrecon_result, output)
+                json.dump(records, output)
             return SimpleNamespace(returncode=0, stdout="", stderr="")
 
         if command[0] == "sublist3r":
@@ -219,54 +233,62 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
         EvidenceSource.WHOIS,
         EvidenceSource.RDAP,
         EvidenceSource.DNSRECON,
+        EvidenceSource.DNSRECON,
         EvidenceSource.SUBLIST3R,
         EvidenceSource.CRTSH,
         EvidenceSource.THEHARVESTER,
     ]
 
-    # The full DOMAIN catalog must execute in Planner order and every tool must
-    # cross both the RawObservation and normalized Evidence boundaries.
-    assert len(investigation.results) == 6
+    # The six-tool DOMAIN catalog now contains seven sequential tasks because
+    # DNSRecon is reused for one explicit direct-DMARC observation. Every task
+    # must cross both RawObservation and normalized Evidence boundaries.
+    assert len(investigation.results) == 7
     assert [result.source for result in investigation.results] == expected_sources
-    assert len(investigation.evidences) == 6
+    assert len(investigation.evidences) == 7
     assert [evidence.source for evidence in investigation.evidences] == expected_sources
 
-    evidence_by_source = {
-        evidence.source: evidence.data
-        for evidence in investigation.evidences
-    }
-    assert evidence_by_source[EvidenceSource.WHOIS]["registrar"] is None
-    assert evidence_by_source[EvidenceSource.WHOIS]["creation_date"] == (
-        "2020-01-01T00:00:00+00:00"
-    )
-    assert evidence_by_source[EvidenceSource.RDAP]["domain_name"] == "example.com"
-    assert evidence_by_source[EvidenceSource.RDAP]["registrar"] == "Example Registrar"
-    assert evidence_by_source[EvidenceSource.DNSRECON]["a_records"] == ["192.0.2.10"]
-    assert evidence_by_source[EvidenceSource.DNSRECON]["spf_records"] == []
-    assert evidence_by_source[EvidenceSource.SUBLIST3R]["subdomains"] == [
+    whois_evidence = investigation.evidences[0].data
+    rdap_evidence = investigation.evidences[1].data
+    standard_dns_evidence = investigation.evidences[2].data
+    dmarc_dns_evidence = investigation.evidences[3].data
+    sublist3r_evidence = investigation.evidences[4].data
+    crtsh_evidence = investigation.evidences[5].data
+    theharvester_evidence = investigation.evidences[6].data
+
+    assert whois_evidence["registrar"] is None
+    assert whois_evidence["creation_date"] == "2020-01-01T00:00:00+00:00"
+    assert rdap_evidence["domain_name"] == "example.com"
+    assert rdap_evidence["registrar"] == "Example Registrar"
+    assert standard_dns_evidence["a_records"] == ["192.0.2.10"]
+    assert standard_dns_evidence["spf_records"] == []
+    assert dmarc_dns_evidence["domain_name"] == "example.com"
+    assert dmarc_dns_evidence["query_name"] == "_dmarc.example.com"
+    assert dmarc_dns_evidence["dmarc_records"] == []
+    assert "spf_records" not in dmarc_dns_evidence
+    assert sublist3r_evidence["subdomains"] == [
         "api.example.com",
         "www.example.com",
     ]
-    assert evidence_by_source[EvidenceSource.CRTSH]["certificate_names"] == [
+    assert crtsh_evidence["certificate_names"] == [
         "api.example.com",
         "www.example.com",
     ]
-    assert evidence_by_source[EvidenceSource.THEHARVESTER]["hosts"] == [
+    assert theharvester_evidence["hosts"] == [
         "mail.example.com",
         "www.example.com",
     ]
-    assert evidence_by_source[EvidenceSource.THEHARVESTER]["emails"] == [
+    assert theharvester_evidence["emails"] == [
         "admin@example.com",
         "security@example.com",
     ]
-    assert evidence_by_source[EvidenceSource.THEHARVESTER]["subdomains"] == [
+    assert theharvester_evidence["subdomains"] == [
         "mail.example.com",
         "www.example.com",
     ]
 
-    # Registral Evidence keeps producing the existing Findings, DNSRecon
-    # produces the factual SPF Finding, and collection Rules reuse normalized
-    # fields across compatible sources without filtering on tool identity.
+    # Registral Evidence keeps producing the existing Findings. Standard and
+    # direct-DMARC DNS Evidence produce isolated factual mail-policy Findings,
+    # while collection Rules remain tool-agnostic across compatible sources.
     finding_counts = Counter(finding.rule.id for finding in investigation.findings)
     assert finding_counts == Counter(
         {
@@ -277,6 +299,7 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
             "RL-007": 1,
             "RL-008": 3,
             "RL-009": 1,
+            "RL-010": 1,
         }
     )
 
@@ -291,13 +314,13 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
     finding_files = sorted((root / "findings").glob("*.json"))
     report_files = sorted((root / "reports").glob("*.json"))
 
-    assert len(raw_files) == 6
-    assert len(evidence_files) == 6
-    assert len(finding_files) == 9
+    assert len(raw_files) == 7
+    assert len(evidence_files) == 7
+    assert len(finding_files) == 10
     assert len(report_files) == 1
 
-    # Filesystem persistence must preserve the same six-source execution order
-    # at both RAW and normalized levels.
+    # Filesystem persistence must preserve the seven-task execution order,
+    # including the second DNSRecon observation, at RAW and normalized levels.
     persisted_raw_sources = [
         json.loads(path.read_text(encoding="utf-8"))["source"]
         for path in raw_files
@@ -309,6 +332,14 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
     expected_source_values = [source.value for source in expected_sources]
     assert persisted_raw_sources == expected_source_values
     assert persisted_evidence_sources == expected_source_values
+
+    persisted_dmarc_raw = json.loads(raw_files[3].read_text(encoding="utf-8"))
+    persisted_dmarc_evidence = json.loads(
+        evidence_files[3].read_text(encoding="utf-8")
+    )
+    assert persisted_dmarc_raw["data"]["scan_kind"] == "dmarc"
+    assert persisted_dmarc_raw["data"]["query_name"] == "_dmarc.example.com"
+    assert persisted_dmarc_evidence["data"]["dmarc_records"] == []
 
     persisted_report = json.loads(report_files[0].read_text(encoding="utf-8"))
     assert persisted_report["investigation_id"] == investigation.id

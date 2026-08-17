@@ -57,6 +57,64 @@ def test_dnsrecon_plugin_executes_standard_scan_and_reads_json(monkeypatch) -> N
     assert captured["kwargs"]["capture_output"] is True
 
 
+def test_dnsrecon_plugin_executes_direct_dmarc_scan(monkeypatch) -> None:
+    captured = {}
+    raw_records = [
+        {"type": "ScanInfo", "arguments": "dnsrecon ...", "date": "2026-08-18"},
+        {
+            "domain": "_dmarc.example.com",
+            "type": "TXT",
+            "name": "_dmarc.example.com",
+            "strings": "v=DMARC1; p=reject",
+        },
+    ]
+
+    def fake_run(command, **kwargs):
+        captured["command"] = command
+        output_path = command[command.index("-j") + 1]
+        with open(output_path, "w", encoding="utf-8") as output:
+            json.dump(raw_records, output)
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr(dnsrecon_plugin.subprocess, "run", fake_run)
+
+    observation = Plugin().execute(
+        {
+            "domain": "Example.COM.",
+            "mode": "dmarc",
+        }
+    )
+
+    assert observation.source is EvidenceSource.DNSRECON
+    assert observation.data == {
+        "scan_kind": "dmarc",
+        "domain_name": "example.com",
+        "query_name": "_dmarc.example.com",
+        "records": raw_records,
+    }
+    assert captured["command"][1:5] == [
+        "-d",
+        "_dmarc.example.com",
+        "-t",
+        "std",
+    ]
+
+
+def test_dnsrecon_plugin_rejects_unknown_execution_mode(monkeypatch) -> None:
+    calls = []
+    monkeypatch.setattr(dnsrecon_plugin.subprocess, "run", lambda *a, **k: calls.append((a, k)))
+
+    with pytest.raises(ValueError, match="Unsupported DNSRecon execution mode"):
+        Plugin().execute(
+            {
+                "domain": "example.com",
+                "mode": "unknown",
+            }
+        )
+
+    assert calls == []
+
+
 def test_dnsrecon_plugin_does_not_use_shell_command(monkeypatch) -> None:
     def fake_run(command, **kwargs):
         assert isinstance(command, list)

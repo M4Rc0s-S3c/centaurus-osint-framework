@@ -77,6 +77,15 @@ class Planner:
             )
             plan.tasks.append(
                 ExecutionTask(
+                    plugin_id="dnsrecon",
+                    parameters={
+                        "domain": investigation.target,
+                        "mode": "dmarc",
+                    },
+                )
+            )
+            plan.tasks.append(
+                ExecutionTask(
                     plugin_id="sublist3r",
                     parameters={
                         "domain": investigation.target,
