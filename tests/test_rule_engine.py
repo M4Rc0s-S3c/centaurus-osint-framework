@@ -39,7 +39,7 @@ def create_rule(
         version=version,
         name="test-rule",
         description="Test rule.",
-        category="whois_rdap",
+        category="registration",
         conditions=conditions,
         conclusion=conclusion,
     )
@@ -267,7 +267,7 @@ def test_rule_engine_finding_references_evidence() -> None:
         evidences=(evidence,),
     )
 
-    assert evidence in findings[0].evidence
+    assert evidence in findings[0].evidences
 
 
 def test_rule_engine_evaluates_multiple_rules() -> None:

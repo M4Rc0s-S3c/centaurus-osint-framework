@@ -12,7 +12,7 @@ class ReportManager:
     Generate immutable Reports from Findings supplied by Core.
 
     ReportManager does not modify Investigation or Findings, apply Rules,
-    inspect Evidence independently, or perform linguistic presentation.
+    inspect Evidence independently, or perform analyst assistance or presentation.
     """
 
     def generate(

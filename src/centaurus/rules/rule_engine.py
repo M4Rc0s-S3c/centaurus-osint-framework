@@ -211,8 +211,8 @@ class RuleEngine:
         """
         Evaluate one Condition against one Evidence.
 
-        Only the minimal operator set required by the
-        current WHOIS/RDAP Rules is supported.
+        The supported operators are generic over normalized Evidence and
+        are independent of the tool that produced the observation.
         """
 
         if condition.field not in evidence.data:

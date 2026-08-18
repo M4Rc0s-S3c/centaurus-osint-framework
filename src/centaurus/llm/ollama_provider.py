@@ -16,7 +16,7 @@ from centaurus.llm.serialization import serialize_report
 
 
 class OllamaProvider:
-    """Generate Report presentations through the local Ollama HTTP API."""
+    """Generate grounded Report analyst assistance through local Ollama."""
 
     def __init__(
         self,
@@ -40,7 +40,7 @@ class OllamaProvider:
         self._owns_client = client is None
 
     def generate(self, report: Report) -> str:
-        """Generate a non-empty linguistic presentation for a Report."""
+        """Generate and validate a grounded analyst-assistance presentation."""
 
         if not isinstance(report, Report):
             raise TypeError("report must be a Report instance")

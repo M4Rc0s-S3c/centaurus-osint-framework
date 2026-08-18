@@ -47,17 +47,12 @@ def test_execution_plan_stores_investigation_id() -> None:
     assert plan.investigation_id == "INV-001"
 
 
-def test_execution_plan_stores_objective() -> None:
-    """
-    ExecutionPlan stores the objective required for execution.
-    """
+def test_execution_plan_does_not_duplicate_investigation_objective() -> None:
+    """ExecutionPlan contains operational context, not a domain objective copy."""
 
-    plan = ExecutionPlan(
-        investigation_id="INV-001",
-        objective="Investigate example.com",
-    )
+    plan = ExecutionPlan(investigation_id="INV-001")
 
-    assert plan.objective == "Investigate example.com"
+    assert not hasattr(plan, "objective")
 
 
 def test_execution_plan_default_values() -> None:
@@ -70,7 +65,6 @@ def test_execution_plan_default_values() -> None:
     )
 
     assert plan.investigation_id == "INV-001"
-    assert plan.objective is None
     assert plan.tasks == []
     assert plan.metadata == {}
 

@@ -38,7 +38,8 @@ def test_planner_returns_execution_plan():
     planner = Planner()
 
     investigation = Investigation(
-        objective="example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     plan = planner.plan(
@@ -59,7 +60,8 @@ def test_planner_creates_execution_task():
     planner = Planner()
 
     investigation = Investigation(
-        objective="example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     plan = planner.plan(
@@ -85,7 +87,8 @@ def test_planner_associates_plan_with_investigation():
     planner = Planner()
 
     investigation = Investigation(
-        objective="example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     plan = planner.plan(
@@ -95,23 +98,20 @@ def test_planner_associates_plan_with_investigation():
     assert plan.investigation_id == investigation.id
 
 
-def test_planner_copies_investigation_objective_to_plan():
-    """
-    Planner copies the Investigation objective into the
-    ExecutionPlan.
-    """
+def test_planner_plan_contains_only_operational_execution_context():
+    """ExecutionPlan keeps identity/tasks without duplicating domain objective."""
 
     planner = Planner()
 
     investigation = Investigation(
-        objective="example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
-    plan = planner.plan(
-        investigation,
-    )
+    plan = planner.plan(investigation)
 
-    assert plan.objective == "example.com"
+    assert plan.investigation_id == investigation.id
+    assert not hasattr(plan, "objective")
 
 
 def test_planner_passes_domain_to_whois_execution_task():
@@ -123,7 +123,8 @@ def test_planner_passes_domain_to_whois_execution_task():
     planner = Planner()
 
     investigation = Investigation(
-        objective="example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     plan = planner.plan(

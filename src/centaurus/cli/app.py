@@ -121,7 +121,7 @@ def render_capabilities(console: Console, *, show_rules: bool = False) -> None:
     )
     console.print(
         "[bold]Output:[/bold] report.json (authoritative), report.md "
-        "(deterministic projection), LLM presentation (ephemeral)"
+        "(deterministic projection), LLM analyst assistance (ephemeral)"
     )
 
     if not show_rules:
@@ -305,12 +305,12 @@ def _render_investigation(
         console.print(
             Panel(
                 Text(presentation),
-                title="LLM presentation — ephemeral",
+                title="LLM analyst assistance — ephemeral",
             )
         )
     elif report is not None:
         console.print(
-            "[dim]LLM presentation unavailable; the deterministic Report "
+            "[dim]LLM analyst assistance unavailable; the deterministic Report "
             "remains the authoritative persisted result.[/dim]"
         )
 

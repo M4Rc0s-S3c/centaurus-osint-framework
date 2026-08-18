@@ -32,7 +32,7 @@ def create_rule() -> Rule:
         version="1.0",
         name="young-domain",
         description="Domain is very recent.",
-        category="whois_rdap",
+        category="registration",
         conditions=(
             create_condition(),
         ),
@@ -102,7 +102,7 @@ def test_rule_stores_category() -> None:
 
     rule = create_rule()
 
-    assert rule.category == "whois_rdap"
+    assert rule.category == "registration"
 
 
 def test_rule_stores_conditions() -> None:
@@ -117,7 +117,7 @@ def test_rule_stores_conditions() -> None:
         version="1.0",
         name="young-domain",
         description="Domain is very recent.",
-        category="whois_rdap",
+        category="registration",
         conditions=(condition,),
         conclusion="Domain is younger than 30 days.",
     )

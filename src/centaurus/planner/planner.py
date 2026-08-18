@@ -35,7 +35,6 @@ class Planner:
 
         plan = ExecutionPlan(
             investigation_id=investigation.id,
-            objective=investigation.objective,
         )
 
         capability = get_operational_target_capability(

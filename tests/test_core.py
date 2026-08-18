@@ -144,7 +144,7 @@ class FakeExecutionFailureStore:
 
 
 class FakeLLMManager:
-    """Test double for the LLM presentation boundary."""
+    """Test double for the LLM analyst-assistance boundary."""
 
     def __init__(self, response="Generated presentation") -> None:
         self.response = response
@@ -286,7 +286,8 @@ def test_core_run_investigation_initializes_framework(tmp_path, monkeypatch):
     )
 
     investigation = Investigation(
-        objective="example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     assert core._initialized is False
@@ -320,7 +321,8 @@ def test_core_run_investigation_delegates_to_planner():
     core._executor = executor
 
     investigation = Investigation(
-        objective="example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     core.run_investigation(
@@ -335,7 +337,8 @@ def test_core_run_investigation_delegates_to_planner():
 
     assert received is investigation
 
-    assert received.objective == "example.com"
+    assert received.target == "example.com"
+    assert received.intent == "public_exposure_assessment"
 
 
 def test_core_run_investigation_delegates_plan_to_executor():
@@ -360,7 +363,8 @@ def test_core_run_investigation_delegates_plan_to_executor():
     core._executor = executor
 
     investigation = Investigation(
-        objective="example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     core.run_investigation(
@@ -408,7 +412,8 @@ def test_core_run_investigation_returns_executor_result():
     core._executor = executor
 
     investigation = Investigation(
-        objective="example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     result = core.run_investigation(
@@ -422,14 +427,7 @@ def test_core_run_investigation_returns_executor_result():
         == InvestigationStatus.COMPLETED
     )
 
-    assert investigation.results == (
-        {
-            "plugin": "whois",
-            "data": {
-                "domain": "example.com",
-            },
-        },
-    )
+    assert not hasattr(investigation, "results")
 
 
 def test_core_persists_raw_observations_with_investigation_id():
@@ -468,7 +466,8 @@ def test_core_persists_raw_observations_with_investigation_id():
     core._raw_observation_store = store
 
     investigation = Investigation(
-        objective="example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     core.run_investigation(
@@ -500,7 +499,7 @@ def test_core_persists_evidence_and_report_with_investigation_id():
     core._finding_store = finding_store
     core._report_store = report_store
 
-    investigation = Investigation(objective="example.com")
+    investigation = Investigation(target="example.com", intent="public_exposure_assessment")
     core.run_investigation(investigation)
 
     assert len(evidence_store.persisted) == 1
@@ -516,7 +515,7 @@ def test_core_persists_findings_with_investigation_id() -> None:
             version="1.0",
             name="missing_registrar",
             description="Registrar information is missing.",
-            category="whois_rdap",
+            category="registration",
             conditions=(Condition(field="registrar", operator="missing"),),
             conclusion="Registrar information is missing.",
         ),
@@ -536,7 +535,7 @@ def test_core_persists_findings_with_investigation_id() -> None:
     core._rules = rules
     core._finding_store = finding_store
 
-    investigation = Investigation(objective="example.com")
+    investigation = Investigation(target="example.com", intent="public_exposure_assessment")
     core.run_investigation(investigation)
 
     assert len(finding_store.persisted) == 1
@@ -597,7 +596,8 @@ def test_core_normalizes_raw_observation_and_adds_evidence():
     core._evidence_manager = EvidenceManager()
 
     investigation = Investigation(
-        objective="example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     core.run_investigation(investigation)
@@ -647,7 +647,8 @@ def test_core_marks_investigation_completed():
     core._executor = executor
 
     investigation = Investigation(
-        objective="example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     core.run_investigation(
@@ -680,7 +681,8 @@ def test_core_marks_investigation_failed():
     core._executor = executor
 
     investigation = Investigation(
-        objective="example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     with pytest.raises(
@@ -708,28 +710,28 @@ def test_core_evaluates_configured_rules_against_normalized_evidence():
             version="1.0",
             name="missing_registrar",
             description="Registrar information is missing.",
-            category="whois_rdap",
+            category="registration",
             conditions=(
                 Condition(
                     field="registrar",
                     operator="missing",
                 ),
             ),
-            conclusion="WHOIS information does not contain registrar information.",
+            conclusion="Registrar information was not observed in normalized registration Evidence.",
         ),
         Rule(
             id="RL-002",
             version="1.0",
             name="missing_name_servers",
             description="Name server information is missing.",
-            category="whois_rdap",
+            category="registration",
             conditions=(
                 Condition(
                     field="name_servers",
                     operator="missing",
                 ),
             ),
-            conclusion="WHOIS information does not contain name server information.",
+            conclusion="Name server information was not observed in normalized registration Evidence.",
         ),
     )
 
@@ -764,7 +766,8 @@ def test_core_evaluates_configured_rules_against_normalized_evidence():
     core._rules = rules
 
     investigation = Investigation(
-        objective="example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     core.run_investigation(investigation)
@@ -794,7 +797,7 @@ def test_core_generates_and_integrates_report_after_findings() -> None:
             version="1.0",
             name="missing_registrar",
             description="Registrar information is missing.",
-            category="whois_rdap",
+            category="registration",
             conditions=(Condition(field="registrar", operator="missing"),),
             conclusion="Registrar information is missing.",
         ),
@@ -816,7 +819,7 @@ def test_core_generates_and_integrates_report_after_findings() -> None:
     core._rule_engine = RuleEngine()
     core._rules = rules
 
-    investigation = Investigation(objective="example.com")
+    investigation = Investigation(target="example.com", intent="public_exposure_assessment")
 
     core.run_investigation(investigation)
 
@@ -843,7 +846,7 @@ def test_core_logs_llm_presentation_failure_without_invalidating_report(monkeypa
     core._executor = FakeExecutor({"status": "completed", "results": []})
     core._rules = ()
 
-    investigation = Investigation(objective="example.com")
+    investigation = Investigation(target="example.com", intent="public_exposure_assessment")
     core.run_investigation(investigation)
 
     assert investigation.status is InvestigationStatus.COMPLETED
@@ -852,7 +855,7 @@ def test_core_logs_llm_presentation_failure_without_invalidating_report(monkeypa
     assert core.last_llm_output is None
     assert len(warnings) == 1
     message, args = warnings[0]
-    assert "LLM presentation failed" in message
+    assert "LLM analyst assistance failed" in message
     assert args[0] == investigation.id
     assert args[1] == "LLMError"
     assert str(args[2]) == "presentation unavailable"
@@ -867,7 +870,7 @@ def test_core_generates_empty_report_when_no_findings_exist() -> None:
     core._executor = FakeExecutor({"status": "completed", "results": []})
     core._rules = ()
 
-    investigation = Investigation(objective="example.com")
+    investigation = Investigation(target="example.com", intent="public_exposure_assessment")
 
     core.run_investigation(investigation)
 
@@ -955,17 +958,16 @@ def test_core_completes_partial_investigation_and_persists_operational_failure()
     })
     core._evidence_manager = EvidenceManager()
 
-    investigation = Investigation(objective="example.com")
+    investigation = Investigation(target="example.com", intent="public_exposure_assessment")
     result = core.run_investigation(investigation)
 
     assert result["status"] == "partial"
     assert investigation.status is InvestigationStatus.COMPLETED
-    assert investigation.results == (observation,)
+    assert not hasattr(investigation, "results")
     assert len(investigation.evidences) == 1
     assert investigation.report is not None
     assert failure_store.persisted == [(investigation.id, failure)]
     assert raw_store.persisted == [(investigation.id, observation)]
-    assert all(item is not failure for item in investigation.results)
     assert all(item is not failure for item in investigation.evidences)
     assert all(item is not failure for item in investigation.findings)
 
@@ -989,12 +991,12 @@ def test_core_marks_investigation_failed_when_all_planned_tools_fail() -> None:
         "failures": [failure],
     })
 
-    investigation = Investigation(objective="example.com")
+    investigation = Investigation(target="example.com", intent="public_exposure_assessment")
     result = core.run_investigation(investigation)
 
     assert result["status"] == "failed"
     assert investigation.status is InvestigationStatus.FAILED
-    assert investigation.results == ()
+    assert not hasattr(investigation, "results")
     assert investigation.evidences == ()
     assert investigation.findings == ()
     assert investigation.report is None
@@ -1014,7 +1016,7 @@ def test_core_rejects_unknown_executor_status_as_framework_failure() -> None:
         "failures": [],
     })
 
-    investigation = Investigation(objective="example.com")
+    investigation = Investigation(target="example.com", intent="public_exposure_assessment")
 
     with pytest.raises(ValueError, match="Unsupported Executor status"):
         core.run_investigation(investigation)
@@ -1040,7 +1042,7 @@ def test_core_exposes_latest_executor_status_and_failures():
         result={"status": "partial", "results": [], "failures": [failure]}
     )
 
-    investigation = Investigation(objective="example.com")
+    investigation = Investigation(target="example.com", intent="public_exposure_assessment")
     core.run_investigation(investigation)
 
     assert core.last_execution_status == "partial"
@@ -1056,7 +1058,7 @@ def test_core_resets_latest_execution_state_before_new_run():
     core._planner = FakePlanner(plan=plan)
     core._executor = FailingExecutor()
 
-    investigation = Investigation(objective="example.com")
+    investigation = Investigation(target="example.com", intent="public_exposure_assessment")
 
     with pytest.raises(RuntimeError, match="Execution failed"):
         core.run_investigation(investigation)

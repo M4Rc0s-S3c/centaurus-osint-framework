@@ -1,19 +1,17 @@
-"""
-Tests for the WHOIS/RDAP rule definitions.
-"""
+"""Tests for source-neutral registration Rule definitions."""
 
 from datetime import datetime, timezone
 
 from centaurus.evidence import Evidence, EvidenceSource
 from centaurus.rules.rule_engine import RuleEngine
-from centaurus.rules.whois_rules import (
+from centaurus.rules.registration_rules import (
     RL_001_MISSING_REGISTRAR,
     RL_002_MISSING_NAME_SERVERS,
     RL_003_INCOMPLETE_REGISTRATION_INFORMATION,
     RL_004_DNSSEC_STATUS_OBSERVED,
     RL_005_REGISTRANT_NAME_UNAVAILABLE,
     RL_006_DOMAIN_CREATED_RECENTLY,
-    WHOIS_RULES,
+    REGISTRATION_RULES,
 )
 
 
@@ -25,24 +23,24 @@ def create_whois_evidence(data: dict) -> Evidence:
     )
 
 
-def test_whois_rules_are_defined() -> None:
+def test_registration_rules_are_defined() -> None:
     assert RL_001_MISSING_REGISTRAR.id == "RL-001"
     assert RL_002_MISSING_NAME_SERVERS.id == "RL-002"
     assert RL_003_INCOMPLETE_REGISTRATION_INFORMATION.id == "RL-003"
     assert RL_004_DNSSEC_STATUS_OBSERVED.id == "RL-004"
     assert RL_005_REGISTRANT_NAME_UNAVAILABLE.id == "RL-005"
     assert RL_006_DOMAIN_CREATED_RECENTLY.id == "RL-006"
-    assert WHOIS_RULES == (
+    assert REGISTRATION_RULES == (
         RL_001_MISSING_REGISTRAR,
         RL_002_MISSING_NAME_SERVERS,
         RL_003_INCOMPLETE_REGISTRATION_INFORMATION,
         RL_004_DNSSEC_STATUS_OBSERVED,
         RL_005_REGISTRANT_NAME_UNAVAILABLE,
-    RL_006_DOMAIN_CREATED_RECENTLY,
+        RL_006_DOMAIN_CREATED_RECENTLY,
     )
 
 
-def test_minimal_whois_rules_evaluate_normalized_evidence() -> None:
+def test_minimal_registration_rules_evaluate_normalized_evidence() -> None:
     evidence_one = create_whois_evidence({
         "domain_name": "example.org",
         "registrar": "Example Registrar",
@@ -72,7 +70,7 @@ def test_minimal_whois_rules_evaluate_normalized_evidence() -> None:
     })
 
     findings = RuleEngine().evaluate(
-        rules=WHOIS_RULES,
+        rules=REGISTRATION_RULES,
         evidences=(evidence_one, evidence_two, evidence_three),
     )
 
@@ -251,7 +249,7 @@ def test_rl_005_does_not_change_existing_rule_count_or_semantics() -> None:
     })
 
     findings = RuleEngine().evaluate(
-        rules=WHOIS_RULES,
+        rules=REGISTRATION_RULES,
         evidences=(evidence,),
     )
 
@@ -286,3 +284,37 @@ def test_rl_006_does_not_report_exactly_30_days_old_domain() -> None:
     )
 
     assert findings == ()
+
+
+def test_registration_rule_metadata_is_source_neutral_and_versioned() -> None:
+    """R3 removes WHOIS-only metadata from Rules shared by WHOIS and RDAP."""
+
+    for rule in REGISTRATION_RULES:
+        assert rule.version == "1.1"
+        assert rule.category == "registration"
+        assert "WHOIS" not in rule.description.upper()
+        assert "WHOIS" not in rule.conclusion.upper()
+
+    assert RL_006_DOMAIN_CREATED_RECENTLY.name == "domain_created_recently"
+
+
+def test_registration_rule_conclusion_is_source_neutral_for_rdap() -> None:
+    """A registration Rule produces the same source-neutral Finding from RDAP."""
+
+    evidence = Evidence(
+        source=EvidenceSource.RDAP,
+        data={"registrar": None},
+        collected_at=datetime(2026, 8, 18, tzinfo=timezone.utc),
+    )
+
+    findings = RuleEngine().evaluate(
+        rules=(RL_001_MISSING_REGISTRAR,),
+        evidences=(evidence,),
+    )
+
+    assert len(findings) == 1
+    assert findings[0].conclusion == (
+        "Registrar information was not observed in normalized registration "
+        "Evidence."
+    )
+    assert findings[0].evidences == (evidence,)

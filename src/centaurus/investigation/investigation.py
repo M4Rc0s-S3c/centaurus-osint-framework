@@ -22,54 +22,20 @@ class Investigation:
 
     def __init__(
         self,
-        objective: str | None = None,
         *,
-        target: str | None = None,
-        intent: str | None = None,
-        target_type: str | None = None,
+        target: str,
+        intent: str,
+        target_type: str = "DOMAIN",
     ) -> None:
         """
-        Create a new Investigation.
-
-        During the migration phase both constructors are accepted:
-
-            Investigation(objective="example.org")
-
-        and
-
-            Investigation(
-                target="example.org",
-                intent="whois",
-            )
+        Create a new Investigation from validated Target and Intent.
         """
 
         self.id = str(uuid4())
 
-        #
-        # Transitional compatibility.
-        #
-
-        if objective is not None:
-
-            self.objective = objective
-
-            self.target = objective
-            self.target_type = target_type or "DOMAIN"
-
-            self.intent = "generic"
-
-        else:
-
-            if target is None or intent is None:
-                raise ValueError(
-                    "Either 'objective' or both "
-                    "'target' and 'intent' must be provided."
-                )
-
-            self.target = target
-            self.target_type = (target_type or "DOMAIN").upper()
-            self.intent = intent
-            self.objective = f"{intent}:{target}"
+        self.target = target
+        self.target_type = target_type.upper()
+        self.intent = intent
 
         self.status = InvestigationStatus.CREATED
 
@@ -88,23 +54,9 @@ class Investigation:
         # Investigation owns one final Report.
         self._report: Report | None = None
 
-        #
-        # Existing execution results.
-        #
-
-        self._results = []
-
     # ==========================================================
     # Public properties
     # ==========================================================
-
-    @property
-    def results(self) -> tuple:
-        """
-        Immutable execution results.
-        """
-
-        return tuple(self._results)
 
     @property
     def evidences(self) -> tuple[Evidence, ...]:
@@ -121,18 +73,6 @@ class Investigation:
         """
 
         return tuple(self._findings)
-
-    #
-    # Transitional compatibility.
-    #
-
-    @property
-    def evidence(self) -> tuple[Evidence, ...]:
-        """
-        Backwards-compatible alias.
-        """
-
-        return self.evidences
 
     # ==========================================================
     # Domain operations
@@ -236,17 +176,6 @@ class Investigation:
             expected=InvestigationStatus.RUNNING,
             new=InvestigationStatus.FAILED,
         )
-
-    # ==========================================================
-    # Execution results
-    # ==========================================================
-
-    def register_results(
-        self,
-        results: list,
-    ) -> None:
-
-        self._results.extend(results)
 
     # ==========================================================
     # Internal helpers

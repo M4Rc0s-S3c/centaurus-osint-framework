@@ -377,7 +377,7 @@ def test_core_integrates_report_with_llm_manager():
     core._executor = FakeExecutor()
     core._rules = ()
 
-    investigation = Investigation(objective="example.com")
+    investigation = Investigation(target="example.com", intent="public_exposure_assessment")
     result = core.run_investigation(investigation)
 
     assert result == {"status": "completed", "results": []}
@@ -407,7 +407,7 @@ def test_core_keeps_completed_domain_state_when_llm_provider_fails():
     core._executor = FakeExecutor()
     core._rules = ()
 
-    investigation = Investigation(objective="example.com")
+    investigation = Investigation(target="example.com", intent="public_exposure_assessment")
     core.run_investigation(investigation)
 
     assert investigation.report is not None

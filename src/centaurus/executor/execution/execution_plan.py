@@ -20,13 +20,11 @@ class ExecutionPlan:
     def __init__(
         self,
         investigation_id: str,
-        objective: str | None = None,
     ) -> None:
         """
         Create an execution plan for an Investigation.
         """
 
         self.investigation_id = investigation_id
-        self.objective = objective
         self.tasks = []
         self.metadata = {}

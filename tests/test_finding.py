@@ -51,7 +51,7 @@ def create_rule(
         version="1.0",
         name=name,
         description="Test rule.",
-        category="whois_rdap",
+        category="registration",
         conditions=(
             create_condition(),
         ),
@@ -171,3 +171,14 @@ def test_finding_evidences_are_immutable() -> None:
 
     with pytest.raises(AttributeError):
         finding.evidences += (evidence,)
+
+def test_finding_exposes_only_the_canonical_evidences_collection() -> None:
+    """The completed multi-Evidence migration has no singular compatibility alias."""
+
+    finding = Finding(
+        conclusion="Test conclusion.",
+        rule=create_rule(),
+        evidences=(create_evidence({"domain_name": "example.org"}),),
+    )
+
+    assert not hasattr(finding, "evidence")

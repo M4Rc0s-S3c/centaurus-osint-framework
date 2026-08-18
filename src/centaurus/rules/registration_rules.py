@@ -1,6 +1,4 @@
-"""
-Minimal WHOIS/RDAP rule definitions.
-"""
+"""Declarative registration rules over normalized Evidence."""
 
 from centaurus.rules.condition import Condition
 from centaurus.rules.rule import Rule
@@ -8,43 +6,64 @@ from centaurus.rules.rule import Rule
 
 RL_001_MISSING_REGISTRAR = Rule(
     id="RL-001",
-    version="1.0",
+    version="1.1",
     name="missing_registrar",
-    description="Registrar information is missing.",
-    category="whois",
+    description=(
+        "Registrar information was not observed in normalized registration "
+        "Evidence."
+    ),
+    category="registration",
     conditions=(Condition(field="registrar", operator="missing"),),
-    conclusion="WHOIS information does not contain registrar information.",
+    conclusion=(
+        "Registrar information was not observed in normalized registration "
+        "Evidence."
+    ),
 )
 
 RL_002_MISSING_NAME_SERVERS = Rule(
     id="RL-002",
-    version="1.0",
+    version="1.1",
     name="missing_name_servers",
-    description="Name server information is missing.",
-    category="whois",
+    description=(
+        "Name server information was not observed in normalized registration "
+        "Evidence."
+    ),
+    category="registration",
     conditions=(Condition(field="name_servers", operator="missing"),),
-    conclusion="WHOIS information does not contain name server information.",
+    conclusion=(
+        "Name server information was not observed in normalized registration "
+        "Evidence."
+    ),
 )
 
 RL_003_INCOMPLETE_REGISTRATION_INFORMATION = Rule(
     id="RL-003",
-    version="1.0",
+    version="1.1",
     name="incomplete_registration_information",
-    description="Relevant registration information is missing.",
-    category="whois",
+    description=(
+        "A relevant registration field was not observed in normalized "
+        "registration Evidence."
+    ),
+    category="registration",
     conditions=(
         Condition(field="creation_date", operator="missing"),
         Condition(field="expiration_date", operator="missing"),
     ),
-    conclusion="Registration information is missing: {field}.",
+    conclusion=(
+        "Registration field was not observed in normalized registration "
+        "Evidence: {field}."
+    ),
 )
 
 RL_004_DNSSEC_STATUS_OBSERVED = Rule(
     id="RL-004",
-    version="1.0",
+    version="1.1",
     name="dnssec_status_observed",
-    description="DNSSEC status is reported by the WHOIS evidence.",
-    category="whois",
+    description=(
+        "A recognized DNSSEC status was observed in normalized registration "
+        "Evidence."
+    ),
+    category="registration",
     conditions=(
         Condition(
             field="dnssec",
@@ -57,16 +76,22 @@ RL_004_DNSSEC_STATUS_OBSERVED = Rule(
             value="unsigned",
         ),
     ),
-    conclusion="DNSSEC status is reported in the WHOIS evidence.",
+    conclusion=(
+        "A recognized DNSSEC status was observed in normalized registration "
+        "Evidence."
+    ),
 )
 
 
 RL_005_REGISTRANT_NAME_UNAVAILABLE = Rule(
     id="RL-005",
-    version="1.0",
+    version="1.1",
     name="registrant_name_unavailable",
-    description="Registrant name information is missing or explicitly redacted.",
-    category="whois",
+    description=(
+        "Registrant name information was not observed or was explicitly "
+        "redacted in normalized registration Evidence."
+    ),
+    category="registration",
     conditions=(
         Condition(
             field="registrant_name",
@@ -78,16 +103,22 @@ RL_005_REGISTRANT_NAME_UNAVAILABLE = Rule(
             value="[REDACTED]",
         ),
     ),
-    conclusion="Registrant name information is unavailable.",
+    conclusion=(
+        "Registrant name information was not available in normalized "
+        "registration Evidence."
+    ),
 )
 
 
 RL_006_DOMAIN_CREATED_RECENTLY = Rule(
     id="RL-006",
-    version="1.0",
-    name="Domain created recently",
-    description="Reports when a domain was created less than 30 days before collection.",
-    category="whois_rdap",
+    version="1.1",
+    name="domain_created_recently",
+    description=(
+        "Reports when a domain was created less than 30 days before Evidence "
+        "collection."
+    ),
+    category="registration",
     conditions=(
         Condition(
             field="creation_date",
@@ -98,7 +129,7 @@ RL_006_DOMAIN_CREATED_RECENTLY = Rule(
     conclusion="Domain was created less than 30 days before collection.",
 )
 
-WHOIS_RULES = (
+REGISTRATION_RULES = (
     RL_001_MISSING_REGISTRAR,
     RL_002_MISSING_NAME_SERVERS,
     RL_003_INCOMPLETE_REGISTRATION_INFORMATION,

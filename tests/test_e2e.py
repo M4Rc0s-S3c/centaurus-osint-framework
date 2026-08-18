@@ -24,7 +24,7 @@ from centaurus.plugin_manager.plugin_manager import PluginManager
 from centaurus.request import PUBLIC_EXPOSURE_ASSESSMENT
 from centaurus.rules.dns_rules import DNS_RULES
 from centaurus.rules.exposure_rules import EXPOSURE_RULES
-from centaurus.rules.whois_rules import WHOIS_RULES
+from centaurus.rules.registration_rules import REGISTRATION_RULES
 
 
 class FixedIntentProvider:
@@ -220,7 +220,7 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
         finding_store=FilesystemFindingStore(tmp_path),
         report_store=FilesystemReportStore(tmp_path),
         llm_manager=LLMManager(provider=report_provider),
-        rules=WHOIS_RULES + DNS_RULES + EXPOSURE_RULES,
+        rules=REGISTRATION_RULES + DNS_RULES + EXPOSURE_RULES,
     )
     interpreter = RequestInterpreter(provider=FixedIntentProvider())
     cli = CLI(core=core, request_interpreter=interpreter)
@@ -245,8 +245,6 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
     # The six-tool DOMAIN catalog now contains seven sequential tasks because
     # DNSRecon is reused for one explicit direct-DMARC observation. Every task
     # must cross both RawObservation and normalized Evidence boundaries.
-    assert len(investigation.results) == 7
-    assert [result.source for result in investigation.results] == expected_sources
     assert len(investigation.evidences) == 7
     assert [evidence.source for evidence in investigation.evidences] == expected_sources
 
@@ -445,7 +443,7 @@ def test_multitool_flow_continues_after_one_tool_failure_without_creating_failur
 
     from centaurus.investigation import Investigation
 
-    investigation = Investigation(objective="example.com")
+    investigation = Investigation(target="example.com", intent="public_exposure_assessment")
     result = core.run_investigation(investigation)
 
     assert result["status"] == "partial"
@@ -455,7 +453,6 @@ def test_multitool_flow_continues_after_one_tool_failure_without_creating_failur
     assert result["failures"][0].category.value == "timeout"
 
     assert investigation.status is InvestigationStatus.COMPLETED
-    assert len(investigation.results) == 6
     assert len(investigation.evidences) == 6
     assert investigation.findings == ()
     assert investigation.report is not None

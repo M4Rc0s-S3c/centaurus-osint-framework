@@ -1,12 +1,8 @@
-"""
-Core coordination component.
+"""Core runtime coordinator.
 
-The Core is responsible for coordinating the execution of investigations
-and governing the lifecycle of the domain objects participating in them.
-
-At this stage, the Core only builds and owns the main framework
-components. Investigation execution will be incorporated during the
-Runtime Flow implementation.
+The Core owns framework-component lifecycle, governs Investigation state,
+and coordinates the complete sequential runtime through specialized
+components without implementing their domain-specific responsibilities.
 """
 
 import logging
@@ -182,9 +178,6 @@ class Core:
             )
 
             if execution_status == "failed":
-                investigation.register_results(
-                    result["results"],
-                )
                 investigation.mark_failed()
                 return result
 
@@ -220,19 +213,15 @@ class Core:
             try:
                 self._last_llm_output = self._llm_manager.generate(report)
             except LLMError as exc:
-                # LLM presentation is operational and must not invalidate
+                # LLM analyst assistance is operational and must not invalidate
                 # the completed domain investigation or its persisted Report.
                 logger.warning(
-                    "LLM presentation failed investigation_id=%s error_type=%s message=%s",
+                    "LLM analyst assistance failed investigation_id=%s error_type=%s message=%s",
                     investigation.id,
                     type(exc).__name__,
                     exc,
                 )
                 self._last_llm_output = None
-
-            investigation.register_results(
-                result["results"],
-            )
 
             investigation.mark_completed()
 
@@ -414,6 +403,6 @@ class Core:
 
     @property
     def last_llm_output(self) -> str | None:
-        """Return the latest ephemeral LLM presentation, if one exists."""
+        """Return the latest ephemeral LLM analyst-assistance view, if any."""
 
         return self._last_llm_output

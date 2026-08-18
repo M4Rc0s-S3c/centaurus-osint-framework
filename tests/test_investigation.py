@@ -54,7 +54,7 @@ def create_rule(
         version="1.0",
         name=name,
         description="Test rule.",
-        category="whois_rdap",
+        category="registration",
         conditions=(
             create_condition(),
         ),
@@ -90,7 +90,8 @@ def test_investigation_can_be_created() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     assert isinstance(
@@ -105,25 +106,28 @@ def test_investigation_generates_identifier() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     assert investigation.id is not None
     assert investigation.id != ""
 
 
-def test_investigation_stores_objective() -> None:
-    """
-    Investigation stores its objective.
-    """
-
-    objective = "Investigate example.com"
+def test_investigation_stores_validated_target_context() -> None:
+    """Investigation stores Target type/value and Intent without legacy objective."""
 
     investigation = Investigation(
-        objective=objective,
+        target="example.com",
+        target_type="domain",
+        intent="public_exposure_assessment",
     )
 
-    assert investigation.objective == objective
+    assert investigation.target == "example.com"
+    assert investigation.target_type == "DOMAIN"
+    assert investigation.intent == "public_exposure_assessment"
+    assert not hasattr(investigation, "objective")
+    assert not hasattr(investigation, "results")
 
 
 def test_investigation_initial_status() -> None:
@@ -132,7 +136,8 @@ def test_investigation_initial_status() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     assert (
@@ -147,7 +152,8 @@ def test_investigation_valid_lifecycle() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     investigation.mark_planned()
@@ -178,7 +184,8 @@ def test_investigation_can_fail_from_running() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     investigation.mark_planned()
@@ -197,7 +204,8 @@ def test_investigation_cannot_skip_planned() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     with pytest.raises(
@@ -212,7 +220,8 @@ def test_investigation_cannot_complete_before_running() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     with pytest.raises(
@@ -227,7 +236,8 @@ def test_completed_investigation_cannot_run_again() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.com",
+        target="example.com",
+        intent="public_exposure_assessment",
     )
 
     investigation.mark_planned()
@@ -246,7 +256,8 @@ def test_investigation_can_store_evidence() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.org",
+        target="example.org",
+        intent="public_exposure_assessment",
     )
 
     evidence = Evidence(
@@ -257,7 +268,7 @@ def test_investigation_can_store_evidence() -> None:
 
     investigation.add_evidence(evidence)
 
-    assert len(investigation.evidence) == 1
+    assert len(investigation.evidences) == 1
 
 
 def test_investigation_preserves_evidence_instance() -> None:
@@ -266,7 +277,8 @@ def test_investigation_preserves_evidence_instance() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.org",
+        target="example.org",
+        intent="public_exposure_assessment",
     )
 
     evidence = Evidence(
@@ -277,7 +289,7 @@ def test_investigation_preserves_evidence_instance() -> None:
 
     investigation.add_evidence(evidence)
 
-    assert investigation.evidence[0] is evidence
+    assert investigation.evidences[0] is evidence
 
 
 def test_investigation_accumulates_evidence() -> None:
@@ -286,7 +298,8 @@ def test_investigation_accumulates_evidence() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.org",
+        target="example.org",
+        intent="public_exposure_assessment",
     )
 
     evidence1 = Evidence(
@@ -304,7 +317,7 @@ def test_investigation_accumulates_evidence() -> None:
     investigation.add_evidence(evidence1)
     investigation.add_evidence(evidence2)
 
-    assert len(investigation.evidence) == 2
+    assert len(investigation.evidences) == 2
 
 
 def test_investigation_rejects_non_evidence() -> None:
@@ -313,7 +326,8 @@ def test_investigation_rejects_non_evidence() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.org",
+        target="example.org",
+        intent="public_exposure_assessment",
     )
 
     with pytest.raises(TypeError):
@@ -326,7 +340,8 @@ def test_investigation_findings_are_initially_empty() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.org",
+        target="example.org",
+        intent="public_exposure_assessment",
     )
 
     assert investigation.findings == ()
@@ -338,7 +353,8 @@ def test_investigation_can_store_finding() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.org",
+        target="example.org",
+        intent="public_exposure_assessment",
     )
 
     finding = create_finding()
@@ -354,7 +370,8 @@ def test_investigation_preserves_finding_instance() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.org",
+        target="example.org",
+        intent="public_exposure_assessment",
     )
 
     finding = create_finding()
@@ -370,7 +387,8 @@ def test_investigation_accumulates_findings() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.org",
+        target="example.org",
+        intent="public_exposure_assessment",
     )
 
     finding1 = create_finding(
@@ -393,7 +411,8 @@ def test_investigation_findings_are_immutable_collection() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.org",
+        target="example.org",
+        intent="public_exposure_assessment",
     )
 
     finding = create_finding()
@@ -412,7 +431,8 @@ def test_investigation_rejects_non_finding() -> None:
     """
 
     investigation = Investigation(
-        objective="Investigate example.org",
+        target="example.org",
+        intent="public_exposure_assessment",
     )
 
     with pytest.raises(TypeError):

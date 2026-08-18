@@ -9,4 +9,4 @@ class LLMProvider(Protocol):
     """Technical contract implemented by concrete LLM providers."""
 
     def generate(self, report: Report) -> str:
-        """Generate a linguistic presentation for a Report."""
+        """Generate a validated analyst-assistance presentation for a Report."""

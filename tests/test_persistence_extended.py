@@ -29,7 +29,7 @@ def make_finding(evidence: Evidence) -> Finding:
         version="1.0",
         name="test_rule",
         description="Test rule.",
-        category="whois_rdap",
+        category="registration",
         conditions=(Condition(field="registrar", operator="missing"),),
         conclusion="Registrar information is missing.",
     )
@@ -69,7 +69,7 @@ def test_report_store_defines_contract() -> None:
 def test_report_store_persists_report_and_findings(tmp_path) -> None:
     evidence = make_evidence()
     finding = make_finding(evidence)
-    investigation = Investigation(objective="example.org")
+    investigation = Investigation(target="example.org", intent="public_exposure_assessment")
     investigation.add_finding(finding)
     report = Report(investigation_id=investigation.id, findings=(finding,))
 
@@ -94,7 +94,7 @@ def test_report_store_persists_report_and_findings(tmp_path) -> None:
 
 
 def test_report_store_rejects_second_report(tmp_path) -> None:
-    investigation = Investigation(objective="example.org")
+    investigation = Investigation(target="example.org", intent="public_exposure_assessment")
     report = Report(investigation_id=investigation.id, findings=())
     store = FilesystemReportStore(tmp_path)
     store.persist_report(investigation.id, report)
@@ -103,7 +103,7 @@ def test_report_store_rejects_second_report(tmp_path) -> None:
 
 
 def test_report_store_rejects_orphan_markdown_artifact(tmp_path) -> None:
-    investigation = Investigation(objective="example.org")
+    investigation = Investigation(target="example.org", intent="public_exposure_assessment")
     report = Report(investigation_id=investigation.id, findings=())
     reports_dir = tmp_path / "investigations" / investigation.id / "reports"
     reports_dir.mkdir(parents=True)
@@ -114,7 +114,7 @@ def test_report_store_rejects_orphan_markdown_artifact(tmp_path) -> None:
 
 
 def test_report_store_rolls_back_json_if_markdown_write_fails(tmp_path, monkeypatch) -> None:
-    investigation = Investigation(objective="example.org")
+    investigation = Investigation(target="example.org", intent="public_exposure_assessment")
     report = Report(investigation_id=investigation.id, findings=())
     store = FilesystemReportStore(tmp_path)
     original = FilesystemReportStore._persist_exclusive
@@ -142,8 +142,8 @@ def test_report_store_rolls_back_json_if_markdown_write_fails(tmp_path, monkeypa
 
 
 def test_report_store_rejects_other_investigation(tmp_path) -> None:
-    investigation = Investigation(objective="example.org")
-    other = Investigation(objective="example.net")
+    investigation = Investigation(target="example.org", intent="public_exposure_assessment")
+    other = Investigation(target="example.net", intent="public_exposure_assessment")
     report = Report(investigation_id=other.id, findings=())
     with pytest.raises(ValueError):
         FilesystemReportStore(tmp_path).persist_report(investigation.id, report)

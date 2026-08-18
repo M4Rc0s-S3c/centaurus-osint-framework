@@ -167,7 +167,7 @@ def test_investigate_command_forwards_natural_language_and_renders_result(monkey
     assert "INV-CLI-001" in result.stdout
     assert "RL-007" in result.stdout
     assert "Structured analyst presentation" in result.stdout
-    assert "LLM presentation — ephemeral" in result.stdout
+    assert "LLM analyst assistance — ephemeral" in result.stdout
 
 
 def test_partial_execution_is_visible_but_returns_success(monkeypatch):

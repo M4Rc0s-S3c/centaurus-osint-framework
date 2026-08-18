@@ -6,13 +6,13 @@ from centaurus.llm.provider import LLMProvider
 
 
 class LLMManager:
-    """Coordinate linguistic presentation without creating domain knowledge."""
+    """Coordinate bounded analyst assistance without creating domain knowledge."""
 
     def __init__(self, provider: LLMProvider | None = None) -> None:
         self._provider = provider or OllamaProvider()
 
     def generate(self, report: Report) -> str:
-        """Present a Report linguistically through the configured provider."""
+        """Produce an ephemeral analyst-assistance view for a Report."""
 
         if not isinstance(report, Report):
             raise TypeError("report must be a Report instance")

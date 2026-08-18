@@ -28,11 +28,3 @@ class Finding:
     conclusion: str
     rule: Rule
     evidences: tuple[Evidence, ...]
-
-    @property
-    def evidence(self) -> tuple[Evidence, ...]:
-        """
-        Backwards-compatible alias for the Evidence collection.
-        """
-
-        return self.evidences

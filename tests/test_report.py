@@ -25,7 +25,7 @@ def create_finding(conclusion: str = "Test conclusion.") -> Finding:
         version="1.0",
         name="test_rule",
         description="Test rule.",
-        category="whois_rdap",
+        category="registration",
         conditions=(
             Condition(
                 field="domain",
@@ -43,7 +43,7 @@ def create_finding(conclusion: str = "Test conclusion.") -> Finding:
 
 
 def test_report_is_immutable_value_object() -> None:
-    investigation = Investigation(objective="example.org")
+    investigation = Investigation(target="example.org", intent="public_exposure_assessment")
     report = Report(investigation_id=investigation.id, findings=())
 
     assert report.investigation_id == investigation.id
@@ -54,7 +54,7 @@ def test_report_is_immutable_value_object() -> None:
 
 
 def test_report_manager_generates_report_with_all_supplied_findings() -> None:
-    investigation = Investigation(objective="example.org")
+    investigation = Investigation(target="example.org", intent="public_exposure_assessment")
     finding_one = create_finding("First conclusion.")
     finding_two = create_finding("Second conclusion.")
     investigation.add_finding(finding_one)
@@ -71,7 +71,7 @@ def test_report_manager_generates_report_with_all_supplied_findings() -> None:
 
 
 def test_report_manager_accepts_empty_findings() -> None:
-    investigation = Investigation(objective="example.org")
+    investigation = Investigation(target="example.org", intent="public_exposure_assessment")
 
     report = ReportManager().generate(
         investigation=investigation,
@@ -82,7 +82,7 @@ def test_report_manager_accepts_empty_findings() -> None:
 
 
 def test_report_manager_preserves_finding_order() -> None:
-    investigation = Investigation(objective="example.org")
+    investigation = Investigation(target="example.org", intent="public_exposure_assessment")
     finding_one = create_finding("First.")
     finding_two = create_finding("Second.")
     investigation.add_finding(finding_one)
@@ -97,7 +97,7 @@ def test_report_manager_preserves_finding_order() -> None:
 
 
 def test_report_manager_rejects_non_tuple_findings() -> None:
-    investigation = Investigation(objective="example.org")
+    investigation = Investigation(target="example.org", intent="public_exposure_assessment")
 
     with pytest.raises(TypeError):
         ReportManager().generate(
@@ -107,8 +107,8 @@ def test_report_manager_rejects_non_tuple_findings() -> None:
 
 
 def test_report_manager_rejects_finding_from_another_investigation() -> None:
-    investigation = Investigation(objective="example.org")
-    other_investigation = Investigation(objective="example.net")
+    investigation = Investigation(target="example.org", intent="public_exposure_assessment")
+    other_investigation = Investigation(target="example.net", intent="public_exposure_assessment")
     finding = create_finding()
     other_investigation.add_finding(finding)
 
@@ -120,7 +120,7 @@ def test_report_manager_rejects_finding_from_another_investigation() -> None:
 
 
 def test_investigation_integrates_one_report() -> None:
-    investigation = Investigation(objective="example.org")
+    investigation = Investigation(target="example.org", intent="public_exposure_assessment")
     report = Report(investigation_id=investigation.id, findings=())
 
     investigation.add_report(report)
@@ -129,8 +129,8 @@ def test_investigation_integrates_one_report() -> None:
 
 
 def test_investigation_rejects_report_for_another_investigation() -> None:
-    investigation = Investigation(objective="example.org")
-    other = Investigation(objective="example.net")
+    investigation = Investigation(target="example.org", intent="public_exposure_assessment")
+    other = Investigation(target="example.net", intent="public_exposure_assessment")
     report = Report(investigation_id=other.id, findings=())
 
     with pytest.raises(ValueError):
@@ -138,7 +138,7 @@ def test_investigation_rejects_report_for_another_investigation() -> None:
 
 
 def test_investigation_rejects_second_report() -> None:
-    investigation = Investigation(objective="example.org")
+    investigation = Investigation(target="example.org", intent="public_exposure_assessment")
     first = Report(investigation_id=investigation.id, findings=())
     second = Report(investigation_id=investigation.id, findings=())
 
