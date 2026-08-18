@@ -11,6 +11,10 @@ from pathlib import Path
 from centaurus.evidence.raw_observation import RawObservation
 from centaurus.executor.execution import ExecutionTask
 from centaurus.plugins.base_plugin import BasePlugin
+from centaurus.exceptions import (
+    InvalidPluginOutputError,
+    PluginExecutionError,
+)
 
 
 class PluginManager:
@@ -38,15 +42,29 @@ class PluginManager:
         returns the RawObservation produced by the plugin.
         """
 
-        plugin_class = self._load_plugin_class(
-        task.plugin_id,
-        )
+        try:
+            plugin_class = self._load_plugin_class(
+                task.plugin_id,
+            )
+            plugin = plugin_class()
+            result = plugin.execute(
+                task.parameters,
+            )
 
-        plugin = plugin_class()
+            if not isinstance(result, RawObservation):
+                raise InvalidPluginOutputError(
+                    "Plugin execution must return a RawObservation instance"
+                )
 
-        return plugin.execute(
-        task.parameters,
-        )
+            return result
+        except PluginExecutionError:
+            raise
+        except Exception as exc:
+            detail = str(exc).strip() or type(exc).__name__
+            raise PluginExecutionError(
+                task.plugin_id,
+                detail,
+            ) from exc
 
     # ==========================================================
     # Internal helpers

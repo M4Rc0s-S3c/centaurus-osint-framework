@@ -2,6 +2,7 @@
 
 from datetime import datetime, timezone
 
+import httpx
 import pytest
 
 from centaurus.evidence import EvidenceSource, RawObservation
@@ -128,4 +129,38 @@ def test_crtsh_plugin_reports_invalid_json(monkeypatch) -> None:
     )
 
     with pytest.raises(RuntimeError, match="invalid JSON"):
+        Plugin().execute({"domain": "example.com"})
+
+
+def test_crtsh_plugin_propagates_http_timeout(monkeypatch) -> None:
+    request = httpx.Request("GET", "https://crt.sh/")
+
+    def timeout(*args, **kwargs):
+        raise httpx.ReadTimeout("crt.sh timed out", request=request)
+
+    monkeypatch.setattr(crtsh_plugin.httpx, "get", timeout)
+
+    with pytest.raises(httpx.ReadTimeout, match="crt.sh timed out"):
+        Plugin().execute({"domain": "example.com"})
+
+
+def test_crtsh_plugin_propagates_http_status_error(monkeypatch) -> None:
+    request = httpx.Request("GET", "https://crt.sh/")
+    response = httpx.Response(503, request=request)
+
+    class ErrorResponse(FakeResponse):
+        def raise_for_status(self) -> None:
+            raise httpx.HTTPStatusError(
+                "Service unavailable",
+                request=request,
+                response=response,
+            )
+
+    monkeypatch.setattr(
+        crtsh_plugin.httpx,
+        "get",
+        lambda *a, **k: ErrorResponse([]),
+    )
+
+    with pytest.raises(httpx.HTTPStatusError):
         Plugin().execute({"domain": "example.com"})

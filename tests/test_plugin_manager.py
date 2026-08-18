@@ -6,6 +6,10 @@ import pytest
 from centaurus.evidence import EvidenceSource, RawObservation
 from centaurus.executor.execution import ExecutionTask
 from centaurus.plugin_manager.plugin_manager import PluginManager
+from centaurus.exceptions import (
+    InvalidPluginOutputError,
+    PluginExecutionError,
+)
 from centaurus.plugins.base_plugin import BasePlugin
 
 
@@ -84,25 +88,25 @@ def test_plugin_manager_has_execute_method() -> None:
     assert hasattr(manager, "execute")
 
 
-def test_plugin_manager_returns_plugin_result() -> None:
-    """
-    Plugin Manager returns the result produced by a plugin.
-    """
+def test_plugin_manager_returns_plugin_result(monkeypatch) -> None:
+    """Plugin Manager returns the RawObservation produced by a valid plugin."""
 
     manager = PluginManager()
-
+    monkeypatch.setattr(
+        manager,
+        "_load_plugin_class",
+        lambda plugin_name: ValidPlugin,
+    )
     task = ExecutionTask(
-        plugin_id="whois",
-        parameters={
-            "domain": "example.com",
-        },
+        plugin_id="test_plugin",
+        parameters={"domain": "example.com"},
     )
 
     result = manager.execute(task)
 
     assert isinstance(result, RawObservation)
     assert result.source == EvidenceSource.WHOIS
-    assert isinstance(result.data, dict)
+    assert result.data == {"value": "test"}
 
 
 def test_plugin_manager_passes_task_parameters_to_plugin(
@@ -254,3 +258,37 @@ def test_load_plugin_class_rejects_invalid_plugin_contract(
         manager._load_plugin_class(
             "invalid_plugin"
         )
+
+class FailingPlugin(BasePlugin):
+    """Plugin double that exposes one tool-level failure."""
+
+    def execute(self, parameters: dict) -> RawObservation:
+        raise TimeoutError("tool timed out")
+
+
+class WrongOutputPlugin(BasePlugin):
+    """Plugin double that violates the RawObservation return contract."""
+
+    def execute(self, parameters: dict):
+        return {"unexpected": "mapping"}
+
+
+def test_plugin_manager_wraps_plugin_exception_at_execution_boundary(monkeypatch) -> None:
+    manager = PluginManager()
+    monkeypatch.setattr(manager, "_load_plugin_class", lambda plugin_name: FailingPlugin)
+
+    with pytest.raises(PluginExecutionError, match="tool timed out") as exc_info:
+        manager.execute(ExecutionTask("failing", {}))
+
+    assert isinstance(exc_info.value.__cause__, TimeoutError)
+    assert exc_info.value.plugin_id == "failing"
+
+
+def test_plugin_manager_wraps_invalid_plugin_output(monkeypatch) -> None:
+    manager = PluginManager()
+    monkeypatch.setattr(manager, "_load_plugin_class", lambda plugin_name: WrongOutputPlugin)
+
+    with pytest.raises(PluginExecutionError) as exc_info:
+        manager.execute(ExecutionTask("wrong_output", {}))
+
+    assert isinstance(exc_info.value.__cause__, InvalidPluginOutputError)

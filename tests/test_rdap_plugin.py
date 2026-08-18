@@ -129,3 +129,32 @@ def test_rdap_plugin_rejects_unregistered_domain_tld(monkeypatch) -> None:
 
     with pytest.raises(ValueError, match="No RDAP service registered"):
         Plugin().execute({"domain": "example.invalid"})
+
+
+def test_rdap_plugin_propagates_http_timeout(monkeypatch) -> None:
+    request = httpx.Request("GET", "https://data.iana.org/rdap/dns.json")
+
+    def timeout(*args, **kwargs):
+        raise httpx.ReadTimeout("RDAP timed out", request=request)
+
+    monkeypatch.setattr(httpx, "get", timeout)
+
+    with pytest.raises(httpx.ReadTimeout, match="RDAP timed out"):
+        Plugin().execute({"domain": "example.com"})
+
+
+def test_rdap_plugin_propagates_http_status_error(monkeypatch) -> None:
+    request = httpx.Request("GET", "https://data.iana.org/rdap/dns.json")
+    response = httpx.Response(503, request=request)
+
+    def bad_status(*args, **kwargs):
+        raise httpx.HTTPStatusError(
+            "Service unavailable",
+            request=request,
+            response=response,
+        )
+
+    monkeypatch.setattr(httpx, "get", bad_status)
+
+    with pytest.raises(httpx.HTTPStatusError):
+        Plugin().execute({"domain": "example.com"})

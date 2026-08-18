@@ -19,9 +19,13 @@ from centaurus.persistence.raw_observation_store import RawObservationStore
 from centaurus.persistence.evidence_store import EvidenceStore
 from centaurus.persistence.report_store import ReportStore
 from centaurus.persistence.finding_store import FindingStore
+from centaurus.persistence.execution_failure_store import ExecutionFailureStore
 from centaurus.persistence.filesystem.evidence_store import FilesystemEvidenceStore
 from centaurus.persistence.filesystem.report_store import FilesystemReportStore
 from centaurus.persistence.filesystem.finding_store import FilesystemFindingStore
+from centaurus.persistence.filesystem.execution_failure_store import (
+    FilesystemExecutionFailureStore,
+)
 
 from centaurus.planner.planner import Planner
 from centaurus.executor.executor import Executor
@@ -56,6 +60,7 @@ class Core:
         evidence_store: EvidenceStore | None = None,
         report_store: ReportStore | None = None,
         finding_store: FindingStore | None = None,
+        execution_failure_store: ExecutionFailureStore | None = None,
         llm_manager: LLMManager | None = None,
         rules: tuple[Rule, ...] | None = None,
     ) -> None:
@@ -80,6 +85,7 @@ class Core:
         self._evidence_store = evidence_store
         self._report_store = report_store
         self._finding_store = finding_store
+        self._execution_failure_store = execution_failure_store
         self._evidence_manager = None
         self._rules = rules if rules is not None else ()
 
@@ -138,6 +144,8 @@ class Core:
         if not self._initialized:
             self.initialize()
 
+        self._last_llm_output = None
+
         investigation.mark_planned()
 
         plan = self._planner.plan(
@@ -149,6 +157,25 @@ class Core:
         try:
 
             result = self._executor.execute(plan)
+
+            execution_status = result.get("status")
+            if execution_status not in {"completed", "partial", "failed"}:
+                raise ValueError(
+                    f"Unsupported Executor status: {execution_status!r}"
+                )
+
+            failures = result.get("failures", [])
+            self._persist_execution_failures(
+                investigation.id,
+                failures,
+            )
+
+            if execution_status == "failed":
+                investigation.register_results(
+                    result["results"],
+                )
+                investigation.mark_failed()
+                return result
 
             self._persist_raw_observations(
                 investigation.id,
@@ -242,6 +269,25 @@ class Core:
             self._finding_store.persist_finding(
                 investigation.id,
                 finding,
+            )
+
+    def _persist_execution_failures(
+        self,
+        investigation_id: str,
+        failures: list,
+    ) -> None:
+        """Persist operational task failures outside the knowledge pipeline."""
+
+        if not failures:
+            return
+
+        if self._execution_failure_store is None:
+            self._execution_failure_store = FilesystemExecutionFailureStore()
+
+        for failure in failures:
+            self._execution_failure_store.persist_failure(
+                investigation_id,
+                failure,
             )
 
     def _persist_raw_observations(

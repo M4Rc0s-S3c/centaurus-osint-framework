@@ -8,16 +8,19 @@ from types import SimpleNamespace
 
 from centaurus.cli import CLI
 from centaurus.core.core import Core
-from centaurus.evidence import EvidenceSource
+from centaurus.evidence import EvidenceSource, RawObservation
 from centaurus.investigation import InvestigationStatus
 from centaurus.llm.llm_manager import LLMManager
 from centaurus.llm.request_interpreter import RequestInterpreter
 from centaurus.persistence.filesystem import (
     FilesystemEvidenceStore,
+    FilesystemExecutionFailureStore,
     FilesystemFindingStore,
     FilesystemRawObservationStore,
     FilesystemReportStore,
 )
+from centaurus.exceptions import PluginExecutionError
+from centaurus.plugin_manager.plugin_manager import PluginManager
 from centaurus.request import PUBLIC_EXPOSURE_ASSESSMENT
 from centaurus.rules.dns_rules import DNS_RULES
 from centaurus.rules.exposure_rules import EXPOSURE_RULES
@@ -130,14 +133,14 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
     monkeypatch.setitem(
         sys.modules,
         "whois",
-        SimpleNamespace(whois=lambda domain: whois_result),
+        SimpleNamespace(whois=lambda domain, **kwargs: whois_result),
     )
     from centaurus.plugins.whois import plugin as whois_plugin
 
     monkeypatch.setattr(
         whois_plugin.whois,
         "whois",
-        lambda domain: whois_result,
+        lambda domain, **kwargs: whois_result,
     )
 
     from centaurus.plugins.crtsh import plugin as crtsh_plugin
@@ -386,3 +389,79 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
         for item in persisted_report["findings"]
     )
     assert persisted_finding_counts == finding_counts
+
+
+def test_multitool_flow_continues_after_one_tool_failure_without_creating_failure_knowledge(
+    tmp_path,
+    monkeypatch,
+) -> None:
+    """G6: one isolated tool failure yields a partial execution and valid Report."""
+
+    source_by_plugin = {
+        "whois": EvidenceSource.WHOIS,
+        "rdap": EvidenceSource.RDAP,
+        "dnsrecon": EvidenceSource.DNSRECON,
+        "sublist3r": EvidenceSource.SUBLIST3R,
+        "crtsh": EvidenceSource.CRTSH,
+        "theharvester": EvidenceSource.THEHARVESTER,
+    }
+
+    def fake_execute(self, task):
+        if task.plugin_id == "crtsh":
+            try:
+                raise TimeoutError("crt.sh timed out")
+            except TimeoutError as exc:
+                raise PluginExecutionError("crtsh", str(exc)) from exc
+
+        return RawObservation(
+            source=source_by_plugin[task.plugin_id],
+            data={},
+            collected_at=datetime(2026, 8, 18, 9, 0, tzinfo=timezone.utc),
+        )
+
+    monkeypatch.setattr(PluginManager, "execute", fake_execute)
+
+    report_provider = CapturingReportProvider()
+    core = Core(
+        raw_observation_store=FilesystemRawObservationStore(tmp_path),
+        evidence_store=FilesystemEvidenceStore(tmp_path),
+        finding_store=FilesystemFindingStore(tmp_path),
+        report_store=FilesystemReportStore(tmp_path),
+        execution_failure_store=FilesystemExecutionFailureStore(tmp_path),
+        llm_manager=LLMManager(provider=report_provider),
+        rules=(),
+    )
+
+    from centaurus.investigation import Investigation
+
+    investigation = Investigation(objective="example.com")
+    result = core.run_investigation(investigation)
+
+    assert result["status"] == "partial"
+    assert len(result["results"]) == 6
+    assert len(result["failures"]) == 1
+    assert result["failures"][0].plugin_id == "crtsh"
+    assert result["failures"][0].category.value == "timeout"
+
+    assert investigation.status is InvestigationStatus.COMPLETED
+    assert len(investigation.results) == 6
+    assert len(investigation.evidences) == 6
+    assert investigation.findings == ()
+    assert investigation.report is not None
+    assert report_provider.reports == [investigation.report]
+
+    root = tmp_path / "investigations" / investigation.id
+    assert len(list((root / "evidences" / "raw").glob("*.json"))) == 6
+    assert len(list((root / "evidences" / "normalized").glob("*.json"))) == 6
+    assert len(list((root / "execution" / "failures").glob("*.json"))) == 1
+    assert len(list((root / "findings").glob("*.json"))) == 0
+    assert len(list((root / "reports").glob("*.json"))) == 1
+
+    persisted_failure = json.loads(
+        next((root / "execution" / "failures").glob("*.json")).read_text(
+            encoding="utf-8"
+        )
+    )
+    assert persisted_failure["plugin_id"] == "crtsh"
+    assert persisted_failure["category"] == "timeout"
+    assert persisted_failure["task_index"] == 6

@@ -10,6 +10,9 @@ from centaurus.evidence import EvidenceSource, RawObservation
 from centaurus.plugins.base_plugin import BasePlugin
 
 
+_WHOIS_TIMEOUT_SECONDS = 10
+
+
 class Plugin(BasePlugin):
     """
     WHOIS plugin.
@@ -33,7 +36,11 @@ class Plugin(BasePlugin):
         if domain == "unknown":
             data = {}
         else:
-            result = whois.whois(domain)
+            result = whois.whois(
+                domain,
+                timeout=_WHOIS_TIMEOUT_SECONDS,
+                ignore_socket_errors=False,
+            )
             data = dict(result)
 
         collected_at = datetime.now(timezone.utc)

@@ -14,7 +14,11 @@ from centaurus.persistence.filesystem import FilesystemRawObservationStore
 from centaurus.rules.condition import Condition
 from centaurus.rules.rule import Rule
 from centaurus.rules.rule_engine import RuleEngine
-from centaurus.executor.execution import ExecutionPlan
+from centaurus.executor.execution import (
+    ExecutionFailure,
+    ExecutionFailureCategory,
+    ExecutionPlan,
+)
 from centaurus.investigation import (
     Investigation,
     InvestigationStatus,
@@ -129,6 +133,15 @@ class FakeFindingStore:
         return None
 
 
+class FakeExecutionFailureStore:
+    def __init__(self) -> None:
+        self.persisted = []
+
+    def persist_failure(self, investigation_id, failure):
+        self.persisted.append((investigation_id, failure))
+        return None
+
+
 class FakeLLMManager:
     """Test double for the LLM presentation boundary."""
 
@@ -187,6 +200,7 @@ def test_core_initial_state():
     assert core._report_manager is None
     assert core._llm_manager is None
     assert core._raw_observation_store is None
+    assert core._execution_failure_store is None
     assert core._evidence_manager is None
     assert core._rules == ()
 
@@ -856,3 +870,112 @@ def test_core_submit_request_rejects_unstructured_input():
 
     with pytest.raises(TypeError, match="StructuredRequest"):
         core.submit_request("investiga example.com")  # type: ignore[arg-type]
+
+
+def _execution_failure(
+    plugin_id: str = "crtsh",
+    task_index: int = 6,
+) -> ExecutionFailure:
+    return ExecutionFailure(
+        task_index=task_index,
+        plugin_id=plugin_id,
+        parameters={"domain": "example.com"},
+        category=ExecutionFailureCategory.TIMEOUT,
+        error_type="ReadTimeout",
+        message="timed out",
+        occurred_at=datetime(2026, 8, 18, 8, 0, tzinfo=timezone.utc),
+    )
+
+
+def test_core_completes_partial_investigation_and_persists_operational_failure() -> None:
+    observation = RawObservation(
+        source=EvidenceSource.WHOIS,
+        data={"domain_name": "EXAMPLE.COM"},
+        collected_at=datetime(2026, 8, 18, 8, 0, tzinfo=timezone.utc),
+    )
+    failure = _execution_failure()
+    failure_store = FakeExecutionFailureStore()
+    raw_store = FakeRawObservationStore()
+    evidence_store = FakeEvidenceStore()
+    report_store = FakeReportStore()
+
+    core = Core(
+        raw_observation_store=raw_store,
+        evidence_store=evidence_store,
+        report_store=report_store,
+        execution_failure_store=failure_store,
+    )
+    core._initialized = True
+    core._planner = FakePlanner(ExecutionPlan(investigation_id="INV-TEST"))
+    core._executor = FakeExecutor({
+        "status": "partial",
+        "results": [observation],
+        "failures": [failure],
+    })
+    core._evidence_manager = EvidenceManager()
+
+    investigation = Investigation(objective="example.com")
+    result = core.run_investigation(investigation)
+
+    assert result["status"] == "partial"
+    assert investigation.status is InvestigationStatus.COMPLETED
+    assert investigation.results == (observation,)
+    assert len(investigation.evidences) == 1
+    assert investigation.report is not None
+    assert failure_store.persisted == [(investigation.id, failure)]
+    assert raw_store.persisted == [(investigation.id, observation)]
+    assert all(item is not failure for item in investigation.results)
+    assert all(item is not failure for item in investigation.evidences)
+    assert all(item is not failure for item in investigation.findings)
+
+
+def test_core_marks_investigation_failed_when_all_planned_tools_fail() -> None:
+    failure = _execution_failure("whois", 1)
+    failure_store = FakeExecutionFailureStore()
+    report_store = FakeReportStore()
+    llm = FakeLLMManager()
+
+    core = Core(
+        report_store=report_store,
+        execution_failure_store=failure_store,
+        llm_manager=llm,
+    )
+    core._initialized = True
+    core._planner = FakePlanner(ExecutionPlan(investigation_id="INV-TEST"))
+    core._executor = FakeExecutor({
+        "status": "failed",
+        "results": [],
+        "failures": [failure],
+    })
+
+    investigation = Investigation(objective="example.com")
+    result = core.run_investigation(investigation)
+
+    assert result["status"] == "failed"
+    assert investigation.status is InvestigationStatus.FAILED
+    assert investigation.results == ()
+    assert investigation.evidences == ()
+    assert investigation.findings == ()
+    assert investigation.report is None
+    assert failure_store.persisted == [(investigation.id, failure)]
+    assert report_store.persisted == []
+    assert llm.received == []
+    assert core.last_llm_output is None
+
+
+def test_core_rejects_unknown_executor_status_as_framework_failure() -> None:
+    core = Core()
+    core._initialized = True
+    core._planner = FakePlanner(ExecutionPlan(investigation_id="INV-TEST"))
+    core._executor = FakeExecutor({
+        "status": "mystery",
+        "results": [],
+        "failures": [],
+    })
+
+    investigation = Investigation(objective="example.com")
+
+    with pytest.raises(ValueError, match="Unsupported Executor status"):
+        core.run_investigation(investigation)
+
+    assert investigation.status is InvestigationStatus.FAILED

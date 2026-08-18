@@ -58,8 +58,13 @@ def test_whois_plugin_returns_raw_observation(
 
     def fake_whois(
         domain: str,
+        **kwargs,
     ) -> dict:
         assert domain == "example.com"
+        assert kwargs == {
+            "timeout": 10,
+            "ignore_socket_errors": False,
+        }
 
         return raw_data
 
@@ -95,10 +100,15 @@ def test_whois_plugin_passes_domain_to_whois_library(
 
     def fake_whois(
         domain: str,
+        **kwargs,
     ) -> dict:
         nonlocal received_domain
 
         received_domain = domain
+        assert kwargs == {
+            "timeout": 10,
+            "ignore_socket_errors": False,
+        }
 
         return {
             "domain_name": "EXAMPLE.COM",
@@ -137,3 +147,19 @@ def test_whois_plugin_handles_unknown_domain_by_default(
     assert result.data == {}
     assert isinstance(result.collected_at, datetime)
     assert result.collected_at.tzinfo == timezone.utc
+
+def test_whois_plugin_propagates_socket_timeout(monkeypatch) -> None:
+    """WHOIS network timeout remains a tool failure, never empty Evidence."""
+
+    def fail_whois(domain: str, **kwargs):
+        raise TimeoutError("WHOIS socket timed out")
+
+    monkeypatch.setattr(whois, "whois", fail_whois)
+
+    plugin = Plugin()
+    try:
+        plugin.execute({"domain": "example.com"})
+    except TimeoutError as exc:
+        assert str(exc) == "WHOIS socket timed out"
+    else:
+        raise AssertionError("WHOIS timeout must propagate through the plugin boundary")
