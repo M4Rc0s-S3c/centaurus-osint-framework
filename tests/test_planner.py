@@ -4,6 +4,7 @@ from centaurus.executor.execution import (
     ExecutionTask,
 )
 from centaurus.investigation import Investigation
+import pytest
 
 
 def test_planner_creation():
@@ -185,8 +186,8 @@ def test_planner_uses_rdap_for_ip_target() -> None:
     assert plan.tasks[0].parameters == {"ip": "192.0.2.10"}
 
 
-def test_planner_does_not_invent_tool_for_email_target() -> None:
-    """EMAIL remains unsupported until its declared tool block is implemented."""
+def test_planner_rejects_non_operational_email_target() -> None:
+    """Planner never produces a false successful empty plan for EMAIL."""
 
     planner = Planner()
     investigation = Investigation(
@@ -195,6 +196,5 @@ def test_planner_does_not_invent_tool_for_email_target() -> None:
         intent="public_exposure_assessment",
     )
 
-    plan = planner.plan(investigation)
-
-    assert plan.tasks == []
+    with pytest.raises(ValueError, match="unsupported operational target type"):
+        planner.plan(investigation)

@@ -6,10 +6,6 @@ import re
 from urllib.parse import urlparse
 
 
-_EMAIL_RE = re.compile(
-    r"(?<![\w.+-])([A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,63})(?![\w-])",
-    re.IGNORECASE,
-)
 _DOMAIN_RE = re.compile(
     r"(?<![@\w.-])((?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,63})(?![\w-])",
     re.IGNORECASE,
@@ -35,9 +31,6 @@ class TargetFactory:
 
         text = user_input.strip()
         candidates: list[TargetCandidate] = []
-
-        for match in _EMAIL_RE.finditer(text):
-            candidates.append(TargetCandidate(match.group(1).lower(), "EMAIL"))
 
         for match in _URL_RE.finditer(text):
             parsed = urlparse(match.group(0))

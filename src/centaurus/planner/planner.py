@@ -5,10 +5,8 @@ The Planner is responsible for transforming an investigation
 into an execution plan.
 """
 
-from centaurus.executor.execution import (
-    ExecutionPlan,
-    ExecutionTask,
-)
+from centaurus.capabilities import get_operational_target_capability
+from centaurus.executor.execution import ExecutionPlan
 from centaurus.investigation import Investigation
 
 
@@ -40,84 +38,12 @@ class Planner:
             objective=investigation.objective,
         )
 
-        #
-        # Temporary planning.
-        #
-        # A fixed execution plan is currently produced so the
-        # runtime execution flow can be exercised end-to-end.
-        #
-        # Future versions will build the execution plan from the
-        # Investigation contents.
-        #
-
-        if investigation.target_type == "DOMAIN":
-            plan.tasks.append(
-                ExecutionTask(
-                    plugin_id="whois",
-                    parameters={
-                        "domain": investigation.target,
-                    },
-                )
-            )
-            plan.tasks.append(
-                ExecutionTask(
-                    plugin_id="rdap",
-                    parameters={
-                        "domain": investigation.target,
-                    },
-                )
-            )
-            plan.tasks.append(
-                ExecutionTask(
-                    plugin_id="dnsrecon",
-                    parameters={
-                        "domain": investigation.target,
-                    },
-                )
-            )
-            plan.tasks.append(
-                ExecutionTask(
-                    plugin_id="dnsrecon",
-                    parameters={
-                        "domain": investigation.target,
-                        "mode": "dmarc",
-                    },
-                )
-            )
-            plan.tasks.append(
-                ExecutionTask(
-                    plugin_id="sublist3r",
-                    parameters={
-                        "domain": investigation.target,
-                    },
-                )
-            )
-            plan.tasks.append(
-                ExecutionTask(
-                    plugin_id="crtsh",
-                    parameters={
-                        "domain": investigation.target,
-                    },
-                )
-            )
-            plan.tasks.append(
-                ExecutionTask(
-                    plugin_id="theharvester",
-                    parameters={
-                        "domain": investigation.target,
-                    },
-                )
-            )
-
-        elif investigation.target_type == "IP":
-            plan.tasks.append(
-                ExecutionTask(
-                    plugin_id="rdap",
-                    parameters={
-                        "ip": investigation.target,
-                    },
-                )
-            )
-
+        capability = get_operational_target_capability(
+            investigation.target_type
+        )
+        plan.tasks.extend(
+            template.build(investigation.target)
+            for template in capability.tasks
+        )
 
         return plan

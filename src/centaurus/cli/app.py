@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from importlib.metadata import PackageNotFoundError, version
 from typing import Protocol
 
 import typer
@@ -13,6 +14,12 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from centaurus.capabilities import (
+    DEFERRED_TARGET_CAPABILITIES,
+    IMPLEMENTED_TOOLS,
+    OPERATIONAL_TARGET_CAPABILITIES,
+    PUBLIC_EXPOSURE_ASSESSMENT,
+)
 from centaurus.cli.cli import CLI
 from centaurus.config import RuntimeConfigurationError, RuntimeSettings
 from centaurus.core.core import Core
@@ -43,8 +50,123 @@ logger = logging.getLogger(__name__)
 app = typer.Typer(
     add_completion=False,
     no_args_is_help=True,
-    help="CENTAURUS OSINT Framework command-line interface.",
+    help=(
+        "CENTAURUS assesses public exposure of supported targets using OSINT "
+        "collection and deterministic Rules. Use 'capabilities' to discover "
+        "the current distribution before starting an investigation."
+    ),
 )
+
+
+def _distribution_version() -> str:
+    """Return the installed distribution version without building runtime state."""
+
+    try:
+        return version("centaurus")
+    except PackageNotFoundError:
+        return "development"
+
+
+def render_capabilities(console: Console, *, show_rules: bool = False) -> None:
+    """Render static distribution capabilities without initializing the runtime."""
+
+    console.print(
+        Panel(
+            "Assess public exposure using deterministic OSINT collection and Rules. "
+            "Capabilities are static distribution metadata and require no Ollama "
+            "connection.",
+            title="CENTAURUS capabilities",
+        )
+    )
+
+    intent_table = Table(title="Supported Intent")
+    intent_table.add_column("Intent")
+    intent_table.add_column("Purpose")
+    intent_table.add_row(
+        PUBLIC_EXPOSURE_ASSESSMENT,
+        "Assess publicly observable exposure for operational target types.",
+    )
+    console.print(intent_table)
+
+    target_table = Table(title="Target coverage", show_lines=True)
+    target_table.add_column("Target")
+    target_table.add_column("Status")
+    target_table.add_column("Tasks", justify="right")
+    target_table.add_column("Tools")
+    target_table.add_column("Scope")
+
+    for capability in OPERATIONAL_TARGET_CAPABILITIES:
+        target_table.add_row(
+            capability.target_type,
+            capability.status,
+            str(len(capability.tasks)),
+            ", ".join(capability.tools),
+            capability.description,
+        )
+    for capability in DEFERRED_TARGET_CAPABILITIES:
+        target_table.add_row(
+            capability.target_type,
+            capability.status,
+            "0",
+            "—",
+            capability.description,
+        )
+    console.print(target_table)
+
+    console.print(
+        "[bold]Implemented tools:[/bold] " + ", ".join(IMPLEMENTED_TOOLS)
+    )
+    console.print(
+        f"[bold]Productive deterministic Rules:[/bold] {len(DEFAULT_RULES)}"
+    )
+    console.print(
+        "[bold]Output:[/bold] report.json (authoritative), report.md "
+        "(deterministic projection), LLM presentation (ephemeral)"
+    )
+
+    if not show_rules:
+        console.print(
+            "[dim]Use 'centaurus capabilities --rules' to list productive Rules.[/dim]"
+        )
+        return
+
+    rules_table = Table(title="Productive Rules", show_lines=True)
+    rules_table.add_column("Rule", no_wrap=True)
+    rules_table.add_column("Category")
+    rules_table.add_column("Name")
+    rules_table.add_column("Description")
+    for rule in DEFAULT_RULES:
+        rules_table.add_row(rule.id, rule.category, rule.name, rule.description)
+    console.print(rules_table)
+
+
+@app.callback(invoke_without_command=True)
+def application_callback(
+    show_version: bool = typer.Option(
+        False,
+        "--version",
+        is_eager=True,
+        help="Show the installed CENTAURUS version and exit.",
+    ),
+) -> None:
+    """CENTAURUS distribution entrypoint."""
+
+    if show_version:
+        typer.echo(f"CENTAURUS {_distribution_version()}")
+        raise typer.Exit(code=EXIT_OK)
+
+
+@app.command("capabilities")
+def capabilities_command(
+    rules: bool = typer.Option(
+        False,
+        "--rules",
+        help="Include the productive deterministic Rule catalog.",
+    ),
+) -> None:
+    """Show supported targets, Intent, tools and optional Rules offline."""
+
+    render_capabilities(Console(), show_rules=rules)
 
 
 class PromptSessionLike(Protocol):
@@ -245,8 +367,9 @@ def run_shell(
 
     console.print(
         Panel(
-            "Enter a natural-language investigation request. "
-            "Use /help for shell commands and /exit to leave.",
+            "Assess public exposure with a natural-language request. "
+            "Use /capabilities to see supported targets, tools and Rules; "
+            "use /help for shell commands and /exit to leave.",
             title="CENTAURUS",
         )
     )
@@ -270,10 +393,14 @@ def run_shell(
                 break
             if command in {"/help", "help", "?"}:
                 console.print(
+                    "[bold]/capabilities[/bold] show supported targets, tools and Rules · "
                     "[bold]/exit[/bold] leave the shell · "
                     "[bold]/help[/bold] show this message · "
                     "all other input is interpreted as an investigation request"
                 )
+                continue
+            if command in {"/capabilities", "capabilities"}:
+                render_capabilities(console, show_rules=False)
                 continue
 
             execute_request(cli, core, text, console)

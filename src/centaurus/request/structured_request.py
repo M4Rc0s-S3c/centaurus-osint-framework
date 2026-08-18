@@ -2,10 +2,11 @@
 
 from dataclasses import dataclass
 
-
-SUPPORTED_TARGET_TYPES = frozenset({"DOMAIN", "IP", "EMAIL"})
-PUBLIC_EXPOSURE_ASSESSMENT = "public_exposure_assessment"
-SUPPORTED_INTENTS = frozenset({PUBLIC_EXPOSURE_ASSESSMENT})
+from centaurus.capabilities import (
+    PUBLIC_EXPOSURE_ASSESSMENT,
+    SUPPORTED_INTENTS,
+    SUPPORTED_TARGET_TYPES,
+)
 
 
 @dataclass(frozen=True, slots=True)

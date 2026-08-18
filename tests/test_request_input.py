@@ -57,11 +57,18 @@ def test_target_factory_detects_ip():
     assert target.type == "IP"
 
 
-def test_target_factory_detects_email():
-    target = TargetFactory().create("Investiga User@Example.COM")
+def test_target_factory_rejects_email_target_not_operational_in_this_release():
+    with pytest.raises(ValueError, match="unable to detect a supported target"):
+        TargetFactory().create("Investiga User@Example.COM")
 
-    assert target.value == "user@example.com"
-    assert target.type == "EMAIL"
+
+def test_structured_request_rejects_email_target_not_operational_in_this_release():
+    with pytest.raises(ValueError, match="unsupported target_type"):
+        StructuredRequest(
+            target="user@example.com",
+            target_type="EMAIL",
+            intent=PUBLIC_EXPOSURE_ASSESSMENT,
+        )
 
 
 def test_target_factory_rejects_ambiguous_multiple_targets():

@@ -73,12 +73,80 @@ def make_console():
     return Console(file=stream, force_terminal=False, width=120), stream
 
 
-def test_cli_help_exposes_final_commands():
+def test_cli_help_exposes_distribution_discovery_commands():
     result = runner.invoke(cli_app.app, ["--help"])
 
     assert result.exit_code == 0
+    assert "assesses public exposure" in result.stdout
+    assert "capabilities" in result.stdout
     assert "investigate" in result.stdout
     assert "shell" in result.stdout
+    assert "--version" in result.stdout
+
+
+def test_version_is_available_without_building_runtime(monkeypatch):
+    monkeypatch.setattr(
+        cli_app,
+        "build_runtime",
+        lambda: (_ for _ in ()).throw(AssertionError("runtime must remain offline")),
+    )
+    monkeypatch.setattr(cli_app, "_distribution_version", lambda: "0.4.0-dev")
+
+    result = runner.invoke(cli_app.app, ["--version"])
+
+    assert result.exit_code == 0
+    assert result.stdout.strip() == "CENTAURUS 0.4.0-dev"
+
+
+def test_capabilities_is_offline_and_exposes_targets_tools_and_intent(monkeypatch):
+    monkeypatch.setattr(
+        cli_app,
+        "build_runtime",
+        lambda: (_ for _ in ()).throw(AssertionError("runtime must remain offline")),
+    )
+
+    result = runner.invoke(cli_app.app, ["capabilities"])
+
+    assert result.exit_code == 0
+    assert "public_exposure_assessment" in result.stdout
+    assert "DOMAIN" in result.stdout
+    assert "full" in result.stdout
+    assert "IP" in result.stdout
+    assert "limited" in result.stdout
+    assert "EMAIL" in result.stdout
+    assert "future" in result.stdout
+    assert "CERTIFICATE" in result.stdout
+    assert "deferred" in result.stdout
+    for tool in ("whois", "rdap", "dnsrecon", "sublist3r", "crtsh", "theharvester"):
+        assert tool in result.stdout
+    assert "Productive deterministic Rules" in result.stdout
+    assert "11" in result.stdout
+
+
+def test_capabilities_rules_lists_the_productive_rule_catalog(monkeypatch):
+    monkeypatch.setattr(
+        cli_app,
+        "build_runtime",
+        lambda: (_ for _ in ()).throw(AssertionError("runtime must remain offline")),
+    )
+
+    result = runner.invoke(cli_app.app, ["capabilities", "--rules"])
+
+    assert result.exit_code == 0
+    for rule_id in (
+        "RL-001",
+        "RL-002",
+        "RL-003",
+        "RL-004",
+        "RL-005",
+        "RL-006",
+        "RL-007",
+        "RL-008",
+        "RL-009",
+        "RL-010",
+        "RL-014",
+    ):
+        assert rule_id in result.stdout
 
 
 def test_investigate_command_forwards_natural_language_and_renders_result(monkeypatch):
@@ -189,7 +257,7 @@ def test_execute_request_falls_back_to_deterministic_report_when_llm_output_miss
 def test_shell_processes_requests_and_stops_without_persistent_history():
     fake_cli = FakeCLI()
     console, stream = make_console()
-    session = FakeSession(["/help", "Investiga example.com", "/exit"])
+    session = FakeSession(["/help", "/capabilities", "Investiga example.com", "/exit"])
 
     exit_code = cli_app.run_shell(fake_cli, FakeCore(), console, session=session)
 
@@ -198,6 +266,8 @@ def test_shell_processes_requests_and_stops_without_persistent_history():
     assert fake_cli.stopped is True
     assert fake_cli.requests == ["Investiga example.com"]
     assert "/exit" in stream.getvalue()
+    assert "CENTAURUS capabilities" in stream.getvalue()
+    assert "public_exposure_assessment" in stream.getvalue()
 
 
 def test_shell_continues_after_invalid_request():
