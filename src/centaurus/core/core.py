@@ -81,6 +81,8 @@ class Core:
         self._report_manager = None
         self._llm_manager = llm_manager
         self._last_llm_output: str | None = None
+        self._last_execution_status: str | None = None
+        self._last_execution_failures: tuple = ()
         self._raw_observation_store = raw_observation_store
         self._evidence_store = evidence_store
         self._report_store = report_store
@@ -145,6 +147,8 @@ class Core:
             self.initialize()
 
         self._last_llm_output = None
+        self._last_execution_status = None
+        self._last_execution_failures = ()
 
         investigation.mark_planned()
 
@@ -165,6 +169,8 @@ class Core:
                 )
 
             failures = result.get("failures", [])
+            self._last_execution_status = execution_status
+            self._last_execution_failures = tuple(failures)
             self._persist_execution_failures(
                 investigation.id,
                 failures,
@@ -382,6 +388,18 @@ class Core:
 
         if self._llm_manager is None:
             self._llm_manager = LLMManager()
+
+    @property
+    def last_execution_status(self) -> str | None:
+        """Return the latest aggregate Executor status, if one exists."""
+
+        return self._last_execution_status
+
+    @property
+    def last_execution_failures(self) -> tuple:
+        """Return latest operational task failures as an immutable tuple."""
+
+        return self._last_execution_failures
 
     @property
     def last_llm_output(self) -> str | None:

@@ -979,3 +979,46 @@ def test_core_rejects_unknown_executor_status_as_framework_failure() -> None:
         core.run_investigation(investigation)
 
     assert investigation.status is InvestigationStatus.FAILED
+
+
+def test_core_exposes_latest_executor_status_and_failures():
+    failure = ExecutionFailure(
+        task_index=1,
+        plugin_id="whois",
+        parameters={"domain": "example.com"},
+        category=ExecutionFailureCategory.TIMEOUT,
+        error_type="TimeoutError",
+        message="timed out",
+        occurred_at=datetime(2026, 8, 18, tzinfo=timezone.utc),
+    )
+    core = Core(execution_failure_store=FakeExecutionFailureStore())
+    plan = ExecutionPlan(investigation_id="INV-TEST")
+    core._initialized = True
+    core._planner = FakePlanner(plan=plan)
+    core._executor = FakeExecutor(
+        result={"status": "partial", "results": [], "failures": [failure]}
+    )
+
+    investigation = Investigation(objective="example.com")
+    core.run_investigation(investigation)
+
+    assert core.last_execution_status == "partial"
+    assert core.last_execution_failures == (failure,)
+
+
+def test_core_resets_latest_execution_state_before_new_run():
+    core = Core()
+    core._last_execution_status = "partial"
+    core._last_execution_failures = ("old",)
+    plan = ExecutionPlan(investigation_id="INV-TEST")
+    core._initialized = True
+    core._planner = FakePlanner(plan=plan)
+    core._executor = FailingExecutor()
+
+    investigation = Investigation(objective="example.com")
+
+    with pytest.raises(RuntimeError, match="Execution failed"):
+        core.run_investigation(investigation)
+
+    assert core.last_execution_status is None
+    assert core.last_execution_failures == ()

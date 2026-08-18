@@ -35,6 +35,10 @@ services:
     depends_on:
       - centaurus-ollama
 
+    # The default container command is the conversational CLI.
+    stdin_open: true
+    tty: true
+
     networks:
       - centaurus-network
 

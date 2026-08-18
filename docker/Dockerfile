@@ -20,7 +20,7 @@ RUN python -m pip install --no-cache-dir \
 
 VOLUME ["/workspace"]
 
-# The framework is currently an on-demand CLI/application container, not a daemon.
-# This default command validates that the framework can be constructed inside the image;
-# operational CLI wiring can replace it without changing the deployment boundary.
-CMD ["python", "-c", "from centaurus.core import Core; core = Core(); core.initialize(); print('CENTAURUS framework initialized')"]
+# CENTAURUS is an on-demand CLI application, not a daemon.
+# The default starts the conversational interface; callers may override the
+# command with e.g. `centaurus investigate <natural-language request>`.
+CMD ["centaurus", "shell"]

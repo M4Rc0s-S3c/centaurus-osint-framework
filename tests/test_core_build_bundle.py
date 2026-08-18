@@ -16,6 +16,8 @@ def test_core_build_bundle_contains_only_required_build_inputs(tmp_path: Path) -
     assert "Dockerfile" in names
     assert "pyproject.toml" in names
     assert "src/centaurus/__init__.py" in names
+    assert "src/centaurus/main.py" in names
+    assert "src/centaurus/cli/app.py" in names
     assert any(name.startswith("src/centaurus/core/") for name in names)
     assert not any(name.startswith("tests/") for name in names)
     assert not any(name.startswith(".git/") for name in names)
@@ -60,3 +62,26 @@ def test_core_dockerfile_installs_pinned_theharvester_runtime() -> None:
     dockerfile = (Path(__file__).resolve().parents[1] / "docker" / "Dockerfile").read_text(encoding="utf-8")
 
     assert "laramies/theHarvester/archive/refs/tags/4.11.1.tar.gz" in dockerfile
+
+
+def test_core_dockerfile_uses_final_cli_command() -> None:
+    dockerfile = (Path(__file__).resolve().parents[1] / "docker" / "Dockerfile").read_text(encoding="utf-8")
+
+    assert 'CMD ["centaurus", "shell"]' in dockerfile
+    assert "CENTAURUS framework initialized" not in dockerfile
+
+
+def test_distribution_declares_console_script_and_cli_dependencies() -> None:
+    pyproject = (Path(__file__).resolve().parents[1] / "pyproject.toml").read_text(encoding="utf-8")
+
+    assert 'centaurus = "centaurus.main:main"' in pyproject
+    assert 'typer>=0.26.3,<0.28' in pyproject
+    assert 'rich>=15,<16' in pyproject
+    assert 'prompt-toolkit>=3.0.52,<4' in pyproject
+
+
+def test_compose_keeps_core_interactive_for_default_shell() -> None:
+    compose = (Path(__file__).resolve().parents[1] / "docker" / "compose.yml").read_text(encoding="utf-8")
+
+    assert "stdin_open: true" in compose
+    assert "tty: true" in compose
