@@ -15,8 +15,12 @@ def serialize_report(report: Report) -> str:
         "investigation_id": report.investigation_id,
         "findings": [
             {
+                "finding_ref": f"F-{index:03d}",
                 "conclusion": finding.conclusion,
                 "rule_id": finding.rule.id,
+                "rule_version": finding.rule.version,
+                "rule_name": finding.rule.name,
+                "rule_category": finding.rule.category,
                 "rule_description": finding.rule.description,
                 "evidence": [
                     {
@@ -27,7 +31,7 @@ def serialize_report(report: Report) -> str:
                     for evidence in finding.evidences
                 ],
             }
-            for finding in report.findings
+            for index, finding in enumerate(report.findings, start=1)
         ],
     }
 

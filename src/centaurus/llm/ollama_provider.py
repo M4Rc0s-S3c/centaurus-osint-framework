@@ -7,6 +7,11 @@ from centaurus.config import configured_positive_float, configured_text
 from centaurus.report.report import Report
 from centaurus.llm.exceptions import LLMProviderError, LLMResponseError
 from centaurus.llm.prompt import SYSTEM_PROMPT
+from centaurus.llm.presentation import (
+    PRESENTATION_SCHEMA,
+    parse_analyst_presentation,
+    render_analyst_presentation,
+)
 from centaurus.llm.serialization import serialize_report
 
 
@@ -45,6 +50,8 @@ class OllamaProvider:
             "system": SYSTEM_PROMPT,
             "prompt": serialize_report(report),
             "stream": False,
+            "think": False,
+            "format": PRESENTATION_SCHEMA,
         }
 
         client = self._client or httpx.Client(timeout=self._timeout)
@@ -73,4 +80,5 @@ class OllamaProvider:
                 "Ollama returned an empty or invalid response"
             )
 
-        return text.strip()
+        presentation = parse_analyst_presentation(report, text)
+        return render_analyst_presentation(report, presentation)

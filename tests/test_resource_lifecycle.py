@@ -1,5 +1,6 @@
 """Resource-lifecycle tests for framework infrastructure boundaries."""
 
+import json
 from datetime import datetime, timezone
 from types import SimpleNamespace
 
@@ -88,7 +89,19 @@ def test_owned_ollama_http_client_is_created_lazily_and_closed(monkeypatch):
             return None
 
         def json(self):
-            return {"response": "presentation"}
+            return {
+                "response": json.dumps(
+                    {
+                        "executive_summary": {
+                            "text": "No Findings are present in the supplied Report.",
+                            "supporting_finding_refs": [],
+                        },
+                        "finding_summaries": [],
+                        "risk_considerations": [],
+                        "recommendations": [],
+                    }
+                )
+            }
 
     class FakeClient:
         def __init__(self, *, timeout):
@@ -113,9 +126,11 @@ def test_owned_ollama_http_client_is_created_lazily_and_closed(monkeypatch):
 
     assert events == []
 
-    assert provider.generate(
+    rendered = provider.generate(
         Report(investigation_id="inv-resource", findings=()),
-    ) == "presentation"
+    )
+
+    assert "Analyst-assistance view" in rendered
 
     assert events == [
         ("created", 12),
