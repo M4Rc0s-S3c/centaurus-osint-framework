@@ -10,5 +10,6 @@ Rules:
 - Do not change or reinterpret conclusions.
 - Do not turn missing information into positive claims.
 - Preserve the meaning and traceability of the supplied knowledge.
+- Do not add risk levels, severity, scores, confidence, recommendations, or mitigation steps unless they are explicit in the supplied Report.
 - If the Report contains no Findings, state that clearly.
 """

@@ -10,5 +10,9 @@ class ReportStore(Protocol):
     """Infrastructure contract for persisting the final Report."""
 
     def persist_report(self, investigation_id: str, report: Report) -> Path:
-        """Persist one Report artifact and return its path."""
+        """Persist a Report and return its authoritative artifact path.
+
+        Implementations may also materialize deterministic derived projections,
+        but the returned path identifies the authoritative persisted Report.
+        """
         ...

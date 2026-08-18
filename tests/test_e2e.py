@@ -340,11 +340,22 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
     evidence_files = sorted((root / "evidences" / "normalized").glob("*.json"))
     finding_files = sorted((root / "findings").glob("*.json"))
     report_files = sorted((root / "reports").glob("*.json"))
+    markdown_files = sorted((root / "reports").glob("*.md"))
 
     assert len(raw_files) == 7
     assert len(evidence_files) == 7
     assert len(finding_files) == 12
     assert len(report_files) == 1
+    assert len(markdown_files) == 1
+
+    markdown_report = markdown_files[0].read_text(encoding="utf-8")
+    assert "**Authoritative artifact:** `report.json`" in markdown_report
+    assert "### Finding 11 — `RL-014`" in markdown_report
+    assert "### Finding 12 — `RL-014`" in markdown_report
+    assert "`sublist3r`" in markdown_report
+    assert "`crtsh`" in markdown_report
+    assert "`theharvester`" in markdown_report
+    assert "Registration findings presented for the analyst." not in markdown_report
 
     # Filesystem persistence must preserve the seven-task execution order,
     # including the second DNSRecon observation, at RAW and normalized levels.
@@ -456,6 +467,12 @@ def test_multitool_flow_continues_after_one_tool_failure_without_creating_failur
     assert len(list((root / "execution" / "failures").glob("*.json"))) == 1
     assert len(list((root / "findings").glob("*.json"))) == 0
     assert len(list((root / "reports").glob("*.json"))) == 1
+    assert len(list((root / "reports").glob("*.md"))) == 1
+    markdown_report = next((root / "reports").glob("*.md")).read_text(
+        encoding="utf-8"
+    )
+    assert "**Findings:** 0" in markdown_report
+    assert "No Findings were produced." in markdown_report
 
     persisted_failure = json.loads(
         next((root / "execution" / "failures").glob("*.json")).read_text(

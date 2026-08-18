@@ -7,6 +7,7 @@ from centaurus.core.core import Core
 from centaurus.investigation import Investigation
 from centaurus.llm import LLMManager, OllamaProvider
 from centaurus.llm.serialization import serialize_report
+from centaurus.llm.prompt import SYSTEM_PROMPT
 from centaurus.llm.exceptions import LLMProviderError, LLMResponseError
 from centaurus.report import Report
 
@@ -41,6 +42,16 @@ def test_report_serialization_is_structured_and_non_mutating():
     payload = json.loads(serialized)
     assert payload == {"investigation_id": "inv-1", "findings": []}
     assert report.findings == ()
+
+
+def test_llm_presentation_prompt_forbids_unbacked_risk_and_recommendations():
+    normalized = SYSTEM_PROMPT.lower()
+
+    assert "risk levels" in normalized
+    assert "severity" in normalized
+    assert "scores" in normalized
+    assert "recommendations" in normalized
+    assert "unless they are explicit in the supplied report" in normalized
 
 
 def test_llm_manager_rejects_non_report():

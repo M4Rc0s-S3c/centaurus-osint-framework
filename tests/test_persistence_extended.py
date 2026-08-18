@@ -74,11 +74,23 @@ def test_report_store_persists_report_and_findings(tmp_path) -> None:
     report = Report(investigation_id=investigation.id, findings=(finding,))
 
     path = FilesystemReportStore(tmp_path).persist_report(investigation.id, report)
-    assert path == tmp_path / "investigations" / investigation.id / "reports" / "report.json"
+    reports_dir = tmp_path / "investigations" / investigation.id / "reports"
+    markdown_path = reports_dir / "report.md"
+
+    assert path == reports_dir / "report.json"
+    assert markdown_path.is_file()
+
     payload = json.loads(path.read_text(encoding="utf-8"))
     assert payload["investigation_id"] == investigation.id
     assert payload["findings"][0]["rule"]["id"] == "RL-TEST-001"
     assert payload["findings"][0]["evidences"][0]["data"]["domain_name"] == "example.org"
+
+    markdown = markdown_path.read_text(encoding="utf-8")
+    assert "**Authoritative artifact:** `report.json`" in markdown
+    assert "### Finding 1 — `RL-TEST-001`" in markdown
+    assert "Registrar information is missing." in markdown
+    assert "##### Evidence 1 — `whois`" in markdown
+    assert '    "domain_name": "example.org"' in markdown
 
 
 def test_report_store_rejects_second_report(tmp_path) -> None:
@@ -88,6 +100,45 @@ def test_report_store_rejects_second_report(tmp_path) -> None:
     store.persist_report(investigation.id, report)
     with pytest.raises(FileExistsError):
         store.persist_report(investigation.id, report)
+
+
+def test_report_store_rejects_orphan_markdown_artifact(tmp_path) -> None:
+    investigation = Investigation(objective="example.org")
+    report = Report(investigation_id=investigation.id, findings=())
+    reports_dir = tmp_path / "investigations" / investigation.id / "reports"
+    reports_dir.mkdir(parents=True)
+    (reports_dir / "report.md").write_text("orphan", encoding="utf-8")
+
+    with pytest.raises(FileExistsError):
+        FilesystemReportStore(tmp_path).persist_report(investigation.id, report)
+
+
+def test_report_store_rolls_back_json_if_markdown_write_fails(tmp_path, monkeypatch) -> None:
+    investigation = Investigation(objective="example.org")
+    report = Report(investigation_id=investigation.id, findings=())
+    store = FilesystemReportStore(tmp_path)
+    original = FilesystemReportStore._persist_exclusive
+    calls = 0
+
+    def fail_second_write(destination, encoded):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise OSError("simulated markdown persistence failure")
+        return original(destination, encoded)
+
+    monkeypatch.setattr(
+        FilesystemReportStore,
+        "_persist_exclusive",
+        staticmethod(fail_second_write),
+    )
+
+    with pytest.raises(OSError, match="markdown persistence failure"):
+        store.persist_report(investigation.id, report)
+
+    reports_dir = tmp_path / "investigations" / investigation.id / "reports"
+    assert not (reports_dir / "report.json").exists()
+    assert not (reports_dir / "report.md").exists()
 
 
 def test_report_store_rejects_other_investigation(tmp_path) -> None:

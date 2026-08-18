@@ -18,6 +18,7 @@ def test_core_build_bundle_contains_only_required_build_inputs(tmp_path: Path) -
     assert "src/centaurus/__init__.py" in names
     assert "src/centaurus/main.py" in names
     assert "src/centaurus/cli/app.py" in names
+    assert "src/centaurus/persistence/report_markdown.py" in names
     assert any(name.startswith("src/centaurus/core/") for name in names)
     assert not any(name.startswith("tests/") for name in names)
     assert not any(name.startswith(".git/") for name in names)

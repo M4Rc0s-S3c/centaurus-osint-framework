@@ -123,7 +123,7 @@ def _render_investigation(
         console.print(
             Panel(
                 Text(presentation),
-                title="LLM presentation",
+                title="LLM presentation — ephemeral",
             )
         )
     elif report is not None:
