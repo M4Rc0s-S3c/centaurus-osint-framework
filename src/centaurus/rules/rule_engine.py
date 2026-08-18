@@ -101,6 +101,16 @@ class RuleEngine:
         findings: list[Finding] = []
 
         for condition in rule.conditions:
+            if condition.operator == "shared_collection_item_min_sources":
+                findings.extend(
+                    self._evaluate_shared_collection_item_condition(
+                        rule=rule,
+                        condition=condition,
+                        evidences=evidences,
+                    )
+                )
+                continue
+
             for evidence in evidences:
 
                 if self._condition_matches(
@@ -117,6 +127,79 @@ class RuleEngine:
                             evidences=(evidence,),
                         )
                     )
+
+        return tuple(findings)
+
+    def _evaluate_shared_collection_item_condition(
+        self,
+        rule: Rule,
+        condition: Condition,
+        evidences: tuple[Evidence, ...],
+    ) -> tuple[Finding, ...]:
+        """Correlate collection items across distinct Evidence sources.
+
+        One normalized string item matches only when it appears in at least
+        ``Condition.value`` distinct EvidenceSource values. Repeated Evidence
+        from the same source cannot satisfy the source threshold by itself.
+        One Finding is produced per corroborated item and keeps the first
+        supporting Evidence from every distinct source in evaluation order.
+        """
+
+        minimum_sources = condition.value
+
+        if not isinstance(minimum_sources, int) or isinstance(
+            minimum_sources, bool
+        ):
+            raise TypeError(
+                "Rule operator 'shared_collection_item_min_sources' "
+                "requires an integer source threshold."
+            )
+
+        if minimum_sources < 2:
+            raise ValueError(
+                "Rule operator 'shared_collection_item_min_sources' "
+                "requires a source threshold of at least 2."
+            )
+
+        supporting_evidences: dict[str, list[Evidence]] = {}
+        supporting_sources: dict[str, set[Any]] = {}
+
+        for evidence in evidences:
+            values = evidence.data.get(condition.field)
+            if not isinstance(values, (list, tuple, set, frozenset)):
+                continue
+
+            seen_items: set[str] = set()
+            for item in values:
+                if not isinstance(item, str) or not item or item in seen_items:
+                    continue
+
+                seen_items.add(item)
+                item_sources = supporting_sources.setdefault(item, set())
+
+                if evidence.source in item_sources:
+                    continue
+
+                item_sources.add(evidence.source)
+                supporting_evidences.setdefault(item, []).append(evidence)
+
+        findings: list[Finding] = []
+
+        for item in sorted(supporting_evidences):
+            if len(supporting_sources[item]) < minimum_sources:
+                continue
+
+            findings.append(
+                Finding(
+                    conclusion=self._build_conclusion(
+                        rule=rule,
+                        condition=condition,
+                        item=item,
+                    ),
+                    rule=rule,
+                    evidences=tuple(supporting_evidences[item]),
+                )
+            )
 
         return tuple(findings)
 
@@ -295,18 +378,24 @@ class RuleEngine:
         self,
         rule: Rule,
         condition: Condition,
+        item: str | None = None,
     ) -> str:
-        """
-        Build the Finding conclusion from the Rule definition.
+        """Build the deterministic Finding conclusion from a Rule.
 
-        The current implementation keeps conclusion generation
-        deliberately simple. Template expansion can be added
-        when the declarative Rule definitions require it.
+        ``{field}`` remains available for field-oriented Rules. ``{item}`` is
+        expanded only when multi-Evidence collection correlation identifies
+        the concrete normalized item recorded by the Finding.
         """
 
-        if "{field}" in rule.conclusion:
-            return rule.conclusion.format(
-                field=condition.field,
+        conclusion = rule.conclusion.replace(
+            "{field}",
+            condition.field,
+        )
+
+        if item is not None:
+            conclusion = conclusion.replace(
+                "{item}",
+                item,
             )
 
-        return rule.conclusion
+        return conclusion

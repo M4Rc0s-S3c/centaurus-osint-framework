@@ -848,3 +848,73 @@ def test_missing_condition_ignores_evidence_without_that_schema_field() -> None:
     findings = RuleEngine().evaluate(rules=(rule,), evidences=(evidence,))
 
     assert findings == ()
+
+
+def test_shared_collection_item_min_sources_requires_integer_threshold() -> None:
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="subdomains",
+                operator="shared_collection_item_min_sources",
+                value=2.0,
+            ),
+        ),
+    )
+    evidence = create_evidence({"subdomains": ["www.example.com"]})
+
+    with pytest.raises(TypeError):
+        RuleEngine().evaluate(
+            rules=(rule,),
+            evidences=(evidence,),
+        )
+
+
+def test_shared_collection_item_min_sources_requires_at_least_two_sources() -> None:
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="subdomains",
+                operator="shared_collection_item_min_sources",
+                value=1,
+            ),
+        ),
+    )
+    evidence = create_evidence({"subdomains": ["www.example.com"]})
+
+    with pytest.raises(ValueError):
+        RuleEngine().evaluate(
+            rules=(rule,),
+            evidences=(evidence,),
+        )
+
+
+def test_shared_collection_item_min_sources_expands_item_placeholder() -> None:
+    rule = create_rule(
+        conditions=(
+            Condition(
+                field="subdomains",
+                operator="shared_collection_item_min_sources",
+                value=2,
+            ),
+        ),
+        conclusion="Corroborated item: {item}.",
+    )
+    first = Evidence(
+        source=EvidenceSource.SUBLIST3R,
+        data={"subdomains": ["www.example.com"]},
+        collected_at=datetime.now(),
+    )
+    second = Evidence(
+        source=EvidenceSource.CRTSH,
+        data={"subdomains": ["www.example.com"]},
+        collected_at=datetime.now(),
+    )
+
+    findings = RuleEngine().evaluate(
+        rules=(rule,),
+        evidences=(first, second),
+    )
+
+    assert len(findings) == 1
+    assert findings[0].conclusion == "Corroborated item: www.example.com."
+    assert findings[0].evidences == (first, second)

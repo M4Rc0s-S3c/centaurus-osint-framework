@@ -145,3 +145,51 @@ def test_finding_store_rejects_invalid_inputs(tmp_path) -> None:
         store.persist_finding("../escape", make_finding(make_evidence()))
     with pytest.raises(TypeError):
         store.persist_finding("INV-001", object())
+
+
+def test_finding_store_persists_multiple_supporting_evidences(tmp_path) -> None:
+    first = Evidence(
+        source=EvidenceSource.SUBLIST3R,
+        data={"subdomains": ["www.example.org"]},
+        collected_at=datetime(2026, 8, 18, 10, 0, tzinfo=timezone.utc),
+    )
+    second = Evidence(
+        source=EvidenceSource.CRTSH,
+        data={"subdomains": ["www.example.org"]},
+        collected_at=datetime(2026, 8, 18, 10, 1, tzinfo=timezone.utc),
+    )
+    rule = Rule(
+        id="RL-TEST-CORRELATION",
+        version="1.0",
+        name="correlation_test",
+        description="Test multi-Evidence persistence.",
+        category="public_exposure",
+        conditions=(
+            Condition(
+                field="subdomains",
+                operator="shared_collection_item_min_sources",
+                value=2,
+            ),
+        ),
+        conclusion="Subdomain corroborated.",
+    )
+    finding = Finding(
+        conclusion=rule.conclusion,
+        rule=rule,
+        evidences=(first, second),
+    )
+
+    path = FilesystemFindingStore(tmp_path).persist_finding(
+        "INV-CORRELATION",
+        finding,
+    )
+    payload = json.loads(path.read_text(encoding="utf-8"))
+
+    assert [item["source"] for item in payload["evidences"]] == [
+        "sublist3r",
+        "crtsh",
+    ]
+    assert [item["data"]["subdomains"] for item in payload["evidences"]] == [
+        ["www.example.org"],
+        ["www.example.org"],
+    ]

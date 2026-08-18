@@ -300,8 +300,32 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
             "RL-008": 3,
             "RL-009": 1,
             "RL-010": 1,
+            "RL-014": 2,
         }
     )
+
+    corroboration_findings = [
+        finding
+        for finding in investigation.findings
+        if finding.rule.id == "RL-014"
+    ]
+    assert [finding.conclusion for finding in corroboration_findings] == [
+        "Subdomain api.example.com was observed in at least two distinct "
+        "normalized Evidence sources.",
+        "Subdomain www.example.com was observed in at least two distinct "
+        "normalized Evidence sources.",
+    ]
+    assert [
+        [evidence.source for evidence in finding.evidences]
+        for finding in corroboration_findings
+    ] == [
+        [EvidenceSource.SUBLIST3R, EvidenceSource.CRTSH],
+        [
+            EvidenceSource.SUBLIST3R,
+            EvidenceSource.CRTSH,
+            EvidenceSource.THEHARVESTER,
+        ],
+    ]
 
     assert investigation.report is not None
     assert investigation.report.findings == investigation.findings
@@ -316,7 +340,7 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
 
     assert len(raw_files) == 7
     assert len(evidence_files) == 7
-    assert len(finding_files) == 10
+    assert len(finding_files) == 12
     assert len(report_files) == 1
 
     # Filesystem persistence must preserve the seven-task execution order,
@@ -340,6 +364,20 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
     assert persisted_dmarc_raw["data"]["scan_kind"] == "dmarc"
     assert persisted_dmarc_raw["data"]["query_name"] == "_dmarc.example.com"
     assert persisted_dmarc_evidence["data"]["dmarc_records"] == []
+
+    persisted_correlation_findings = [
+        json.loads(path.read_text(encoding="utf-8"))
+        for path in finding_files
+        if path.name.endswith("-RL-014.json")
+    ]
+    assert len(persisted_correlation_findings) == 2
+    assert [
+        [evidence["source"] for evidence in item["evidences"]]
+        for item in persisted_correlation_findings
+    ] == [
+        ["sublist3r", "crtsh"],
+        ["sublist3r", "crtsh", "theharvester"],
+    ]
 
     persisted_report = json.loads(report_files[0].read_text(encoding="utf-8"))
     assert persisted_report["investigation_id"] == investigation.id

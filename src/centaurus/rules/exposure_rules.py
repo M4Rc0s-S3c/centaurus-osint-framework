@@ -44,7 +44,31 @@ RL_009_MULTIPLE_PUBLIC_EMAILS_OBSERVED = Rule(
 )
 
 
+RL_014_SUBDOMAIN_CORROBORATED_ACROSS_SOURCES = Rule(
+    id="RL-014",
+    version="1.0",
+    name="subdomain_corroborated_across_sources",
+    description=(
+        "Reports each normalized subdomain observed in at least two distinct "
+        "Evidence sources."
+    ),
+    category="public_exposure",
+    conditions=(
+        Condition(
+            field="subdomains",
+            operator="shared_collection_item_min_sources",
+            value=2,
+        ),
+    ),
+    conclusion=(
+        "Subdomain {item} was observed in at least two distinct normalized "
+        "Evidence sources."
+    ),
+)
+
+
 EXPOSURE_RULES = (
     RL_008_MULTIPLE_PUBLIC_SUBDOMAINS_OBSERVED,
     RL_009_MULTIPLE_PUBLIC_EMAILS_OBSERVED,
+    RL_014_SUBDOMAIN_CORROBORATED_ACROSS_SOURCES,
 )
