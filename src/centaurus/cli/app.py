@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Protocol
 
 import typer
@@ -13,9 +14,22 @@ from rich.table import Table
 from rich.text import Text
 
 from centaurus.cli.cli import CLI
+from centaurus.config import RuntimeConfigurationError, RuntimeSettings
 from centaurus.core.core import Core
+from centaurus.llm import LLMManager, OllamaProvider
 from centaurus.llm.exceptions import LLMError
+from centaurus.llm.ollama_intent_provider import OllamaIntentProvider
 from centaurus.llm.request_interpreter import RequestInterpreter
+from centaurus.observability import configure_logging
+from centaurus.persistence.filesystem.evidence_store import FilesystemEvidenceStore
+from centaurus.persistence.filesystem.execution_failure_store import (
+    FilesystemExecutionFailureStore,
+)
+from centaurus.persistence.filesystem.finding_store import FilesystemFindingStore
+from centaurus.persistence.filesystem.raw_observation_store import (
+    FilesystemRawObservationStore,
+)
+from centaurus.persistence.filesystem.report_store import FilesystemReportStore
 from centaurus.rules.catalog import DEFAULT_RULES
 
 
@@ -23,6 +37,8 @@ EXIT_OK = 0
 EXIT_INTERNAL_ERROR = 1
 EXIT_INVALID_REQUEST = 2
 EXIT_OPERATIONAL_FAILURE = 3
+
+logger = logging.getLogger(__name__)
 
 app = typer.Typer(
     add_completion=False,
@@ -38,13 +54,57 @@ class PromptSessionLike(Protocol):
         """Read one line from the analyst."""
 
 
-def build_runtime() -> tuple[CLI, Core]:
-    """Compose the application boundary without moving domain logic into the CLI."""
+def build_runtime(
+    settings: RuntimeSettings | None = None,
+) -> tuple[CLI, Core]:
+    """Compose the product runtime from validated external configuration."""
 
-    core = Core(rules=DEFAULT_RULES)
-    interpreter = RequestInterpreter()
+    runtime = settings or RuntimeSettings.from_env()
+    configure_logging(runtime)
+
+    core = Core(
+        raw_observation_store=FilesystemRawObservationStore(runtime.workspace),
+        evidence_store=FilesystemEvidenceStore(runtime.workspace),
+        report_store=FilesystemReportStore(runtime.workspace),
+        finding_store=FilesystemFindingStore(runtime.workspace),
+        execution_failure_store=FilesystemExecutionFailureStore(runtime.workspace),
+        llm_manager=LLMManager(
+            provider=OllamaProvider(
+                base_url=runtime.ollama_base_url,
+                model=runtime.ollama_model,
+                timeout=runtime.ollama_timeout,
+            )
+        ),
+        rules=DEFAULT_RULES,
+    )
+    interpreter = RequestInterpreter(
+        provider=OllamaIntentProvider(
+            base_url=runtime.ollama_base_url,
+            model=runtime.ollama_model,
+            timeout=runtime.ollama_interpretation_timeout,
+        )
+    )
     cli = CLI(core, request_interpreter=interpreter)
+
+    logger.info(
+        "runtime configured workspace=%s ollama_base_url=%s ollama_model=%s "
+        "log_level=%s",
+        runtime.workspace,
+        runtime.ollama_base_url,
+        runtime.ollama_model,
+        runtime.log_level,
+    )
     return cli, core
+
+
+def _build_runtime_or_exit(console: Console) -> tuple[CLI, Core]:
+    """Translate invalid deployment configuration at the CLI boundary."""
+
+    try:
+        return build_runtime()
+    except RuntimeConfigurationError as exc:
+        console.print(f"[red]CENTAURUS configuration error:[/red] {exc}")
+        raise typer.Exit(code=EXIT_INTERNAL_ERROR) from exc
 
 
 def _render_failures(core: Core, console: Console) -> None:
@@ -146,15 +206,28 @@ def execute_request(
     try:
         investigation = cli.submit(user_input)
     except ValueError as exc:
+        logger.warning("request rejected: %s", exc)
         console.print(f"[red]Invalid request:[/red] {exc}")
         return EXIT_INVALID_REQUEST
     except LLMError as exc:
+        logger.warning("LLM service error before investigation completion: %s", exc)
         console.print(f"[red]LLM service error:[/red] {exc}")
         return EXIT_OPERATIONAL_FAILURE
     except Exception as exc:  # final user-facing boundary
+        logger.exception("unexpected error at CLI execution boundary")
         console.print(f"[red]CENTAURUS execution error:[/red] {exc}")
         return EXIT_INTERNAL_ERROR
 
+    logger.info(
+        "investigation finished id=%s domain_status=%s execution_status=%s "
+        "evidence=%d findings=%d failures=%d",
+        investigation.id,
+        investigation.status.value,
+        core.last_execution_status,
+        len(investigation.evidences),
+        len(investigation.findings),
+        len(core.last_execution_failures),
+    )
     return _render_investigation(core, investigation, console)
 
 
@@ -168,6 +241,7 @@ def run_shell(
 
     prompt_session = session or PromptSession(history=InMemoryHistory())
     cli.start()
+    logger.info("interactive shell started")
 
     console.print(
         Panel(
@@ -205,6 +279,7 @@ def run_shell(
             execute_request(cli, core, text, console)
     finally:
         cli.stop()
+        logger.info("interactive shell stopped")
 
     return EXIT_OK
 
@@ -219,7 +294,7 @@ def investigate_command(
     """Run one investigation and print its structured result."""
 
     console = Console()
-    cli, core = build_runtime()
+    cli, core = _build_runtime_or_exit(console)
     exit_code = execute_request(cli, core, " ".join(request), console)
     if exit_code != EXIT_OK:
         raise typer.Exit(code=exit_code)
@@ -230,7 +305,7 @@ def shell_command() -> None:
     """Start the conversational Prompt Toolkit shell."""
 
     console = Console()
-    cli, core = build_runtime()
+    cli, core = _build_runtime_or_exit(console)
     exit_code = run_shell(cli, core, console)
     if exit_code != EXIT_OK:
         raise typer.Exit(code=exit_code)

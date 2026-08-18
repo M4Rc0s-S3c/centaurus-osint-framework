@@ -19,6 +19,7 @@ from centaurus.executor.execution import (
     ExecutionFailureCategory,
     ExecutionPlan,
 )
+from centaurus.llm.exceptions import LLMError
 from centaurus.investigation import (
     Investigation,
     InvestigationStatus,
@@ -152,6 +153,14 @@ class FakeLLMManager:
     def generate(self, report):
         self.received.append(report)
         return self.response
+
+
+class FailingLLMManager(FakeLLMManager):
+    """Test double that simulates an operational presentation failure."""
+
+    def generate(self, report):
+        self.received.append(report)
+        raise LLMError("presentation unavailable")
 
 
 @pytest.fixture(autouse=True)
@@ -815,6 +824,38 @@ def test_core_generates_and_integrates_report_after_findings() -> None:
     assert investigation.report.investigation_id == investigation.id
     assert investigation.report.findings == investigation.findings
     assert investigation.status is InvestigationStatus.COMPLETED
+
+
+def test_core_logs_llm_presentation_failure_without_invalidating_report(monkeypatch) -> None:
+    """Operational LLM #2 failure is observable but never invalidates Report."""
+
+    warnings = []
+    monkeypatch.setattr(
+        "centaurus.core.core.logger.warning",
+        lambda message, *args: warnings.append((message, args)),
+    )
+
+    report_store = FakeReportStore()
+    llm = FailingLLMManager()
+    core = Core(report_store=report_store, llm_manager=llm)
+    core._initialized = True
+    core._planner = FakePlanner(ExecutionPlan(investigation_id="INV-TEST"))
+    core._executor = FakeExecutor({"status": "completed", "results": []})
+    core._rules = ()
+
+    investigation = Investigation(objective="example.com")
+    core.run_investigation(investigation)
+
+    assert investigation.status is InvestigationStatus.COMPLETED
+    assert investigation.report is not None
+    assert report_store.persisted == [(investigation.id, investigation.report)]
+    assert core.last_llm_output is None
+    assert len(warnings) == 1
+    message, args = warnings[0]
+    assert "LLM presentation failed" in message
+    assert args[0] == investigation.id
+    assert args[1] == "LLMError"
+    assert str(args[2]) == "presentation unavailable"
 
 
 def test_core_generates_empty_report_when_no_findings_exist() -> None:

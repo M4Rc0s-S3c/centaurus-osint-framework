@@ -6,17 +6,18 @@ from datetime import datetime, timezone
 
 import whois
 
+from centaurus.config import tool_timeout
 from centaurus.evidence import EvidenceSource, RawObservation
 from centaurus.plugins.base_plugin import BasePlugin
-
-
-_WHOIS_TIMEOUT_SECONDS = 10
 
 
 class Plugin(BasePlugin):
     """
     WHOIS plugin.
     """
+
+    def __init__(self, timeout: float | None = None) -> None:
+        self._timeout = tool_timeout("whois", timeout)
 
     def execute(
         self,
@@ -38,7 +39,7 @@ class Plugin(BasePlugin):
         else:
             result = whois.whois(
                 domain,
-                timeout=_WHOIS_TIMEOUT_SECONDS,
+                timeout=self._timeout,
                 ignore_socket_errors=False,
             )
             data = dict(result)

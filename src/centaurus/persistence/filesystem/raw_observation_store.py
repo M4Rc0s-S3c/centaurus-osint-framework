@@ -11,6 +11,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from centaurus.config import resolve_workspace
 from centaurus.evidence.raw_observation import RawObservation
 from centaurus.persistence.raw_observation_store import RawObservationStore
 
@@ -40,10 +41,7 @@ class FilesystemRawObservationStore(RawObservationStore):
         otherwise /workspace is the runtime default defined by STORAGE.md.
         """
 
-        configured_workspace = os.environ.get("CENTAURUS_WORKSPACE")
-        self._workspace = Path(
-            workspace if workspace is not None else configured_workspace or "/workspace"
-        )
+        self._workspace = resolve_workspace(workspace)
 
     @property
     def workspace(self) -> Path:

@@ -1,9 +1,10 @@
 """Ollama provider for the LLM interpretation instance."""
 
 import json
-import os
 
 import httpx
+
+from centaurus.config import configured_positive_float, configured_text
 
 from centaurus.llm.exceptions import LLMProviderError, LLMResponseError
 from centaurus.llm.interpretation_prompt import INTERPRETATION_SYSTEM_PROMPT
@@ -20,20 +21,29 @@ class OllamaIntentProvider:
         timeout: float | None = None,
         client: httpx.Client | None = None,
     ) -> None:
-        self._base_url = (
-            base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        self._base_url = configured_text(
+            base_url,
+            "OLLAMA_BASE_URL",
+            "http://localhost:11434",
         ).rstrip("/")
-        self._model = model or os.getenv("OLLAMA_MODEL", "qwen3:4b")
-        self._timeout = (
-            timeout
-            if timeout is not None
-            else float(
-                os.getenv(
-                    "OLLAMA_INTERPRETATION_TIMEOUT",
-                    os.getenv("OLLAMA_TIMEOUT", "60"),
-                )
+        self._model = configured_text(model, "OLLAMA_MODEL", "qwen3:4b")
+        if timeout is not None:
+            self._timeout = configured_positive_float(
+                timeout,
+                "OLLAMA_INTERPRETATION_TIMEOUT",
+                60.0,
             )
-        )
+        else:
+            inherited_timeout = configured_positive_float(
+                None,
+                "OLLAMA_TIMEOUT",
+                60.0,
+            )
+            self._timeout = configured_positive_float(
+                None,
+                "OLLAMA_INTERPRETATION_TIMEOUT",
+                inherited_timeout,
+            )
         self._client = client
         self._owns_client = client is None
 

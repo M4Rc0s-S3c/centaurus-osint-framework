@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 import httpx
 
+from centaurus.config import tool_timeout
 from centaurus.evidence import EvidenceSource, RawObservation
 from centaurus.plugins.base_plugin import BasePlugin
 
@@ -13,11 +14,11 @@ _CRTSH_HEADERS = {
     "Accept": "application/json",
     "User-Agent": "centaurus/0.4",
 }
-_CRTSH_TIMEOUT_SECONDS = 30.0
-
-
 class Plugin(BasePlugin):
     """Passive crt.sh Certificate Transparency lookup for domain targets."""
+
+    def __init__(self, timeout: float | None = None) -> None:
+        self._timeout = tool_timeout("crtsh", timeout)
 
     def execute(
         self,
@@ -38,8 +39,7 @@ class Plugin(BasePlugin):
             collected_at=datetime.now(timezone.utc),
         )
 
-    @staticmethod
-    def _lookup_domain(domain: str) -> dict:
+    def _lookup_domain(self, domain: str) -> dict:
         """Query the crt.sh JSON interface for certificates below one domain."""
 
         response = httpx.get(
@@ -49,7 +49,7 @@ class Plugin(BasePlugin):
                 "output": "json",
             },
             headers=_CRTSH_HEADERS,
-            timeout=_CRTSH_TIMEOUT_SECONDS,
+            timeout=self._timeout,
             follow_redirects=True,
         )
         response.raise_for_status()

@@ -6,18 +6,21 @@ from pathlib import Path
 import subprocess
 import tempfile
 
+from centaurus.config import tool_timeout
 from centaurus.evidence import EvidenceSource, RawObservation
 from centaurus.plugins.base_plugin import BasePlugin
 
 
 _DNSRECON_EXECUTABLE = "dnsrecon"
-_DNSRECON_TIMEOUT_SECONDS = 120
 _DNSRECON_STANDARD_MODE = "standard"
 _DNSRECON_DMARC_MODE = "dmarc"
 
 
 class Plugin(BasePlugin):
     """DNSRecon DNS-enumeration plugin for domain targets."""
+
+    def __init__(self, timeout: float | None = None) -> None:
+        self._timeout = tool_timeout("dnsrecon", timeout)
 
     def execute(
         self,
@@ -55,8 +58,7 @@ class Plugin(BasePlugin):
             collected_at=datetime.now(timezone.utc),
         )
 
-    @staticmethod
-    def _run_dnsrecon(domain: str) -> list:
+    def _run_dnsrecon(self, domain: str) -> list:
         """Run one bounded DNSRecon standard scan using a temporary JSON file."""
 
         with tempfile.TemporaryDirectory(prefix="centaurus-dnsrecon-") as temp_dir:
@@ -79,7 +81,7 @@ class Plugin(BasePlugin):
                     check=False,
                     capture_output=True,
                     text=True,
-                    timeout=_DNSRECON_TIMEOUT_SECONDS,
+                    timeout=self._timeout,
                 )
             except FileNotFoundError as exc:
                 raise RuntimeError(

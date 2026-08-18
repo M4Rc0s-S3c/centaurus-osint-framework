@@ -9,6 +9,8 @@ components. Investigation execution will be incorporated during the
 Runtime Flow implementation.
 """
 
+import logging
+
 from centaurus.evidence.raw_observation import RawObservation
 from centaurus.evidence.evidence_manager import EvidenceManager
 from centaurus.investigation import Investigation
@@ -37,6 +39,9 @@ from centaurus.report.report_manager import ReportManager
 from centaurus.llm.llm_manager import LLMManager
 from centaurus.llm.exceptions import LLMError
 from centaurus.request import StructuredRequest
+
+
+logger = logging.getLogger("centaurus.core")
 
 
 class Core:
@@ -214,9 +219,15 @@ class Core:
                 self._create_llm_manager()
             try:
                 self._last_llm_output = self._llm_manager.generate(report)
-            except LLMError:
+            except LLMError as exc:
                 # LLM presentation is operational and must not invalidate
                 # the completed domain investigation or its persisted Report.
+                logger.warning(
+                    "LLM presentation failed investigation_id=%s error_type=%s message=%s",
+                    investigation.id,
+                    type(exc).__name__,
+                    exc,
+                )
                 self._last_llm_output = None
 
             investigation.register_results(

@@ -7,6 +7,8 @@ import os
 import tempfile
 from pathlib import Path
 
+from centaurus.config import resolve_workspace
+
 from centaurus.report.report import Report
 from centaurus.persistence.report_markdown import render_report_markdown
 from centaurus.persistence.report_store import ReportStore
@@ -17,10 +19,7 @@ class FilesystemReportStore(ReportStore):
     """Persist the final Report as authoritative JSON plus Markdown projection."""
 
     def __init__(self, workspace: str | Path | None = None) -> None:
-        configured = os.environ.get("CENTAURUS_WORKSPACE")
-        self._workspace = Path(
-            workspace if workspace is not None else configured or "/workspace"
-        )
+        self._workspace = resolve_workspace(workspace)
 
     @property
     def workspace(self) -> Path:

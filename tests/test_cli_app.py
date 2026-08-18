@@ -217,3 +217,44 @@ def test_shell_continues_after_invalid_request():
     assert exit_code == cli_app.EXIT_OK
     assert fake_cli.requests == ["bad request", "Investiga example.com"]
     assert "Invalid request" in stream.getvalue()
+
+
+def test_build_runtime_injects_validated_workspace_and_creates_operational_log(tmp_path):
+    settings = cli_app.RuntimeSettings(
+        workspace=tmp_path,
+        ollama_base_url="http://ollama:11434",
+        ollama_model="qwen3:4b",
+        ollama_timeout=60.0,
+        ollama_interpretation_timeout=30.0,
+        log_level="INFO",
+    )
+
+    _, core = cli_app.build_runtime(settings)
+    try:
+        assert core._raw_observation_store.workspace == tmp_path
+        assert core._evidence_store.workspace == tmp_path
+        assert core._finding_store.workspace == tmp_path
+        assert core._report_store.workspace == tmp_path
+        assert core._execution_failure_store.workspace == tmp_path
+        assert settings.log_path.is_file()
+        assert "runtime configured" in settings.log_path.read_text(encoding="utf-8")
+    finally:
+        import logging
+
+        logger = logging.getLogger("centaurus")
+        for handler in list(logger.handlers):
+            logger.removeHandler(handler)
+            handler.close()
+
+
+def test_invalid_runtime_configuration_is_visible_at_command_boundary(monkeypatch):
+    def invalid_runtime():
+        raise cli_app.RuntimeConfigurationError("OLLAMA_TIMEOUT must be greater than zero")
+
+    monkeypatch.setattr(cli_app, "build_runtime", invalid_runtime)
+
+    result = runner.invoke(cli_app.app, ["investigate", "Investiga", "example.com"])
+
+    assert result.exit_code == cli_app.EXIT_INTERNAL_ERROR
+    assert "CENTAURUS configuration error" in result.stdout
+    assert "OLLAMA_TIMEOUT" in result.stdout

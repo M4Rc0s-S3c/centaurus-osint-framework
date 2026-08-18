@@ -1,8 +1,8 @@
 """Ollama implementation of the LLM provider contract."""
 
-import os
-
 import httpx
+
+from centaurus.config import configured_positive_float, configured_text
 
 from centaurus.report.report import Report
 from centaurus.llm.exceptions import LLMProviderError, LLMResponseError
@@ -20,14 +20,16 @@ class OllamaProvider:
         timeout: float | None = None,
         client: httpx.Client | None = None,
     ) -> None:
-        self._base_url = (
-            base_url or os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        self._base_url = configured_text(
+            base_url,
+            "OLLAMA_BASE_URL",
+            "http://localhost:11434",
         ).rstrip("/")
-        self._model = model or os.getenv("OLLAMA_MODEL", "qwen3:4b")
-        self._timeout = (
-            timeout
-            if timeout is not None
-            else float(os.getenv("OLLAMA_TIMEOUT", "60"))
+        self._model = configured_text(model, "OLLAMA_MODEL", "qwen3:4b")
+        self._timeout = configured_positive_float(
+            timeout,
+            "OLLAMA_TIMEOUT",
+            60.0,
         )
         self._client = client
         self._owns_client = client is None

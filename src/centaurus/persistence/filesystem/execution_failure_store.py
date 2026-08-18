@@ -8,6 +8,8 @@ import re
 import tempfile
 from pathlib import Path
 
+from centaurus.config import resolve_workspace
+
 from centaurus.executor.execution import ExecutionFailure
 from centaurus.persistence.execution_failure_store import ExecutionFailureStore
 from centaurus.persistence.serialization import json_default
@@ -31,10 +33,7 @@ class FilesystemExecutionFailureStore(ExecutionFailureStore):
     """
 
     def __init__(self, workspace: str | Path | None = None) -> None:
-        configured_workspace = os.environ.get("CENTAURUS_WORKSPACE")
-        self._workspace = Path(
-            workspace if workspace is not None else configured_workspace or "/workspace"
-        )
+        self._workspace = resolve_workspace(workspace)
 
     @property
     def workspace(self) -> Path:

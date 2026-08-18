@@ -5,16 +5,19 @@ from pathlib import Path
 import subprocess
 import tempfile
 
+from centaurus.config import tool_timeout
 from centaurus.evidence import EvidenceSource, RawObservation
 from centaurus.plugins.base_plugin import BasePlugin
 
 
 _SUBLIST3R_EXECUTABLE = "sublist3r"
-_SUBLIST3R_TIMEOUT_SECONDS = 180
 
 
 class Plugin(BasePlugin):
     """Passive Sublist3r subdomain-enumeration plugin for domain targets."""
+
+    def __init__(self, timeout: float | None = None) -> None:
+        self._timeout = tool_timeout("sublist3r", timeout)
 
     def execute(
         self,
@@ -35,8 +38,7 @@ class Plugin(BasePlugin):
             collected_at=datetime.now(timezone.utc),
         )
 
-    @staticmethod
-    def _run_sublist3r(domain: str) -> dict:
+    def _run_sublist3r(self, domain: str) -> dict:
         """Run one bounded passive enumeration and read its output file."""
 
         with tempfile.TemporaryDirectory(prefix="centaurus-sublist3r-") as temp_dir:
@@ -56,7 +58,7 @@ class Plugin(BasePlugin):
                     check=False,
                     capture_output=True,
                     text=True,
-                    timeout=_SUBLIST3R_TIMEOUT_SECONDS,
+                    timeout=self._timeout,
                 )
             except FileNotFoundError as exc:
                 raise RuntimeError(

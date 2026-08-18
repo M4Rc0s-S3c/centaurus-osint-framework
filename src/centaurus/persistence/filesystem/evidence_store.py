@@ -8,6 +8,8 @@ import re
 import tempfile
 from pathlib import Path
 
+from centaurus.config import resolve_workspace
+
 from centaurus.evidence.evidence import Evidence
 from centaurus.persistence.evidence_store import EvidenceStore
 from centaurus.persistence.serialization import evidence_payload, json_default
@@ -20,8 +22,7 @@ class FilesystemEvidenceStore(EvidenceStore):
     """Persist normalized Evidence below investigations/<id>/evidences/normalized/."""
 
     def __init__(self, workspace: str | Path | None = None) -> None:
-        configured = os.environ.get("CENTAURUS_WORKSPACE")
-        self._workspace = Path(workspace if workspace is not None else configured or "/workspace")
+        self._workspace = resolve_workspace(workspace)
 
     @property
     def workspace(self) -> Path:

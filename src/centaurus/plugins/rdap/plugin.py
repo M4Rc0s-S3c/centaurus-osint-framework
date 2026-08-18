@@ -6,6 +6,7 @@ from urllib.parse import quote
 
 import httpx
 
+from centaurus.config import tool_timeout
 from centaurus.evidence import EvidenceSource, RawObservation
 from centaurus.plugins.base_plugin import BasePlugin
 
@@ -17,11 +18,11 @@ _RDAP_HEADERS = {
     "Accept": "application/rdap+json",
     "User-Agent": "centaurus/0.4",
 }
-_TIMEOUT_SECONDS = 10.0
-
-
 class Plugin(BasePlugin):
     """RDAP lookup plugin for domain names and IP addresses."""
+
+    def __init__(self, timeout: float | None = None) -> None:
+        self._timeout = tool_timeout("rdap", timeout)
 
     def execute(
         self,
@@ -120,14 +121,13 @@ class Plugin(BasePlugin):
 
         return max(matches, key=lambda item: item[0])[1]
 
-    @staticmethod
-    def _get_json(url: str) -> dict:
+    def _get_json(self, url: str) -> dict:
         """Fetch one JSON document without retaining network resources."""
 
         response = httpx.get(
             url,
             headers=_RDAP_HEADERS,
-            timeout=_TIMEOUT_SECONDS,
+            timeout=self._timeout,
             follow_redirects=True,
         )
         response.raise_for_status()

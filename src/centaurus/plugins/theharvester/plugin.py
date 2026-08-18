@@ -7,12 +7,12 @@ from pathlib import Path
 import subprocess
 import tempfile
 
+from centaurus.config import tool_timeout
 from centaurus.evidence import EvidenceSource, RawObservation
 from centaurus.plugins.base_plugin import BasePlugin
 
 
 _THEHARVESTER_EXECUTABLE = "theHarvester"
-_THEHARVESTER_TIMEOUT_SECONDS = 300
 _THEHARVESTER_LIMIT = 100
 _THEHARVESTER_SOURCES = (
     "duckduckgo",
@@ -24,6 +24,9 @@ _THEHARVESTER_SOURCES = (
 
 class Plugin(BasePlugin):
     """Passive theHarvester collection plugin for domain targets."""
+
+    def __init__(self, timeout: float | None = None) -> None:
+        self._timeout = tool_timeout("theharvester", timeout)
 
     def execute(
         self,
@@ -44,8 +47,7 @@ class Plugin(BasePlugin):
             collected_at=datetime.now(timezone.utc),
         )
 
-    @staticmethod
-    def _run_theharvester(domain: str) -> dict:
+    def _run_theharvester(self, domain: str) -> dict:
         """Run theHarvester with passive no-key sources in an isolated temp home."""
 
         with tempfile.TemporaryDirectory(prefix="centaurus-theharvester-") as temp_dir:
@@ -78,7 +80,7 @@ class Plugin(BasePlugin):
                     check=False,
                     capture_output=True,
                     text=True,
-                    timeout=_THEHARVESTER_TIMEOUT_SECONDS,
+                    timeout=self._timeout,
                     cwd=temp_dir,
                     env=environment,
                     shell=False,
