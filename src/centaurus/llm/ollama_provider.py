@@ -6,6 +6,10 @@ from centaurus.config import configured_positive_float, configured_text
 
 from centaurus.report.report import Report
 from centaurus.llm.exceptions import LLMProviderError, LLMResponseError
+from centaurus.llm.inference_profile import (
+    ANALYST_ASSISTANCE_INFERENCE_PROFILE,
+    OllamaInferenceProfile,
+)
 from centaurus.llm.prompt import SYSTEM_PROMPT
 from centaurus.llm.presentation import (
     PRESENTATION_SCHEMA,
@@ -24,6 +28,7 @@ class OllamaProvider:
         model: str | None = None,
         timeout: float | None = None,
         client: httpx.Client | None = None,
+        inference_profile: OllamaInferenceProfile | None = None,
     ) -> None:
         self._base_url = configured_text(
             base_url,
@@ -38,6 +43,9 @@ class OllamaProvider:
         )
         self._client = client
         self._owns_client = client is None
+        self._inference_profile = (
+            inference_profile or ANALYST_ASSISTANCE_INFERENCE_PROFILE
+        )
 
     def generate(self, report: Report) -> str:
         """Generate and validate a grounded analyst-assistance presentation."""
@@ -50,8 +58,9 @@ class OllamaProvider:
             "system": SYSTEM_PROMPT,
             "prompt": serialize_report(report),
             "stream": False,
-            "think": False,
+            "think": self._inference_profile.think,
             "format": PRESENTATION_SCHEMA,
+            "options": self._inference_profile.options(),
         }
 
         client = self._client or httpx.Client(timeout=self._timeout)

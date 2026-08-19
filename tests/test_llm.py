@@ -8,7 +8,7 @@ from centaurus.core.core import Core
 from centaurus.evidence import Evidence, EvidenceSource
 from centaurus.finding import Finding
 from centaurus.investigation import Investigation
-from centaurus.llm import LLMManager, OllamaProvider
+from centaurus.llm import LLMManager, OllamaInferenceProfile, OllamaProvider
 from centaurus.llm.serialization import serialize_report
 from centaurus.llm.prompt import SYSTEM_PROMPT
 from centaurus.llm.presentation import (
@@ -174,6 +174,13 @@ def test_ollama_provider_posts_structured_output_schema_and_renders_grounded_tex
     assert payload["stream"] is False
     assert payload["think"] is False
     assert payload["format"] == PRESENTATION_SCHEMA
+    assert payload["options"] == {
+        "temperature": 0.7,
+        "top_p": 0.8,
+        "top_k": 20,
+        "min_p": 0.0,
+        "seed": 42,
+    }
     assert payload["system"] == SYSTEM_PROMPT
     prompt_payload = json.loads(payload["prompt"])
     assert prompt_payload["findings"][0]["finding_ref"] == "F-001"
@@ -182,6 +189,45 @@ def test_ollama_provider_posts_structured_output_schema_and_renders_grounded_tex
     assert "Potential risk implications" in rendered
     assert "Recommendations for analyst review" in rendered
     assert "report.json/report.md" in rendered
+    client.close()
+
+
+def test_ollama_provider_accepts_an_independent_analyst_assistance_profile():
+    captured = {}
+    report = make_finding_report()
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["json"] = request.read()
+        return httpx.Response(
+            200,
+            json={"response": json.dumps(valid_finding_presentation_payload())},
+        )
+
+    profile = OllamaInferenceProfile(
+        think=False,
+        temperature=0.4,
+        top_p=0.6,
+        top_k=9,
+        min_p=0.05,
+        seed=99,
+    )
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(
+        base_url="http://ollama",
+        client=client,
+        inference_profile=profile,
+    )
+
+    provider.generate(report)
+    payload = json.loads(captured["json"])
+    assert payload["think"] is False
+    assert payload["options"] == {
+        "temperature": 0.4,
+        "top_p": 0.6,
+        "top_k": 9,
+        "min_p": 0.05,
+        "seed": 99,
+    }
     client.close()
 
 

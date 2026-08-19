@@ -3,8 +3,13 @@ import json
 import httpx
 import pytest
 
-from centaurus.llm import OllamaIntentProvider, RequestInterpreter
+from centaurus.llm import (
+    OllamaInferenceProfile,
+    OllamaIntentProvider,
+    RequestInterpreter,
+)
 from centaurus.llm.exceptions import LLMProviderError, LLMResponseError
+from centaurus.llm.interpretation_prompt import INTERPRETATION_SCHEMA
 from centaurus.request import (
     PUBLIC_EXPOSURE_ASSESSMENT,
     StructuredRequest,
@@ -107,13 +112,64 @@ def test_ollama_intent_provider_posts_interpretation_specific_payload():
         client=client,
     )
 
-    assert provider.classify_intent("Investiga example.com") == PUBLIC_EXPOSURE_ASSESSMENT
+    assert (
+        provider.classify_intent("Investiga example.com")
+        == PUBLIC_EXPOSURE_ASSESSMENT
+    )
     payload = json.loads(captured["body"])
     assert payload["model"] == "qwen3:4b-instruct"
     assert payload["stream"] is False
-    assert payload["format"] == "json"
-    assert payload["options"]["temperature"] == 0
+    assert payload["format"] == INTERPRETATION_SCHEMA
+    assert payload["think"] is False
+    assert payload["options"] == {
+        "temperature": 0.7,
+        "top_p": 0.8,
+        "top_k": 20,
+        "min_p": 0.0,
+        "seed": 42,
+    }
     assert "public_exposure_assessment" in payload["system"]
+    client.close()
+
+
+def test_ollama_intent_provider_accepts_an_independent_inference_profile():
+    captured = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["body"] = request.read()
+        return httpx.Response(
+            200,
+            json={"response": json.dumps({"intent": PUBLIC_EXPOSURE_ASSESSMENT})},
+        )
+
+    profile = OllamaInferenceProfile(
+        think=True,
+        temperature=0.2,
+        top_p=0.3,
+        top_k=7,
+        min_p=0.1,
+        seed=11,
+    )
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    provider = OllamaIntentProvider(
+        base_url="http://ollama",
+        client=client,
+        inference_profile=profile,
+    )
+
+    assert (
+        provider.classify_intent("Investiga example.com")
+        == PUBLIC_EXPOSURE_ASSESSMENT
+    )
+    payload = json.loads(captured["body"])
+    assert payload["think"] is True
+    assert payload["options"] == {
+        "temperature": 0.2,
+        "top_p": 0.3,
+        "top_k": 7,
+        "min_p": 0.1,
+        "seed": 11,
+    }
     client.close()
 
 

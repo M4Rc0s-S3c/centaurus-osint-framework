@@ -7,7 +7,14 @@ import httpx
 from centaurus.config import configured_positive_float, configured_text
 
 from centaurus.llm.exceptions import LLMProviderError, LLMResponseError
-from centaurus.llm.interpretation_prompt import INTERPRETATION_SYSTEM_PROMPT
+from centaurus.llm.inference_profile import (
+    INTERPRETATION_INFERENCE_PROFILE,
+    OllamaInferenceProfile,
+)
+from centaurus.llm.interpretation_prompt import (
+    INTERPRETATION_SCHEMA,
+    INTERPRETATION_SYSTEM_PROMPT,
+)
 from centaurus.request.structured_request import SUPPORTED_INTENTS
 
 
@@ -20,6 +27,7 @@ class OllamaIntentProvider:
         model: str | None = None,
         timeout: float | None = None,
         client: httpx.Client | None = None,
+        inference_profile: OllamaInferenceProfile | None = None,
     ) -> None:
         self._base_url = configured_text(
             base_url,
@@ -46,6 +54,9 @@ class OllamaIntentProvider:
             )
         self._client = client
         self._owns_client = client is None
+        self._inference_profile = (
+            inference_profile or INTERPRETATION_INFERENCE_PROFILE
+        )
 
     def classify_intent(self, user_input: str) -> str:
         if not isinstance(user_input, str) or not user_input.strip():
@@ -56,8 +67,9 @@ class OllamaIntentProvider:
             "system": INTERPRETATION_SYSTEM_PROMPT,
             "prompt": user_input.strip(),
             "stream": False,
-            "format": "json",
-            "options": {"temperature": 0},
+            "think": self._inference_profile.think,
+            "format": INTERPRETATION_SCHEMA,
+            "options": self._inference_profile.options(),
         }
 
         client = self._client or httpx.Client(timeout=self._timeout)
