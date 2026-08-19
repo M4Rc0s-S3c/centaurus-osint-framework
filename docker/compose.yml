@@ -7,16 +7,22 @@ services:
     container_name: centaurus-ollama
     restart: unless-stopped
 
-    # Ollama is reachable by the framework through the private Compose network.
-    # Host publication is restricted to loopback for local administration only.
-    ports:
-      - "127.0.0.1:11434:11434"
+    # R5: Ollama is an internal inference service. It has no published host
+    # port and no default route to external networks.
+    environment:
+      OLLAMA_NO_CLOUD: "1"
 
     volumes:
-      - /opt/osint-framework/runtime/ollama:/root/.ollama
+      - /opt/osint-framework/runtime/ollama:/root/.ollama:ro
+
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 512
 
     networks:
-      - centaurus-network
+      - centaurus-llm-network
 
   centaurus-core:
     # Built from the transient release bundle on the OVA.
@@ -26,6 +32,7 @@ services:
 
     environment:
       CENTAURUS_WORKSPACE: /workspace
+      HOME: /tmp/centaurus
       CENTAURUS_LOG_LEVEL: "${CENTAURUS_LOG_LEVEL:-INFO}"
       OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-http://centaurus-ollama:11434}"
       OLLAMA_MODEL: "${OLLAMA_MODEL:-qwen3:4b}"
@@ -44,12 +51,29 @@ services:
     depends_on:
       - centaurus-ollama
 
+    # R5: the Core runs as the non-root user baked into the image. The image
+    # filesystem is immutable at runtime; only /workspace and bounded /tmp are
+    # writable. All Linux capabilities are dropped and privilege escalation is
+    # disabled. init reaps child processes spawned by OSINT tools.
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,noexec,size=256m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    init: true
+
     # The default container command is the conversational CLI.
     stdin_open: true
     tty: true
 
+    # The Core is the only service with external egress. It reaches Ollama on
+    # the isolated LLM network and OSINT sources through the egress network.
     networks:
-      - centaurus-network
+      - centaurus-llm-network
+      - centaurus-egress-network
 
     # The framework is invoked on demand. Keeping it behind a profile avoids
     # pretending that the current CLI is a long-running daemon service.
@@ -57,5 +81,9 @@ services:
       - framework
 
 networks:
-  centaurus-network:
+  centaurus-llm-network:
+    driver: bridge
+    internal: true
+
+  centaurus-egress-network:
     driver: bridge
