@@ -27,6 +27,7 @@ from centaurus.persistence.filesystem.execution_failure_store import (
 
 from centaurus.planner.planner import Planner
 from centaurus.executor.executor import Executor
+from centaurus.executor.execution import ExecutionFailure, ExecutionTask
 from centaurus.plugin_manager.plugin_manager import PluginManager
 
 from centaurus.rules.rule import Rule
@@ -35,6 +36,11 @@ from centaurus.report.report_manager import ReportManager
 from centaurus.llm.llm_manager import LLMManager
 from centaurus.llm.exceptions import LLMError
 from centaurus.request import StructuredRequest
+from centaurus.observability import (
+    NullRuntimeProgressReporter,
+    RuntimeProgressReporter,
+    RuntimeProgressEvent,
+)
 
 
 logger = logging.getLogger("centaurus.core")
@@ -64,6 +70,7 @@ class Core:
         execution_failure_store: ExecutionFailureStore | None = None,
         llm_manager: LLMManager | None = None,
         rules: tuple[Rule, ...] | None = None,
+        progress_reporter: RuntimeProgressReporter | None = None,
     ) -> None:
         """
         Create a new Core instance.
@@ -91,6 +98,7 @@ class Core:
         self._execution_failure_store = execution_failure_store
         self._evidence_manager = None
         self._rules = rules if rules is not None else ()
+        self._progress_reporter = progress_reporter or NullRuntimeProgressReporter()
 
     # ==========================================================
     # Public interface
@@ -151,6 +159,7 @@ class Core:
         self._last_execution_status = None
         self._last_execution_failures = ()
 
+        self._publish_progress("Planificando Investigation")
         investigation.mark_planned()
 
         plan = self._planner.plan(
@@ -158,6 +167,9 @@ class Core:
         )
 
         investigation.mark_running()
+        self._publish_progress(
+            f"Preparando adquisición · {len(plan.tasks)} tareas"
+        )
 
         try:
 
@@ -181,20 +193,24 @@ class Core:
                 investigation.mark_failed()
                 return result
 
+            self._publish_progress("Persistiendo observaciones RAW")
             self._persist_raw_observations(
                 investigation.id,
                 result["results"],
             )
 
+            self._publish_progress("Normalizando Evidence")
             self._create_evidence_from_raw_observations(
                 result["results"],
                 investigation,
             )
 
+            self._publish_progress("Evaluando Rules")
             self._evaluate_rules(
                 investigation,
             )
 
+            self._publish_progress("Generando Report")
             if self._report_manager is None:
                 self._create_report_manager()
 
@@ -208,6 +224,7 @@ class Core:
                 self._report_store = FilesystemReportStore()
             self._report_store.persist_report(investigation.id, report)
 
+            self._publish_progress("Preparando asistencia analítica LLM")
             if self._llm_manager is None:
                 self._create_llm_manager()
             try:
@@ -223,7 +240,14 @@ class Core:
                 )
                 self._last_llm_output = None
 
+            self._publish_progress("Finalizando Investigation")
             investigation.mark_completed()
+            self._emit_progress(
+                RuntimeProgressEvent(
+                    message="Investigation completada",
+                    kind="session_completed",
+                )
+            )
 
             return result
 
@@ -321,6 +345,75 @@ class Core:
                 observation,
             )
 
+    def _publish_progress(self, message: str) -> None:
+        """Publish one Core-coordinated ephemeral runtime phase."""
+
+        self._emit_progress(RuntimeProgressEvent(message=message))
+
+    def _emit_progress(self, event: RuntimeProgressEvent) -> None:
+        """Keep presentation/observability failures outside runtime authority."""
+
+        try:
+            self._progress_reporter.publish(event)
+        except Exception:
+            self._progress_reporter = NullRuntimeProgressReporter()
+            logger.warning(
+                "runtime progress reporter failed; investigation continues",
+                exc_info=True,
+            )
+
+    def _handle_execution_progress(
+        self,
+        state: str,
+        task_index: int,
+        task_total: int,
+        task: ExecutionTask,
+        failure: ExecutionFailure | None,
+    ) -> None:
+        """Translate Executor task facts into Core-coordinated progress events."""
+
+        variant = task.parameters.get("mode")
+        if variant is not None:
+            variant = str(variant)
+
+        if state == "started":
+            event = RuntimeProgressEvent(
+                message="Adquiriendo",
+                kind="task_started",
+                task_index=task_index,
+                task_total=task_total,
+                plugin_id=task.plugin_id,
+                task_variant=variant,
+            )
+        elif state == "failed":
+            category = "execution_error"
+            if failure is not None:
+                category = getattr(
+                    failure.category,
+                    "value",
+                    str(failure.category),
+                )
+            event = RuntimeProgressEvent(
+                message="Adquiriendo",
+                kind="task_failed",
+                task_index=task_index,
+                task_total=task_total,
+                plugin_id=task.plugin_id,
+                task_variant=variant,
+                failure_category=category,
+            )
+        else:
+            event = RuntimeProgressEvent(
+                message="Adquiriendo",
+                kind="task_succeeded",
+                task_index=task_index,
+                task_total=task_total,
+                plugin_id=task.plugin_id,
+                task_variant=variant,
+            )
+
+        self._emit_progress(event)
+
     # ==========================================================
     # Internal implementation
     # ==========================================================
@@ -367,6 +460,7 @@ class Core:
 
         self._executor = Executor(
             plugin_manager=self._plugin_manager,
+            progress_callback=self._handle_execution_progress,
         )
 
     def _create_rule_engine(self) -> None:

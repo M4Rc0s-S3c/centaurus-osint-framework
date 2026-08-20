@@ -21,13 +21,14 @@ from centaurus.capabilities import (
     PUBLIC_EXPOSURE_ASSESSMENT,
 )
 from centaurus.cli.cli import CLI
+from centaurus.cli.progress import RichRuntimeProgressReporter
 from centaurus.config import RuntimeConfigurationError, RuntimeSettings
 from centaurus.core.core import Core
 from centaurus.llm import LLMManager, OllamaProvider
 from centaurus.llm.exceptions import LLMError
 from centaurus.llm.ollama_intent_provider import OllamaIntentProvider
 from centaurus.llm.request_interpreter import RequestInterpreter
-from centaurus.observability import configure_logging
+from centaurus.observability import RuntimeProgressReporter, configure_logging
 from centaurus.persistence.filesystem.evidence_store import FilesystemEvidenceStore
 from centaurus.persistence.filesystem.execution_failure_store import (
     FilesystemExecutionFailureStore,
@@ -178,6 +179,7 @@ class PromptSessionLike(Protocol):
 
 def build_runtime(
     settings: RuntimeSettings | None = None,
+    progress_reporter: RuntimeProgressReporter | None = None,
 ) -> tuple[CLI, Core]:
     """Compose the product runtime from validated external configuration."""
 
@@ -198,6 +200,7 @@ def build_runtime(
             )
         ),
         rules=DEFAULT_RULES,
+        progress_reporter=progress_reporter,
     )
     interpreter = RequestInterpreter(
         provider=OllamaIntentProvider(
@@ -206,7 +209,11 @@ def build_runtime(
             timeout=runtime.ollama_interpretation_timeout,
         )
     )
-    cli = CLI(core, request_interpreter=interpreter)
+    cli = CLI(
+        core,
+        request_interpreter=interpreter,
+        progress_reporter=progress_reporter,
+    )
 
     logger.info(
         "runtime configured workspace=%s ollama_base_url=%s ollama_model=%s "
@@ -223,7 +230,9 @@ def _build_runtime_or_exit(console: Console) -> tuple[CLI, Core]:
     """Translate invalid deployment configuration at the CLI boundary."""
 
     try:
-        return build_runtime()
+        return build_runtime(
+            progress_reporter=RichRuntimeProgressReporter(console),
+        )
     except RuntimeConfigurationError as exc:
         console.print(f"[red]CENTAURUS configuration error:[/red] {exc}")
         raise typer.Exit(code=EXIT_INTERNAL_ERROR) from exc

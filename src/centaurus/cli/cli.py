@@ -5,6 +5,17 @@ The CLI is responsible for user interaction
 and communicates with the Core framework.
 """
 
+import logging
+
+from centaurus.observability import (
+    NullRuntimeProgressReporter,
+    RuntimeProgressReporter,
+    RuntimeProgressEvent,
+)
+
+
+logger = logging.getLogger("centaurus.cli")
+
 
 class CLI:
     """
@@ -15,7 +26,12 @@ class CLI:
     with the Core.
     """
 
-    def __init__(self, core, request_interpreter=None) -> None:
+    def __init__(
+        self,
+        core,
+        request_interpreter=None,
+        progress_reporter: RuntimeProgressReporter | None = None,
+    ) -> None:
         """
         Create a new CLI instance.
 
@@ -25,6 +41,7 @@ class CLI:
 
         self._core = core
         self._request_interpreter = request_interpreter
+        self._progress_reporter = progress_reporter or NullRuntimeProgressReporter()
         self._running = False
 
     def start(self) -> None:
@@ -40,8 +57,28 @@ class CLI:
         if self._request_interpreter is None:
             raise RuntimeError("CLI request interpreter has not been configured")
 
-        request = self._request_interpreter.interpret(user_input)
-        return self._core.submit_request(request)
+        self._safe_progress("start")
+        try:
+            self._safe_progress(
+                "publish",
+                RuntimeProgressEvent(message="Interpretando la petición"),
+            )
+            request = self._request_interpreter.interpret(user_input)
+            return self._core.submit_request(request)
+        finally:
+            self._safe_progress("stop")
+
+    def _safe_progress(self, method: str, *args) -> None:
+        """Keep presentation failures from changing request/runtime semantics."""
+
+        try:
+            getattr(self._progress_reporter, method)(*args)
+        except Exception:
+            self._progress_reporter = NullRuntimeProgressReporter()
+            logger.warning(
+                "runtime progress reporter failed; request continues",
+                exc_info=True,
+            )
 
     def stop(self) -> None:
         """

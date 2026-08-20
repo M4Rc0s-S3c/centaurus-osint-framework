@@ -155,7 +155,7 @@ def test_investigate_command_forwards_natural_language_and_renders_result(monkey
         conclusion="No SPF policy was observed.",
     )
     fake_cli = FakeCLI(investigation=make_investigation(findings=(finding,)))
-    monkeypatch.setattr(cli_app, "build_runtime", lambda: (fake_cli, FakeCore()))
+    monkeypatch.setattr(cli_app, "build_runtime", lambda **kwargs: (fake_cli, FakeCore()))
 
     result = runner.invoke(
         cli_app.app,
@@ -179,7 +179,7 @@ def test_partial_execution_is_visible_but_returns_success(monkeypatch):
     )
     fake_cli = FakeCLI()
     fake_core = FakeCore(execution_status="partial", failures=(failure,))
-    monkeypatch.setattr(cli_app, "build_runtime", lambda: (fake_cli, fake_core))
+    monkeypatch.setattr(cli_app, "build_runtime", lambda **kwargs: (fake_cli, fake_core))
 
     result = runner.invoke(cli_app.app, ["investigate", "Investiga", "example.com"])
 
@@ -202,7 +202,7 @@ def test_failed_investigation_returns_operational_failure_code(monkeypatch):
         failures=(failure,),
         presentation=None,
     )
-    monkeypatch.setattr(cli_app, "build_runtime", lambda: (fake_cli, fake_core))
+    monkeypatch.setattr(cli_app, "build_runtime", lambda **kwargs: (fake_cli, fake_core))
 
     result = runner.invoke(cli_app.app, ["investigate", "Investiga", "example.com"])
 
@@ -213,7 +213,7 @@ def test_failed_investigation_returns_operational_failure_code(monkeypatch):
 
 def test_invalid_request_returns_usage_code(monkeypatch):
     fake_cli = FakeCLI(error=ValueError("unable to detect a supported target"))
-    monkeypatch.setattr(cli_app, "build_runtime", lambda: (fake_cli, FakeCore()))
+    monkeypatch.setattr(cli_app, "build_runtime", lambda **kwargs: (fake_cli, FakeCore()))
 
     result = runner.invoke(cli_app.app, ["investigate", "investiga", "esto"])
 
@@ -223,7 +223,7 @@ def test_invalid_request_returns_usage_code(monkeypatch):
 
 def test_llm_interpretation_failure_returns_operational_failure_code(monkeypatch):
     fake_cli = FakeCLI(error=LLMProviderError("Ollama unavailable"))
-    monkeypatch.setattr(cli_app, "build_runtime", lambda: (fake_cli, FakeCore()))
+    monkeypatch.setattr(cli_app, "build_runtime", lambda **kwargs: (fake_cli, FakeCore()))
 
     result = runner.invoke(cli_app.app, ["investigate", "Investiga", "example.com"])
 
@@ -233,7 +233,7 @@ def test_llm_interpretation_failure_returns_operational_failure_code(monkeypatch
 
 def test_unexpected_error_returns_internal_error_code(monkeypatch):
     fake_cli = FakeCLI(error=RuntimeError("unexpected runtime failure"))
-    monkeypatch.setattr(cli_app, "build_runtime", lambda: (fake_cli, FakeCore()))
+    monkeypatch.setattr(cli_app, "build_runtime", lambda **kwargs: (fake_cli, FakeCore()))
 
     result = runner.invoke(cli_app.app, ["investigate", "Investiga", "example.com"])
 
@@ -318,7 +318,7 @@ def test_build_runtime_injects_validated_workspace_and_creates_operational_log(t
 
 
 def test_invalid_runtime_configuration_is_visible_at_command_boundary(monkeypatch):
-    def invalid_runtime():
+    def invalid_runtime(**kwargs):
         raise cli_app.RuntimeConfigurationError("OLLAMA_TIMEOUT must be greater than zero")
 
     monkeypatch.setattr(cli_app, "build_runtime", invalid_runtime)
