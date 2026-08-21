@@ -13,7 +13,8 @@ def serialize_report(report: Report) -> str:
 
     # Deliberate allowlist: Report provenance such as analyst_question,
     # generated_at, Target and Intent is not part of the LLM #2 prompt.
-    # LLM #2 remains grounded only in the established Finding/Evidence view.
+    # Evidence payload data is also excluded: LLM #2 receives only the
+    # deterministic Finding/Rule view plus minimal Evidence provenance.
     payload = {
         "investigation_id": report.investigation_id,
         "findings": [
@@ -28,7 +29,6 @@ def serialize_report(report: Report) -> str:
                 "evidence": [
                     {
                         "source": evidence.source.value,
-                        "data": evidence.data,
                         "collected_at": evidence.collected_at.isoformat(),
                     }
                     for evidence in finding.evidences

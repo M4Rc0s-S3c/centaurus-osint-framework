@@ -57,6 +57,10 @@ class OllamaProvider:
             "model": self._model,
             "system": SYSTEM_PROMPT,
             "prompt": serialize_report(report),
+            # LLM #2 is the final model use in an Investigation. Release the
+            # heavy model resource immediately after this request instead of
+            # retaining it under Ollama's default keep-alive policy.
+            "keep_alive": 0,
             "stream": False,
             "think": self._inference_profile.think,
             "format": PRESENTATION_SCHEMA,

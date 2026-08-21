@@ -178,6 +178,20 @@ def test_investigation_valid_lifecycle() -> None:
     )
 
 
+def test_investigation_can_fail_from_planned() -> None:
+    """A structural planning failure can terminate a PLANNED Investigation."""
+
+    investigation = Investigation(
+        target="example.com",
+        intent="public_exposure_assessment",
+    )
+
+    investigation.mark_planned()
+    investigation.mark_failed()
+
+    assert investigation.status is InvestigationStatus.FAILED
+
+
 def test_investigation_can_fail_from_running() -> None:
     """
     Investigation can transition from RUNNING to FAILED.

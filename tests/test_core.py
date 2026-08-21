@@ -31,12 +31,16 @@ class FakePlanner:
     Test double for the Planner component.
     """
 
-    def __init__(self, plan: ExecutionPlan) -> None:
-        """
-        Create a fake Planner with a predefined plan.
-        """
+    def __init__(
+        self,
+        plan: ExecutionPlan,
+        *,
+        bind_investigation_id: bool = True,
+    ) -> None:
+        """Create a fake Planner with a predefined plan."""
 
         self._plan = plan
+        self._bind_investigation_id = bind_investigation_id
         self.received_investigations = []
 
     def plan(
@@ -50,6 +54,8 @@ class FakePlanner:
         self.received_investigations.append(
             investigation,
         )
+        if self._bind_investigation_id:
+            self._plan.investigation_id = investigation.id
 
         return self._plan
 
@@ -659,6 +665,102 @@ def test_core_marks_investigation_completed():
         investigation.status
         == InvestigationStatus.COMPLETED
     )
+
+
+def test_core_marks_planned_investigation_failed_when_planner_raises(monkeypatch):
+    """Planner failures are fail-fast and leave the aggregate in FAILED."""
+
+    planner_error = RuntimeError("planning failed")
+
+    def fail_plan(self, investigation):
+        raise planner_error
+
+    monkeypatch.setattr(
+        "centaurus.planner.planner.Planner.plan",
+        fail_plan,
+    )
+
+    core = Core()
+    investigation = Investigation(
+        target="example.com",
+        intent="public_exposure_assessment",
+    )
+
+    with pytest.raises(RuntimeError, match="planning failed") as exc_info:
+        core.run_investigation(investigation)
+
+    assert exc_info.value is planner_error
+    assert investigation.status is InvestigationStatus.FAILED
+
+
+def test_core_rejects_non_execution_plan_before_running(monkeypatch):
+    """Core validates the Planner contract before entering RUNNING."""
+
+    monkeypatch.setattr(
+        "centaurus.planner.planner.Planner.plan",
+        lambda self, investigation: {
+            "investigation_id": investigation.id,
+            "tasks": [],
+        },
+    )
+
+    core = Core()
+    investigation = Investigation(
+        target="example.com",
+        intent="public_exposure_assessment",
+    )
+
+    with pytest.raises(TypeError, match="ExecutionPlan"):
+        core.run_investigation(investigation)
+
+    assert investigation.status is InvestigationStatus.FAILED
+
+
+def test_core_rejects_execution_plan_for_different_investigation(monkeypatch):
+    """A Planner cannot cross-wire one Investigation with another plan."""
+
+    monkeypatch.setattr(
+        "centaurus.planner.planner.Planner.plan",
+        lambda self, investigation: ExecutionPlan(
+            investigation_id="different-investigation"
+        ),
+    )
+
+    core = Core()
+    investigation = Investigation(
+        target="example.com",
+        intent="public_exposure_assessment",
+    )
+
+    with pytest.raises(ValueError, match="different Investigation"):
+        core.run_investigation(investigation)
+
+    assert investigation.status is InvestigationStatus.FAILED
+
+
+def test_core_rejects_execution_plan_with_non_task_entries(monkeypatch):
+    """Only ExecutionTask instances may cross the Planner/Executor boundary."""
+
+    def build_invalid_plan(self, investigation):
+        plan = ExecutionPlan(investigation_id=investigation.id)
+        plan.tasks.append({"plugin_id": "whois"})
+        return plan
+
+    monkeypatch.setattr(
+        "centaurus.planner.planner.Planner.plan",
+        build_invalid_plan,
+    )
+
+    core = Core()
+    investigation = Investigation(
+        target="example.com",
+        intent="public_exposure_assessment",
+    )
+
+    with pytest.raises(TypeError, match="ExecutionTask"):
+        core.run_investigation(investigation)
+
+    assert investigation.status is InvestigationStatus.FAILED
 
 
 def test_core_marks_investigation_failed():

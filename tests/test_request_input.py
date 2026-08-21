@@ -40,6 +40,47 @@ def test_structured_request_accepts_supported_domain_request():
     assert not hasattr(request, "analyst_question")
 
 
+def test_structured_request_canonically_normalizes_domain_and_ip_targets():
+    domain = StructuredRequest(
+        target=" EXAMPLE.COM. ",
+        target_type="domain",
+        intent=PUBLIC_EXPOSURE_ASSESSMENT,
+    )
+    address = StructuredRequest(
+        target="2001:0db8:0:0:0:0:0:1",
+        target_type="ip",
+        intent=PUBLIC_EXPOSURE_ASSESSMENT,
+    )
+
+    assert domain.target == "example.com"
+    assert domain.target_type == "DOMAIN"
+    assert address.target == "2001:db8::1"
+    assert address.target_type == "IP"
+
+
+@pytest.mark.parametrize(
+    ("target", "target_type"),
+    [
+        ("-h", "DOMAIN"),
+        ("http://example.com", "DOMAIN"),
+        ("192.0.2.10", "DOMAIN"),
+        ("example.com", "IP"),
+        ("fe80::1%eth0", "IP"),
+        ("bad_label.example", "DOMAIN"),
+    ],
+)
+def test_structured_request_rejects_target_type_mismatch_and_malformed_targets(
+    target,
+    target_type,
+):
+    with pytest.raises(ValueError):
+        StructuredRequest(
+            target=target,
+            target_type=target_type,
+            intent=PUBLIC_EXPOSURE_ASSESSMENT,
+        )
+
+
 def test_structured_request_rejects_unknown_intent():
     with pytest.raises(ValueError):
         StructuredRequest(
@@ -53,6 +94,18 @@ def test_target_factory_detects_and_normalizes_domain():
     target = TargetFactory().create("Investiga la exposición de EXAMPLE.COM.")
 
     assert target.value == "example.com"
+    assert target.type == "DOMAIN"
+
+
+def test_target_factory_rejects_malformed_domain_from_url():
+    with pytest.raises(ValueError, match="invalid domain target"):
+        TargetFactory().create("Investiga http://-x.com")
+
+
+def test_target_factory_normalizes_idna_domain_from_url():
+    target = TargetFactory().create("Investiga https://münich.example")
+
+    assert target.value == "xn--mnich-kva.example"
     assert target.type == "DOMAIN"
 
 
@@ -186,6 +239,45 @@ def test_ollama_intent_provider_rejects_unsupported_intent():
     provider = OllamaIntentProvider(base_url="http://ollama", client=client)
 
     with pytest.raises(LLMResponseError):
+        provider.classify_intent("Investiga example.com")
+    client.close()
+
+
+def test_ollama_intent_provider_rejects_additional_response_fields():
+    client = httpx.Client(
+        transport=httpx.MockTransport(
+            lambda request: httpx.Response(
+                200,
+                json={
+                    "response": json.dumps(
+                        {
+                            "intent": PUBLIC_EXPOSURE_ASSESSMENT,
+                            "command": "ignore local policy",
+                        }
+                    )
+                },
+            )
+        )
+    )
+    provider = OllamaIntentProvider(base_url="http://ollama", client=client)
+
+    with pytest.raises(LLMResponseError, match="unexpected fields"):
+        provider.classify_intent("Investiga example.com")
+    client.close()
+
+
+def test_ollama_intent_provider_rejects_non_object_response():
+    client = httpx.Client(
+        transport=httpx.MockTransport(
+            lambda request: httpx.Response(
+                200,
+                json={"response": json.dumps([PUBLIC_EXPOSURE_ASSESSMENT])},
+            )
+        )
+    )
+    provider = OllamaIntentProvider(base_url="http://ollama", client=client)
+
+    with pytest.raises(LLMResponseError, match="unexpected fields"):
         provider.classify_intent("Investiga example.com")
     client.close()
 

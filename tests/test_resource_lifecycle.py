@@ -6,6 +6,7 @@ from types import SimpleNamespace
 
 from centaurus.evidence import EvidenceSource, RawObservation
 from centaurus.executor.execution import ExecutionTask
+from centaurus.llm.ollama_intent_provider import OllamaIntentProvider
 from centaurus.llm.ollama_provider import OllamaProvider
 from centaurus.persistence.filesystem import (
     FilesystemEvidenceStore,
@@ -79,6 +80,54 @@ def test_plugin_manager_loads_plugin_only_when_task_is_executed(monkeypatch):
     assert result.data == {"domain": "example.com"}
 
 
+def test_owned_intent_http_client_is_created_lazily_and_closed(monkeypatch):
+    """LLM #1 transport is acquired per request and released afterwards."""
+
+    events = []
+
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {
+                "response": json.dumps(
+                    {"intent": "public_exposure_assessment"}
+                )
+            }
+
+    class FakeClient:
+        def __init__(self, *, timeout):
+            events.append(("created", timeout))
+
+        def post(self, url, json):
+            events.append(("post", url))
+            return FakeResponse()
+
+        def close(self):
+            events.append(("closed", None))
+
+    monkeypatch.setattr(
+        "centaurus.llm.ollama_intent_provider.httpx.Client",
+        FakeClient,
+    )
+
+    provider = OllamaIntentProvider(
+        base_url="http://ollama",
+        timeout=9,
+    )
+
+    assert events == []
+    assert provider.classify_intent("Investiga example.com") == (
+        "public_exposure_assessment"
+    )
+    assert events == [
+        ("created", 9),
+        ("post", "http://ollama/api/generate"),
+        ("closed", None),
+    ]
+
+
 def test_owned_ollama_http_client_is_created_lazily_and_closed(monkeypatch):
     """Ollama transport exists only for the duration of an owned request."""
 
@@ -108,7 +157,7 @@ def test_owned_ollama_http_client_is_created_lazily_and_closed(monkeypatch):
             events.append(("created", timeout))
 
         def post(self, url, json):
-            events.append(("post", url))
+            events.append(("post", url, json.get("keep_alive")))
             return FakeResponse()
 
         def close(self):
@@ -141,7 +190,7 @@ def test_owned_ollama_http_client_is_created_lazily_and_closed(monkeypatch):
 
     assert events == [
         ("created", 12),
-        ("post", "http://ollama/api/generate"),
+        ("post", "http://ollama/api/generate", 0),
         ("closed", None),
     ]
 

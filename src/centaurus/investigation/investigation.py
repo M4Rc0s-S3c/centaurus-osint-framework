@@ -171,11 +171,19 @@ class Investigation:
         )
 
     def mark_failed(self) -> None:
+        """Fail an Investigation from a controlled pre-terminal runtime state."""
 
-        self._change_status(
-            expected=InvestigationStatus.RUNNING,
-            new=InvestigationStatus.FAILED,
-        )
+        if self.status not in {
+            InvestigationStatus.PLANNED,
+            InvestigationStatus.RUNNING,
+        }:
+            raise InvalidInvestigationState(
+                f"Cannot transition from "
+                f"{self.status.value!r} "
+                f"to {InvestigationStatus.FAILED.value!r}."
+            )
+
+        self.status = InvestigationStatus.FAILED
 
     # ==========================================================
     # Internal helpers

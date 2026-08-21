@@ -27,7 +27,11 @@ from centaurus.persistence.filesystem.execution_failure_store import (
 
 from centaurus.planner.planner import Planner
 from centaurus.executor.executor import Executor
-from centaurus.executor.execution import ExecutionFailure, ExecutionTask
+from centaurus.executor.execution import (
+    ExecutionFailure,
+    ExecutionPlan,
+    ExecutionTask,
+)
 from centaurus.plugin_manager.plugin_manager import PluginManager
 
 from centaurus.rules.rule import Rule
@@ -177,16 +181,19 @@ class Core:
         self._publish_progress("Planificando Investigation")
         investigation.mark_planned()
 
-        plan = self._planner.plan(
-            investigation,
-        )
-
-        investigation.mark_running()
-        self._publish_progress(
-            f"Preparando adquisición · {len(plan.tasks)} tareas"
-        )
-
         try:
+            plan = self._planner.plan(
+                investigation,
+            )
+            self._validate_execution_plan(
+                plan,
+                investigation,
+            )
+
+            investigation.mark_running()
+            self._publish_progress(
+                f"Preparando adquisición · {len(plan.tasks)} tareas"
+            )
 
             result = self._executor.execute(plan)
 
@@ -272,6 +279,24 @@ class Core:
             investigation.mark_failed()
 
             raise
+
+    @staticmethod
+    def _validate_execution_plan(
+        plan: ExecutionPlan,
+        investigation: Investigation,
+    ) -> None:
+        """Validate Planner output before entering RUNNING execution."""
+
+        if not isinstance(plan, ExecutionPlan):
+            raise TypeError("Planner must return an ExecutionPlan")
+        if plan.investigation_id != investigation.id:
+            raise ValueError(
+                "ExecutionPlan belongs to a different Investigation"
+            )
+        if not all(isinstance(task, ExecutionTask) for task in plan.tasks):
+            raise TypeError(
+                "ExecutionPlan tasks must contain only ExecutionTask instances"
+            )
 
     @staticmethod
     def _validate_analyst_question(

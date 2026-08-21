@@ -91,7 +91,12 @@ class OllamaIntentProvider:
         except (ValueError, TypeError) as exc:
             raise LLMResponseError("Ollama returned an invalid interpretation") from exc
 
-        intent = parsed.get("intent") if isinstance(parsed, dict) else None
+        if not isinstance(parsed, dict) or set(parsed) != {"intent"}:
+            raise LLMResponseError(
+                "Ollama interpretation response has unexpected fields"
+            )
+
+        intent = parsed["intent"]
         if intent not in SUPPORTED_INTENTS:
             raise LLMResponseError("Ollama returned an unsupported Intent")
 
