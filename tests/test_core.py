@@ -899,14 +899,41 @@ def test_core_submit_request_creates_and_executes_investigation():
         intent=PUBLIC_EXPOSURE_ASSESSMENT,
     )
 
-    investigation = core.submit_request(request)
+    investigation = core.submit_request(
+        request,
+        analyst_question="Investiga la exposición pública de example.com",
+    )
 
     assert isinstance(investigation, Investigation)
     assert investigation.target == "example.com"
     assert investigation.target_type == "DOMAIN"
     assert investigation.intent == PUBLIC_EXPOSURE_ASSESSMENT
     assert investigation.status is InvestigationStatus.COMPLETED
+    assert investigation.report is not None
+    assert investigation.report.target == "example.com"
+    assert investigation.report.target_type == "DOMAIN"
+    assert investigation.report.intent == PUBLIC_EXPOSURE_ASSESSMENT
+    assert (
+        investigation.report.analyst_question
+        == "Investiga la exposición pública de example.com"
+    )
     assert planner.received_investigations == [investigation]
+
+
+def test_core_rejects_blank_analyst_question_before_runtime():
+    from centaurus.request import PUBLIC_EXPOSURE_ASSESSMENT, StructuredRequest
+
+    core = Core()
+    request = StructuredRequest(
+        target="example.com",
+        target_type="DOMAIN",
+        intent=PUBLIC_EXPOSURE_ASSESSMENT,
+    )
+
+    with pytest.raises(ValueError, match="analyst_question"):
+        core.submit_request(request, analyst_question="   ")
+
+    assert core._initialized is False
 
 
 def test_core_submit_request_rejects_unstructured_input():

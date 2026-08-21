@@ -61,8 +61,8 @@ def test_cli_submit_interprets_and_forwards_structured_request():
         def __init__(self):
             self.received = []
 
-        def submit_request(self, request):
-            self.received.append(request)
+        def submit_request(self, request, *, analyst_question=None):
+            self.received.append((request, analyst_question))
             return "investigation"
 
     core = FakeCore()
@@ -73,7 +73,9 @@ def test_cli_submit_interprets_and_forwards_structured_request():
 
     assert result == "investigation"
     assert interpreter.received == ["Investiga example.com"]
-    assert core.received == [expected_request]
+    assert core.received == [
+        (expected_request, "Investiga example.com"),
+    ]
 
 
 def test_cli_submit_requires_configured_interpreter():

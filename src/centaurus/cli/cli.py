@@ -64,7 +64,10 @@ class CLI:
                 RuntimeProgressEvent(message="Interpretando la petición"),
             )
             request = self._request_interpreter.interpret(user_input)
-            return self._core.submit_request(request)
+            return self._core.submit_request(
+                request,
+                analyst_question=user_input.strip(),
+            )
         finally:
             self._safe_progress("stop")
 

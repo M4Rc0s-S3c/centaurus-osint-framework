@@ -40,6 +40,23 @@ def make_finding(evidence: Evidence) -> Finding:
     )
 
 
+def make_report(
+    investigation: Investigation,
+    findings: tuple[Finding, ...] = (),
+    *,
+    analyst_question: str | None = None,
+) -> Report:
+    return Report(
+        investigation_id=investigation.id,
+        generated_at=datetime(2026, 8, 20, 12, 30, tzinfo=timezone.utc),
+        target=investigation.target,
+        target_type=investigation.target_type,
+        intent=investigation.intent,
+        findings=findings,
+        analyst_question=analyst_question,
+    )
+
+
 def test_evidence_store_defines_contract() -> None:
     assert hasattr(EvidenceStore, "persist_evidence")
     assert hasattr(FilesystemEvidenceStore, "persist_evidence")
@@ -71,7 +88,11 @@ def test_report_store_persists_report_and_findings(tmp_path) -> None:
     finding = make_finding(evidence)
     investigation = Investigation(target="example.org", intent="public_exposure_assessment")
     investigation.add_finding(finding)
-    report = Report(investigation_id=investigation.id, findings=(finding,))
+    report = make_report(
+        investigation,
+        (finding,),
+        analyst_question="Investiga la exposición pública de example.org",
+    )
 
     path = FilesystemReportStore(tmp_path).persist_report(investigation.id, report)
     reports_dir = tmp_path / "investigations" / investigation.id / "reports"
@@ -82,12 +103,23 @@ def test_report_store_persists_report_and_findings(tmp_path) -> None:
 
     payload = json.loads(path.read_text(encoding="utf-8"))
     assert payload["investigation_id"] == investigation.id
+    assert payload["generated_at"] == "2026-08-20T12:30:00+00:00"
+    assert payload["target"] == "example.org"
+    assert payload["target_type"] == "DOMAIN"
+    assert payload["intent"] == "public_exposure_assessment"
+    assert payload["analyst_question"] == "Investiga la exposición pública de example.org"
+    assert payload["findings"][0]["finding_ref"] == "F-001"
     assert payload["findings"][0]["rule"]["id"] == "RL-TEST-001"
     assert payload["findings"][0]["evidences"][0]["data"]["domain_name"] == "example.org"
 
     markdown = markdown_path.read_text(encoding="utf-8")
+    assert markdown.startswith("# CENTAURUS OSINT Investigation Report\n")
+    assert "**Report generated:** `2026-08-20T12:30:00Z`" in markdown
+    assert "**Target:** `DOMAIN:example.org`" in markdown
+    assert "**Intent:** `public_exposure_assessment`" in markdown
+    assert "> Investiga la exposición pública de example.org" in markdown
     assert "**Authoritative artifact:** `report.json`" in markdown
-    assert "### Finding 1 — `RL-TEST-001`" in markdown
+    assert "### F-001 — `RL-TEST-001` · `test_rule`" in markdown
     assert "Registrar information is missing." in markdown
     assert "##### Evidence 1 — `whois`" in markdown
     assert '    "domain_name": "example.org"' in markdown
@@ -95,7 +127,7 @@ def test_report_store_persists_report_and_findings(tmp_path) -> None:
 
 def test_report_store_rejects_second_report(tmp_path) -> None:
     investigation = Investigation(target="example.org", intent="public_exposure_assessment")
-    report = Report(investigation_id=investigation.id, findings=())
+    report = make_report(investigation)
     store = FilesystemReportStore(tmp_path)
     store.persist_report(investigation.id, report)
     with pytest.raises(FileExistsError):
@@ -104,7 +136,7 @@ def test_report_store_rejects_second_report(tmp_path) -> None:
 
 def test_report_store_rejects_orphan_markdown_artifact(tmp_path) -> None:
     investigation = Investigation(target="example.org", intent="public_exposure_assessment")
-    report = Report(investigation_id=investigation.id, findings=())
+    report = make_report(investigation)
     reports_dir = tmp_path / "investigations" / investigation.id / "reports"
     reports_dir.mkdir(parents=True)
     (reports_dir / "report.md").write_text("orphan", encoding="utf-8")
@@ -115,7 +147,7 @@ def test_report_store_rejects_orphan_markdown_artifact(tmp_path) -> None:
 
 def test_report_store_rolls_back_json_if_markdown_write_fails(tmp_path, monkeypatch) -> None:
     investigation = Investigation(target="example.org", intent="public_exposure_assessment")
-    report = Report(investigation_id=investigation.id, findings=())
+    report = make_report(investigation)
     store = FilesystemReportStore(tmp_path)
     original = FilesystemReportStore._persist_exclusive
     calls = 0
@@ -144,7 +176,7 @@ def test_report_store_rolls_back_json_if_markdown_write_fails(tmp_path, monkeypa
 def test_report_store_rejects_other_investigation(tmp_path) -> None:
     investigation = Investigation(target="example.org", intent="public_exposure_assessment")
     other = Investigation(target="example.net", intent="public_exposure_assessment")
-    report = Report(investigation_id=other.id, findings=())
+    report = make_report(other)
     with pytest.raises(ValueError):
         FilesystemReportStore(tmp_path).persist_report(investigation.id, report)
 

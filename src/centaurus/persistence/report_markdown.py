@@ -33,6 +33,18 @@ def _indented_json(value: Any) -> list[str]:
     return [f"    {line}" for line in encoded.splitlines()]
 
 
+def _blockquote(value: str) -> list[str]:
+    """Render untrusted analyst text as a Markdown blockquote."""
+
+    return [f"> {line}" if line else ">" for line in value.splitlines()]
+
+
+def _utc_iso(value) -> str:
+    """Render a UTC datetime using an explicit ``Z`` suffix."""
+
+    return value.isoformat().replace("+00:00", "Z")
+
+
 def render_report_markdown(report: Report) -> str:
     """Project a domain Report into deterministic analyst-facing Markdown.
 
@@ -45,16 +57,42 @@ def render_report_markdown(report: Report) -> str:
         raise TypeError("report must be a Report instance")
 
     lines = [
-        "# CENTAURUS Report",
+        "# CENTAURUS OSINT Investigation Report",
+        "",
+        "## Investigation context",
         "",
         f"- **Investigation ID:** `{report.investigation_id}`",
-        "- **Authoritative artifact:** `report.json`",
-        "- **Markdown role:** deterministic projection of the persisted Report",
+        f"- **Report generated:** `{_utc_iso(report.generated_at)}`",
+        f"- **Target:** `{report.target_type}:{report.target}`",
+        f"- **Intent:** `{report.intent}`",
         f"- **Findings:** {len(report.findings)}",
         "",
-        "## Findings",
+        "## Analyst question",
         "",
     ]
+
+    if report.analyst_question is None:
+        lines.extend(
+            [
+                "No analyst question was recorded for this Report.",
+                "",
+            ]
+        )
+    else:
+        lines.extend(_blockquote(report.analyst_question))
+        lines.append("")
+
+    lines.extend(
+        [
+            "## Report provenance",
+            "",
+            "- **Authoritative artifact:** `report.json`",
+            "- **Markdown role:** deterministic projection of the persisted Report",
+            "",
+            "## Findings",
+            "",
+        ]
+    )
 
     if not report.findings:
         lines.extend(
@@ -67,14 +105,16 @@ def render_report_markdown(report: Report) -> str:
 
     for index, finding in enumerate(report.findings, start=1):
         rule = finding.rule
+        finding_ref = f"F-{index:03d}"
         lines.extend(
             [
-                f"### Finding {index} — `{rule.id}`",
+                f"### {finding_ref} — `{rule.id}` · `{rule.name}`",
                 "",
-                f"**Conclusion:** {finding.conclusion}",
+                "#### Conclusion",
+                "",
+                finding.conclusion,
                 "",
                 f"- **Rule version:** `{rule.version}`",
-                f"- **Rule name:** `{rule.name}`",
                 f"- **Category:** `{rule.category}`",
                 f"- **Description:** {rule.description}",
                 f"- **Supporting Evidence:** {len(finding.evidences)}",

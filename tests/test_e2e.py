@@ -330,6 +330,14 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
 
     assert investigation.report is not None
     assert investigation.report.findings == investigation.findings
+    assert investigation.report.target == "example.com"
+    assert investigation.report.target_type == "DOMAIN"
+    assert investigation.report.intent == PUBLIC_EXPOSURE_ASSESSMENT
+    assert (
+        investigation.report.analyst_question
+        == "Analiza la exposición pública de example.com"
+    )
+    assert investigation.report.generated_at.tzinfo is not None
     assert report_provider.reports == [investigation.report]
     assert core.last_llm_output == "Registration findings presented for the analyst."
 
@@ -346,10 +354,26 @@ def test_complete_catalog_multitool_flow_from_cli_to_persisted_report_and_llm_pr
     assert len(report_files) == 1
     assert len(markdown_files) == 1
 
+    persisted_report = json.loads(report_files[0].read_text(encoding="utf-8"))
+    assert persisted_report["target"] == "example.com"
+    assert persisted_report["target_type"] == "DOMAIN"
+    assert persisted_report["intent"] == PUBLIC_EXPOSURE_ASSESSMENT
+    assert (
+        persisted_report["analyst_question"]
+        == "Analiza la exposición pública de example.com"
+    )
+    assert persisted_report["generated_at"].endswith("+00:00")
+    assert persisted_report["findings"][10]["finding_ref"] == "F-011"
+    assert persisted_report["findings"][11]["finding_ref"] == "F-012"
+
     markdown_report = markdown_files[0].read_text(encoding="utf-8")
+    assert markdown_report.startswith("# CENTAURUS OSINT Investigation Report\n")
+    assert "**Target:** `DOMAIN:example.com`" in markdown_report
+    assert "**Intent:** `public_exposure_assessment`" in markdown_report
+    assert "> Analiza la exposición pública de example.com" in markdown_report
     assert "**Authoritative artifact:** `report.json`" in markdown_report
-    assert "### Finding 11 — `RL-014`" in markdown_report
-    assert "### Finding 12 — `RL-014`" in markdown_report
+    assert "### F-011 — `RL-014`" in markdown_report
+    assert "### F-012 — `RL-014`" in markdown_report
     assert "`sublist3r`" in markdown_report
     assert "`crtsh`" in markdown_report
     assert "`theharvester`" in markdown_report

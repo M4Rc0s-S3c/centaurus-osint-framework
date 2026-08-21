@@ -127,7 +127,14 @@ def test_owned_ollama_http_client_is_created_lazily_and_closed(monkeypatch):
     assert events == []
 
     rendered = provider.generate(
-        Report(investigation_id="inv-resource", findings=()),
+        Report(
+            investigation_id="inv-resource",
+            generated_at=datetime(2026, 8, 20, 12, 30, tzinfo=timezone.utc),
+            target="example.org",
+            target_type="DOMAIN",
+            intent="public_exposure_assessment",
+            findings=(),
+        ),
     )
 
     assert "Analyst-assistance view" in rendered

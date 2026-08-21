@@ -124,23 +124,36 @@ class Core:
     def submit_request(
         self,
         request: StructuredRequest,
+        *,
+        analyst_question: str | None = None,
     ) -> Investigation:
-        """Create and execute an Investigation from a validated request."""
+        """Create and execute an Investigation from a validated request.
+
+        ``analyst_question`` is optional request provenance for the final Report.
+        It does not participate in Target/Intent semantics, planning or Rules.
+        """
 
         if not isinstance(request, StructuredRequest):
             raise TypeError("request must be a StructuredRequest instance")
+
+        analyst_question = self._validate_analyst_question(analyst_question)
 
         investigation = Investigation(
             target=request.target,
             target_type=request.target_type,
             intent=request.intent,
         )
-        self.run_investigation(investigation)
+        self.run_investigation(
+            investigation,
+            analyst_question=analyst_question,
+        )
         return investigation
 
     def run_investigation(
         self,
         investigation: Investigation,
+        *,
+        analyst_question: str | None = None,
     ):
         """
         Coordinate the execution of an investigation.
@@ -151,6 +164,8 @@ class Core:
         The Core governs the Investigation aggregate, driving its
         lifecycle through the different execution stages.
         """
+
+        analyst_question = self._validate_analyst_question(analyst_question)
 
         if not self._initialized:
             self.initialize()
@@ -217,6 +232,7 @@ class Core:
             report = self._report_manager.generate(
                 investigation=investigation,
                 findings=investigation.findings,
+                analyst_question=analyst_question,
             )
             investigation.add_report(report)
 
@@ -257,6 +273,21 @@ class Core:
 
             raise
 
+    @staticmethod
+    def _validate_analyst_question(
+        analyst_question: str | None,
+    ) -> str | None:
+        """Validate optional request provenance without interpreting it."""
+
+        if analyst_question is None:
+            return None
+        if not isinstance(analyst_question, str):
+            raise TypeError("analyst_question must be a string or None")
+
+        normalized = analyst_question.strip()
+        if not normalized:
+            raise ValueError("analyst_question must be non-empty when supplied")
+        return normalized
 
     def _create_evidence_from_raw_observations(
         self,

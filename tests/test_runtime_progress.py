@@ -62,8 +62,8 @@ class FakeCore:
     def __init__(self) -> None:
         self.received = []
 
-    def submit_request(self, request):
-        self.received.append(request)
+    def submit_request(self, request, *, analyst_question=None):
+        self.received.append((request, analyst_question))
         return "investigation"
 
 
@@ -93,7 +93,7 @@ def test_cli_owns_progress_session_around_pre_core_interpretation():
     assert reporter.started == 1
     assert reporter.stopped == 1
     assert reporter.events[0].message == "Interpretando la petición"
-    assert core.received == [request]
+    assert core.received == [(request, "Investiga example.com")]
 
 
 def test_executor_returns_task_lifecycle_facts_through_callback():
@@ -351,7 +351,7 @@ def test_progress_presentation_failure_does_not_block_cli_submission():
     result = cli.submit("Investiga example.com")
 
     assert result == "investigation"
-    assert core.received == [request]
+    assert core.received == [(request, "Investiga example.com")]
 
 
 def test_progress_presentation_failure_does_not_change_core_runtime(monkeypatch):

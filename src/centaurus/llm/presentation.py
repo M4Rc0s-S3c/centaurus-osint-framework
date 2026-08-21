@@ -310,6 +310,9 @@ def render_analyst_presentation(
     }
 
     lines = [
+        "Analyst question — deterministic request provenance",
+        report.analyst_question or "No analyst question was recorded for this Report.",
+        "",
         "Analyst-assistance view — ephemeral and non-authoritative",
         "",
         "Executive summary",

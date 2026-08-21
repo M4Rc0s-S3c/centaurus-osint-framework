@@ -51,7 +51,18 @@ class FilesystemReportStore(ReportStore):
 
         payload = {
             "investigation_id": report.investigation_id,
-            "findings": [finding_payload(finding) for finding in report.findings],
+            "generated_at": report.generated_at,
+            "target": report.target,
+            "target_type": report.target_type,
+            "intent": report.intent,
+            "analyst_question": report.analyst_question,
+            "findings": [
+                {
+                    "finding_ref": f"F-{index:03d}",
+                    **finding_payload(finding),
+                }
+                for index, finding in enumerate(report.findings, start=1)
+            ],
         }
         json_encoded = (
             json.dumps(

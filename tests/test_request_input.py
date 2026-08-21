@@ -37,6 +37,7 @@ def test_structured_request_accepts_supported_domain_request():
     assert request.target == "example.com"
     assert request.target_type == "DOMAIN"
     assert request.intent == PUBLIC_EXPOSURE_ASSESSMENT
+    assert not hasattr(request, "analyst_question")
 
 
 def test_structured_request_rejects_unknown_intent():
@@ -256,4 +257,11 @@ def test_cli_to_core_input_flow_creates_completed_investigation():
     assert investigation.intent == PUBLIC_EXPOSURE_ASSESSMENT
     assert investigation.status is InvestigationStatus.COMPLETED
     assert investigation.report is not None
+    assert (
+        investigation.report.analyst_question
+        == "Evalúa la exposición pública de Example.COM"
+    )
+    assert investigation.report.target == "example.com"
+    assert investigation.report.target_type == "DOMAIN"
+    assert investigation.report.intent == PUBLIC_EXPOSURE_ASSESSMENT
     assert core.last_llm_output == "presentation"

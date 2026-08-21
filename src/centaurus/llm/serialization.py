@@ -11,6 +11,9 @@ def serialize_report(report: Report) -> str:
     if not isinstance(report, Report):
         raise TypeError("report must be a Report instance")
 
+    # Deliberate allowlist: Report provenance such as analyst_question,
+    # generated_at, Target and Intent is not part of the LLM #2 prompt.
+    # LLM #2 remains grounded only in the established Finding/Evidence view.
     payload = {
         "investigation_id": report.investigation_id,
         "findings": [
