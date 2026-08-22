@@ -32,7 +32,10 @@ def test_core_container_applies_least_privilege_filesystem_and_process_controls(
     assert "no-new-privileges:true" in core
     assert "pids_limit: 256" in core
     assert "init: true" in core
-    assert "/workspace:/workspace" in core
+    assert (
+        "${CENTAURUS_WORKSPACE_HOST_DIR:-/workspace}:/workspace"
+        in core
+    )
 
 
 def test_ollama_is_not_published_to_host_and_cloud_features_are_disabled() -> None:
@@ -41,7 +44,10 @@ def test_ollama_is_not_published_to_host_and_cloud_features_are_disabled() -> No
     assert "ports:" not in ollama
     assert "11434:11434" not in ollama
     assert 'OLLAMA_NO_CLOUD: "1"' in ollama
-    assert "/opt/osint-framework/runtime/ollama:/root/.ollama:ro" in ollama
+    assert (
+        "${CENTAURUS_OLLAMA_HOST_DIR:-/opt/osint-framework/runtime/ollama}"
+        ":/root/.ollama:ro" in ollama
+    )
     assert re.search(r"cap_drop:\s*\n\s*- ALL", ollama)
     assert "no-new-privileges:true" in ollama
     assert "pids_limit: 512" in ollama

@@ -14,7 +14,7 @@ services:
       OLLAMA_NO_CLOUD: "1"
 
     volumes:
-      - /opt/osint-framework/runtime/ollama:/root/.ollama:ro
+      - ${CENTAURUS_OLLAMA_HOST_DIR:-/opt/osint-framework/runtime/ollama}:/root/.ollama:ro
 
     cap_drop:
       - ALL
@@ -47,7 +47,7 @@ services:
       CENTAURUS_THEHARVESTER_TIMEOUT: "${CENTAURUS_THEHARVESTER_TIMEOUT:-300}"
 
     volumes:
-      - /workspace:/workspace
+      - ${CENTAURUS_WORKSPACE_HOST_DIR:-/workspace}:/workspace
 
     depends_on:
       - centaurus-ollama
