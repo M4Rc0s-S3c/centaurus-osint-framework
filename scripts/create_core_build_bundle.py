@@ -7,7 +7,7 @@ only the files required by Docker to build ``centaurus-core:local`` on the OVA.
 from __future__ import annotations
 
 from pathlib import Path
-from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
+from zipfile import ZIP_STORED, ZipFile, ZipInfo
 
 _FIXED_TIMESTAMP = (2026, 8, 16, 0, 0, 0)
 _RUNTIME_LOCKS = (
@@ -20,8 +20,14 @@ _RUNTIME_LOCKS = (
 
 def _write_file(archive: ZipFile, source: Path, arcname: str) -> None:
     info = ZipInfo(arcname, date_time=_FIXED_TIMESTAMP)
-    info.compress_type = ZIP_DEFLATED
+    # Canonical release serialization: do not depend on the host's DEFLATE
+    # implementation (for example zlib versus zlib-ng) or host OS metadata.
+    info.compress_type = ZIP_STORED
+    info.create_system = 0
     info.external_attr = 0o644 << 16
+    info.internal_attr = 0
+    info.extra = b""
+    info.comment = b""
     archive.writestr(info, source.read_bytes())
 
 
