@@ -1,0 +1,10 @@
+# Sublist3r isolated runtime lock.
+# Upstream commit and source archive hash are immutable inputs.
+
+certifi==2026.7.22
+charset-normalizer==3.5.1
+dnspython==2.8.0
+idna==3.19
+requests==2.34.2
+Sublist3r @ https://github.com/aboul3la/Sublist3r/archive/6af1b8c22b5ca035818fbb04c54890896f9b181a.tar.gz#sha256=9ea8e76d03ad7c7819aded19c212fdc371484b18065afda93d78a21e94f31b0f
+urllib3==2.7.0

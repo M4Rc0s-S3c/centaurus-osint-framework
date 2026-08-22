@@ -1,0 +1,65 @@
+{
+  "schema_version": 2,
+  "validated_from": {
+    "git_commit": "bb8426ab7979126f8c9e41e0a97db1c71688716b",
+    "core_image": "sha256:e2557c87026914e7f1ac5a9d88c195981f29f7ca0179196fb9af3831e78f830b"
+  },
+  "images": {
+    "python_base": {
+      "human_reference": "python:3.12.14-slim",
+      "digest": "sha256:2c941e860699f878900b0edc2403613c234d4b32eda3cc9fa7036991a2a63c4a",
+      "platform": "linux/amd64",
+      "python_version": "3.12.14",
+      "pip_version": "25.0.1"
+    },
+    "ollama": {
+      "human_reference": "ollama/ollama",
+      "digest": "sha256:509fdf54e23bd50d87af646cb51c0a7a203d6a83cc4d6695b3b08c5be1c62c0a",
+      "platform": "linux/amd64",
+      "runtime_version": "0.31.2"
+    }
+  },
+  "build_backends": {
+    "setuptools": "83.0.0",
+    "flit_core": "3.12.0"
+  },
+  "dependency_model": {
+    "core_lock": "requirements-core.lock",
+    "tool_isolation_root": "/opt/centaurus-tools",
+    "reason": "DNSRecon 1.6.3 and theHarvester 4.11.1 have incompatible exact runtime requirements."
+  },
+  "tools": {
+    "dnsrecon": {
+      "version": "1.6.3",
+      "source": "https://github.com/darkoperator/dnsrecon/archive/refs/tags/1.6.3.tar.gz",
+      "source_sha256": "7f7e230bb3fae959ff37ac19d1c1deea25089ac6a1bbbbf3b4e26e78ed96bd7a",
+      "lock": "requirements-dnsrecon.lock",
+      "venv": "/opt/centaurus-tools/dnsrecon"
+    },
+    "sublist3r": {
+      "version": "1.0",
+      "source_commit": "6af1b8c22b5ca035818fbb04c54890896f9b181a",
+      "source": "https://github.com/aboul3la/Sublist3r/archive/6af1b8c22b5ca035818fbb04c54890896f9b181a.tar.gz",
+      "source_sha256": "9ea8e76d03ad7c7819aded19c212fdc371484b18065afda93d78a21e94f31b0f",
+      "lock": "requirements-sublist3r.lock",
+      "venv": "/opt/centaurus-tools/sublist3r",
+      "upstream_metadata_note": "A clean install exposes duplicate Sublist3r distribution metadata; pip freeze emits one direct requirement and pip check passes."
+    },
+    "theharvester": {
+      "version": "4.11.1",
+      "source": "https://github.com/laramies/theHarvester/archive/refs/tags/4.11.1.tar.gz",
+      "source_sha256": "73a931f6e346972939203a82ae38fed24570b3137bfce5d1ae5517e8284df6df",
+      "lock": "requirements-theharvester.lock",
+      "venv": "/opt/centaurus-tools/theharvester"
+    }
+  },
+  "model": {
+    "name": "qwen3:4b",
+    "manifest_sha256": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+    "config_digest": "sha256:e18a783aae5525fd2852fc94c985541a77e791e034abc2d3056474d59de336fc",
+    "model_blob_digest": "sha256:3e4cb14174460404e7a233e531675303b2fbf7749c02f91864fe311ab6344e4f",
+    "template_digest": "sha256:2d54db2b9bb29ce7db54fea63a891f5859603813c555b1f88b5e0994652897f9",
+    "license_digest": "sha256:d18a5cc71b84bc4af394a31116bd3932b42241de70c77d2b76d69a314ec8aa12",
+    "params_digest": "sha256:cff3f395ef3756ab63e58b0ad1b32bb6f802905cae1472e6a12034e4246fbbdb"
+  }
+}

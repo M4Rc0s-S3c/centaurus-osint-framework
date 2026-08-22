@@ -3,7 +3,8 @@ name: centaurus
 services:
 
   centaurus-ollama:
-    image: ollama/ollama:latest
+    # G1: validated runtime is Ollama 0.31.2; the digest is immutable.
+    image: ollama/ollama@sha256:509fdf54e23bd50d87af646cb51c0a7a203d6a83cc4d6695b3b08c5be1c62c0a
     container_name: centaurus-ollama
     restart: unless-stopped
 

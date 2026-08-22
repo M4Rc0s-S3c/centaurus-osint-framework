@@ -15,6 +15,11 @@ def test_core_build_bundle_contains_only_required_build_inputs(tmp_path: Path) -
 
     assert "Dockerfile" in names
     assert "pyproject.toml" in names
+    assert "requirements-core.lock" in names
+    assert "requirements-dnsrecon.lock" in names
+    assert "requirements-sublist3r.lock" in names
+    assert "requirements-theharvester.lock" in names
+    assert "supply-chain.lock.json" in names
     assert "src/centaurus/__init__.py" in names
     assert "src/centaurus/main.py" in names
     assert "src/centaurus/cli/app.py" in names
@@ -40,32 +45,21 @@ def test_core_build_bundle_is_deterministic(tmp_path: Path) -> None:
     assert first.read_bytes() == second.read_bytes()
 
 
-def test_core_dockerfile_installs_pinned_dnsrecon_runtime() -> None:
-    """The Linux runtime image installs DNSRecon from its upstream 1.6.3 tag."""
+def test_core_dockerfile_consumes_isolated_runtime_locks() -> None:
+    """Core and external tools are built from separate validated locks."""
 
     dockerfile = (Path(__file__).resolve().parents[1] / "docker" / "Dockerfile").read_text(encoding="utf-8")
 
-    assert "darkoperator/dnsrecon/archive/refs/tags/1.6.3.tar.gz" in dockerfile
-    assert "dnsrecon==1.6.3" not in dockerfile
-
-
-def test_core_dockerfile_installs_pinned_sublist3r_runtime() -> None:
-    """The Linux runtime image pins the official Sublist3r 1.1 commit."""
-
-    dockerfile = (Path(__file__).resolve().parents[1] / "docker" / "Dockerfile").read_text(encoding="utf-8")
-
-    assert (
-        "aboul3la/Sublist3r/archive/"
-        "6af1b8c22b5ca035818fbb04c54890896f9b181a.tar.gz"
-    ) in dockerfile
-
-
-def test_core_dockerfile_installs_pinned_theharvester_runtime() -> None:
-    """The Linux runtime image pins the official theHarvester 4.11.1 release."""
-
-    dockerfile = (Path(__file__).resolve().parents[1] / "docker" / "Dockerfile").read_text(encoding="utf-8")
-
-    assert "laramies/theHarvester/archive/refs/tags/4.11.1.tar.gz" in dockerfile
+    assert "COPY requirements-core.lock ./" in dockerfile
+    assert "COPY requirements-dnsrecon.lock ./locks/" in dockerfile
+    assert "COPY requirements-sublist3r.lock ./locks/" in dockerfile
+    assert "COPY requirements-theharvester.lock ./locks/" in dockerfile
+    assert "-r requirements-core.lock" in dockerfile
+    assert "/opt/centaurus-tools/dnsrecon" in dockerfile
+    assert "/opt/centaurus-tools/sublist3r" in dockerfile
+    assert "/opt/centaurus-tools/theharvester" in dockerfile
+    assert "python -m pip install --no-cache-dir --no-deps ." in dockerfile
+    assert "python -m pip check" in dockerfile
 
 
 def test_core_dockerfile_uses_final_cli_command() -> None:

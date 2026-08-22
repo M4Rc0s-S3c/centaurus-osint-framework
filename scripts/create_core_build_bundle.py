@@ -10,6 +10,12 @@ from pathlib import Path
 from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 
 _FIXED_TIMESTAMP = (2026, 8, 16, 0, 0, 0)
+_RUNTIME_LOCKS = (
+    "requirements-core.lock",
+    "requirements-dnsrecon.lock",
+    "requirements-sublist3r.lock",
+    "requirements-theharvester.lock",
+)
 
 
 def _write_file(archive: ZipFile, source: Path, arcname: str) -> None:
@@ -27,9 +33,11 @@ def create_bundle(project_root: Path, destination: Path) -> Path:
 
     dockerfile = project_root / "docker" / "Dockerfile"
     pyproject = project_root / "pyproject.toml"
+    runtime_locks = tuple(project_root / name for name in _RUNTIME_LOCKS)
+    supply_chain_lock = project_root / "docker" / "supply-chain.lock.json"
     source_root = project_root / "src"
 
-    required = (dockerfile, pyproject, source_root)
+    required = (dockerfile, pyproject, *runtime_locks, supply_chain_lock, source_root)
     missing = [str(path) for path in required if not path.exists()]
     if missing:
         raise FileNotFoundError(f"missing build input(s): {', '.join(missing)}")
@@ -39,6 +47,9 @@ def create_bundle(project_root: Path, destination: Path) -> Path:
     with ZipFile(destination, "w") as archive:
         _write_file(archive, dockerfile, "Dockerfile")
         _write_file(archive, pyproject, "pyproject.toml")
+        for runtime_lock in runtime_locks:
+            _write_file(archive, runtime_lock, runtime_lock.name)
+        _write_file(archive, supply_chain_lock, "supply-chain.lock.json")
 
         for path in sorted(source_root.rglob("*")):
             if not path.is_file():
