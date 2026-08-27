@@ -79,6 +79,7 @@ def test_cli_help_exposes_distribution_discovery_commands():
     assert result.exit_code == 0
     assert "assesses public exposure" in result.stdout
     assert "capabilities" in result.stdout
+    assert "rules" in result.stdout
     assert "investigate" in result.stdout
     assert "shell" in result.stdout
     assert "--version" in result.stdout
@@ -121,6 +122,21 @@ def test_capabilities_is_offline_and_exposes_targets_tools_and_intent(monkeypatc
         assert tool in result.stdout
     assert "Productive deterministic Rules" in result.stdout
     assert "11" in result.stdout
+
+
+def test_rules_command_is_offline_and_lists_the_productive_catalog(monkeypatch):
+    monkeypatch.setattr(
+        cli_app,
+        "build_runtime",
+        lambda: (_ for _ in ()).throw(AssertionError("runtime must remain offline")),
+    )
+
+    result = runner.invoke(cli_app.app, ["rules"])
+
+    assert result.exit_code == 0
+    assert "Productive Rules" in result.stdout
+    assert "RL-001" in result.stdout
+    assert "RL-014" in result.stdout
 
 
 def test_capabilities_rules_lists_the_productive_rule_catalog(monkeypatch):
@@ -268,6 +284,47 @@ def test_shell_processes_requests_and_stops_without_persistent_history():
     assert "/exit" in stream.getvalue()
     assert "CENTAURUS capabilities" in stream.getvalue()
     assert "public_exposure_assessment" in stream.getvalue()
+
+
+def test_shell_accepts_prefixed_capabilities_and_rules_without_leaving_shell():
+    fake_cli = FakeCLI()
+    console, stream = make_console()
+    session = FakeSession(
+        [
+            "centaurus capabilities",
+            "centaurus rules",
+            "/capabilities --rules",
+            "capabilities rules",
+            "rules capabilities",
+            "Investiga example.com",
+            "exit",
+        ]
+    )
+
+    exit_code = cli_app.run_shell(fake_cli, FakeCore(), console, session=session)
+
+    assert exit_code == cli_app.EXIT_OK
+    assert fake_cli.started is True
+    assert fake_cli.stopped is True
+    assert fake_cli.requests == ["Investiga example.com"]
+    output = stream.getvalue()
+    assert output.count("CENTAURUS capabilities") >= 3
+    assert output.count("Productive Rules") >= 4
+    assert "RL-001" in output
+    assert "RL-014" in output
+
+
+def test_shell_meta_parser_keeps_non_meta_centaurus_text_as_investigation():
+    assert cli_app._shell_meta_command("centaurus capabilities") == (
+        "capabilities",
+        False,
+    )
+    assert cli_app._shell_meta_command("centaurus rules") == ("rules", True)
+    assert cli_app._shell_meta_command("centaurus capabilities --rules") == (
+        "capabilities",
+        True,
+    )
+    assert cli_app._shell_meta_command("centaurus investigate example.com") is None
 
 
 def test_shell_continues_after_invalid_request():

@@ -131,6 +131,12 @@ def render_capabilities(console: Console, *, show_rules: bool = False) -> None:
         )
         return
 
+    render_rules(console)
+
+
+def render_rules(console: Console) -> None:
+    """Render the productive deterministic Rule catalog offline."""
+
     rules_table = Table(title="Productive Rules", show_lines=True)
     rules_table.add_column("Rule", no_wrap=True)
     rules_table.add_column("Category")
@@ -168,6 +174,13 @@ def capabilities_command(
     """Show supported targets, Intent, tools and optional Rules offline."""
 
     render_capabilities(Console(), show_rules=rules)
+
+
+@app.command("rules")
+def rules_command() -> None:
+    """Show the productive deterministic Rule catalog offline."""
+
+    render_rules(Console())
 
 
 class PromptSessionLike(Protocol):
@@ -362,6 +375,35 @@ def execute_request(
     return _render_investigation(core, investigation, console)
 
 
+def _shell_meta_command(text: str) -> tuple[str, bool] | None:
+    """Parse deterministic shell-only discovery commands.
+
+    The optional ``centaurus`` prefix is accepted so an analyst can use the
+    same vocabulary inside the conversational shell without leaving it.
+    """
+
+    normalized = text.strip().lower()
+    if normalized.startswith("/"):
+        normalized = normalized[1:].lstrip()
+
+    tokens = normalized.split()
+    if tokens and tokens[0] == "centaurus":
+        tokens = tokens[1:]
+
+    if tokens == ["capabilities"]:
+        return ("capabilities", False)
+    if tokens == ["rules"]:
+        return ("rules", True)
+    if tokens in (
+        ["capabilities", "--rules"],
+        ["capabilities", "rules"],
+        ["rules", "capabilities"],
+    ):
+        return ("capabilities", True)
+
+    return None
+
+
 def run_shell(
     cli: CLI,
     core: Core,
@@ -402,14 +444,23 @@ def run_shell(
                 break
             if command in {"/help", "help", "?"}:
                 console.print(
-                    "[bold]/capabilities[/bold] show supported targets, tools and Rules · "
+                    "[bold]/capabilities[/bold] show supported targets and tools · "
+                    "[bold]/rules[/bold] show productive Rules · "
+                    "[bold]/capabilities --rules[/bold] show both · "
+                    "the optional [bold]centaurus[/bold] prefix is accepted · "
                     "[bold]/exit[/bold] leave the shell · "
                     "[bold]/help[/bold] show this message · "
                     "all other input is interpreted as an investigation request"
                 )
                 continue
-            if command in {"/capabilities", "capabilities"}:
-                render_capabilities(console, show_rules=False)
+
+            meta_command = _shell_meta_command(text)
+            if meta_command is not None:
+                name, show_rules = meta_command
+                if name == "rules":
+                    render_rules(console)
+                else:
+                    render_capabilities(console, show_rules=show_rules)
                 continue
 
             execute_request(cli, core, text, console)
