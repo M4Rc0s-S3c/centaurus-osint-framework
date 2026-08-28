@@ -18,6 +18,9 @@ _RUNTIME_ENV = (
     "OLLAMA_MODEL",
     "OLLAMA_TIMEOUT",
     "OLLAMA_INTERPRETATION_TIMEOUT",
+    "OLLAMA_ANALYST_ASSISTANCE_TIMEOUT",
+    "OLLAMA_ANALYST_ASSISTANCE_NUM_CTX",
+    "OLLAMA_ANALYST_ASSISTANCE_NUM_PREDICT",
     "CENTAURUS_WHOIS_TIMEOUT",
     "CENTAURUS_RDAP_TIMEOUT",
     "CENTAURUS_CRTSH_TIMEOUT",
@@ -42,6 +45,9 @@ def test_runtime_settings_have_valid_minimal_defaults(monkeypatch) -> None:
     assert settings.ollama_model == "qwen3:4b"
     assert settings.ollama_timeout == 60.0
     assert settings.ollama_interpretation_timeout == 60.0
+    assert settings.ollama_analyst_assistance_timeout == 300.0
+    assert settings.ollama_analyst_assistance_num_ctx == 8192
+    assert settings.ollama_analyst_assistance_num_predict is None
     assert settings.log_level == "INFO"
     assert settings.log_path == Path("/workspace/logs/centaurus.log")
 
@@ -53,6 +59,9 @@ def test_runtime_settings_load_external_overrides(monkeypatch, tmp_path: Path) -
     monkeypatch.setenv("OLLAMA_MODEL", "qwen-test")
     monkeypatch.setenv("OLLAMA_TIMEOUT", "75.5")
     monkeypatch.setenv("OLLAMA_INTERPRETATION_TIMEOUT", "12")
+    monkeypatch.setenv("OLLAMA_ANALYST_ASSISTANCE_TIMEOUT", "181")
+    monkeypatch.setenv("OLLAMA_ANALYST_ASSISTANCE_NUM_CTX", "9216")
+    monkeypatch.setenv("OLLAMA_ANALYST_ASSISTANCE_NUM_PREDICT", "1536")
     monkeypatch.setenv("CENTAURUS_DNSRECON_TIMEOUT", "222")
 
     settings = RuntimeSettings.from_env()
@@ -62,6 +71,9 @@ def test_runtime_settings_load_external_overrides(monkeypatch, tmp_path: Path) -
     assert settings.ollama_model == "qwen-test"
     assert settings.ollama_timeout == 75.5
     assert settings.ollama_interpretation_timeout == 12.0
+    assert settings.ollama_analyst_assistance_timeout == 181.0
+    assert settings.ollama_analyst_assistance_num_ctx == 9216
+    assert settings.ollama_analyst_assistance_num_predict == 1536
     assert settings.log_level == "DEBUG"
 
 
@@ -80,6 +92,11 @@ def test_interpretation_timeout_inherits_general_ollama_timeout(monkeypatch) -> 
     [
         ("OLLAMA_TIMEOUT", "not-a-number", "positive number"),
         ("OLLAMA_TIMEOUT", "0", "greater than zero"),
+        ("OLLAMA_ANALYST_ASSISTANCE_TIMEOUT", "invalid", "positive number"),
+        ("OLLAMA_ANALYST_ASSISTANCE_NUM_CTX", "8192.5", "positive integer"),
+        ("OLLAMA_ANALYST_ASSISTANCE_NUM_CTX", "0", "greater than zero"),
+        ("OLLAMA_ANALYST_ASSISTANCE_NUM_PREDICT", "invalid", "positive integer"),
+        ("OLLAMA_ANALYST_ASSISTANCE_NUM_PREDICT", "-1", "greater than zero"),
         ("CENTAURUS_DNSRECON_TIMEOUT", "invalid", "positive number"),
         ("CENTAURUS_LOG_LEVEL", "verbose", "must be one of"),
     ],
@@ -95,6 +112,27 @@ def test_runtime_settings_reject_malformed_external_configuration(
 
     with pytest.raises(RuntimeConfigurationError, match=message):
         RuntimeSettings.from_env()
+
+
+
+
+def test_analyst_assistance_timeout_is_independent_from_general_timeout(monkeypatch) -> None:
+    _clear_runtime_env(monkeypatch)
+    monkeypatch.setenv("OLLAMA_TIMEOUT", "44")
+
+    settings = RuntimeSettings.from_env()
+
+    assert settings.ollama_interpretation_timeout == 44.0
+    assert settings.ollama_analyst_assistance_timeout == 300.0
+
+
+def test_optional_analyst_num_predict_accepts_empty_external_value(monkeypatch) -> None:
+    _clear_runtime_env(monkeypatch)
+    monkeypatch.setenv("OLLAMA_ANALYST_ASSISTANCE_NUM_PREDICT", "")
+
+    settings = RuntimeSettings.from_env()
+
+    assert settings.ollama_analyst_assistance_num_predict is None
 
 
 def test_explicit_workspace_overrides_environment(monkeypatch, tmp_path: Path) -> None:

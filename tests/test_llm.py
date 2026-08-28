@@ -562,3 +562,173 @@ def test_core_keeps_completed_domain_state_when_llm_provider_fails():
 
     assert investigation.report is not None
     assert core.last_llm_output is None
+
+
+def test_ollama_provider_context_profile_includes_num_ctx_and_optional_num_predict():
+    captured = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        captured["json"] = request.read()
+        return httpx.Response(
+            200,
+            json={"response": json.dumps(valid_empty_presentation_payload())},
+        )
+
+    profile = OllamaInferenceProfile(
+        think=False,
+        temperature=0.7,
+        top_p=0.8,
+        top_k=20,
+        min_p=0.0,
+        seed=42,
+        num_ctx=8192,
+        num_predict=1536,
+    )
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(
+        base_url="http://ollama",
+        timeout=180,
+        client=client,
+        inference_profile=profile,
+    )
+
+    provider.generate(make_report())
+    payload = json.loads(captured["json"])
+
+    assert payload["options"]["num_ctx"] == 8192
+    assert payload["options"]["num_predict"] == 1536
+    assert payload["keep_alive"] == 0
+    assert payload["think"] is False
+    client.close()
+
+
+def test_ollama_provider_classifies_read_timeout_without_logging_payload_content():
+    sensitive = "DO-NOT-LOG-THIS-PROMPT-CONTENT"
+    report = make_report(analyst_question=sensitive)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.ReadTimeout("timed out", request=request)
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(
+        base_url="http://ollama",
+        timeout=180,
+        client=client,
+    )
+
+    with pytest.raises(LLMProviderError) as captured:
+        provider.generate(report)
+
+    error = captured.value
+    assert str(error) == "Unable to obtain a response from Ollama"
+    assert error.cause_type == "ReadTimeout"
+    assert error.provider == "ollama"
+    assert error.role == "analyst_assistance"
+    assert error.timeout_seconds == 180.0
+    assert error.http_status is None
+    assert error.duration_seconds is not None
+    assert sensitive not in str(error)
+    client.close()
+
+
+def test_ollama_provider_classifies_http_status_error_safely():
+    client = httpx.Client(
+        transport=httpx.MockTransport(
+            lambda request: httpx.Response(503, json={"error": "sensitive-backend-detail"})
+        )
+    )
+    provider = OllamaProvider(base_url="http://ollama", client=client)
+
+    with pytest.raises(LLMProviderError) as captured:
+        provider.generate(make_report())
+
+    error = captured.value
+    assert error.cause_type == "HTTPStatusError"
+    assert error.http_status == 503
+    assert error.provider == "ollama"
+    assert error.role == "analyst_assistance"
+    assert "sensitive-backend-detail" not in str(error)
+    client.close()
+
+
+def test_ollama_provider_logs_only_safe_success_metrics(monkeypatch):
+    sensitive = "DO-NOT-LOG-ANALYST-QUESTION"
+    records = []
+    monkeypatch.setattr(
+        "centaurus.llm.ollama_provider.logger.info",
+        lambda message, *args: records.append((message, args)),
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "response": json.dumps(valid_empty_presentation_payload()),
+                "prompt_eval_count": 5386,
+                "eval_count": 720,
+            },
+        )
+
+    client = httpx.Client(transport=httpx.MockTransport(handler))
+    provider = OllamaProvider(base_url="http://ollama", client=client)
+    provider.generate(make_report(analyst_question=sensitive))
+
+    assert len(records) == 1
+    message, args = records[0]
+    rendered = message % args
+    assert "provider=ollama" in rendered
+    assert "role=analyst_assistance" in rendered
+    assert "prompt_eval_count=5386" in rendered
+    assert "eval_count=720" in rendered
+    assert sensitive not in rendered
+    assert "prompt=" not in rendered
+    client.close()
+
+
+def test_core_fail_soft_warning_contains_safe_operational_cause_without_payload(monkeypatch):
+    from centaurus.executor.execution import ExecutionPlan
+
+    class FakePlanner:
+        def plan(self, investigation):
+            return ExecutionPlan(investigation_id=investigation.id)
+
+    class FakeExecutor:
+        def execute(self, plan):
+            return {"status": "completed", "results": []}
+
+    class FailingProvider:
+        def generate(self, report):
+            raise LLMProviderError(
+                "Unable to obtain a response from Ollama",
+                cause_type="ReadTimeout",
+                provider="ollama",
+                role="analyst_assistance",
+                timeout_seconds=180.0,
+                duration_seconds=179.8,
+            )
+
+    core = Core(llm_manager=LLMManager(provider=FailingProvider()))
+    core._initialized = True
+    core._planner = FakePlanner()
+    core._executor = FakeExecutor()
+    core._rules = ()
+
+    warnings = []
+    monkeypatch.setattr(
+        "centaurus.core.core.logger.warning",
+        lambda message, *args: warnings.append((message, args)),
+    )
+
+    investigation = Investigation(target="example.com", intent="public_exposure_assessment")
+    core.run_investigation(investigation)
+
+    assert len(warnings) == 1
+    message, args = warnings[0]
+    warning = message % args
+    assert investigation.report is not None
+    assert core.last_llm_output is None
+    assert "provider=ollama" in warning
+    assert "role=analyst_assistance" in warning
+    assert "cause_type=ReadTimeout" in warning
+    assert "timeout_seconds=180.0" in warning
+    assert "duration_seconds=179.8" in warning

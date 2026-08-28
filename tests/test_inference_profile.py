@@ -42,3 +42,23 @@ def test_inference_profile_is_immutable():
 
     with pytest.raises(FrozenInstanceError):
         profile.temperature = 0.1  # type: ignore[misc]
+
+
+def test_inference_profile_adds_context_capacity_only_when_configured():
+    profile = OllamaInferenceProfile(
+        think=False,
+        temperature=0.7,
+        top_p=0.8,
+        top_k=20,
+        min_p=0.0,
+        seed=42,
+        num_ctx=8192,
+        num_predict=1536,
+    )
+
+    options = profile.options()
+
+    assert options["num_ctx"] == 8192
+    assert options["num_predict"] == 1536
+    assert "num_ctx" not in INTERPRETATION_INFERENCE_PROFILE.options()
+    assert "num_predict" not in INTERPRETATION_INFERENCE_PROFILE.options()

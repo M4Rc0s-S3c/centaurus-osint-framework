@@ -18,6 +18,8 @@ _DEFAULT_WORKSPACE = "/workspace"
 _DEFAULT_OLLAMA_BASE_URL = "http://localhost:11434"
 _DEFAULT_OLLAMA_MODEL = "qwen3:4b"
 _DEFAULT_OLLAMA_TIMEOUT = 60.0
+_DEFAULT_OLLAMA_ANALYST_ASSISTANCE_TIMEOUT = 300.0
+_DEFAULT_OLLAMA_ANALYST_ASSISTANCE_NUM_CTX = 8192
 _DEFAULT_LOG_LEVEL = "INFO"
 _ALLOWED_LOG_LEVELS = frozenset({"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"})
 
@@ -78,6 +80,65 @@ def configured_positive_float(
     return value
 
 
+def configured_positive_int(
+    explicit: int | str | None,
+    env_name: str,
+    default: int,
+) -> int:
+    """Resolve and validate a strictly positive integer runtime setting."""
+
+    raw: int | str
+    if explicit is not None:
+        raw = explicit
+    else:
+        raw = os.getenv(env_name, str(default))
+
+    if isinstance(raw, bool):
+        raise RuntimeConfigurationError(f"{env_name} must be a positive integer")
+
+    try:
+        value = int(raw)
+    except (TypeError, ValueError) as exc:
+        raise RuntimeConfigurationError(
+            f"{env_name} must be a positive integer"
+        ) from exc
+
+    if value <= 0:
+        raise RuntimeConfigurationError(f"{env_name} must be greater than zero")
+    return value
+
+
+def configured_optional_positive_int(
+    explicit: int | str | None,
+    env_name: str,
+) -> int | None:
+    """Resolve an optional strictly positive integer runtime setting."""
+
+    raw: int | str | None
+    if explicit is not None:
+        raw = explicit
+    else:
+        raw = os.getenv(env_name)
+
+    if raw is None:
+        return None
+    if isinstance(raw, str) and not raw.strip():
+        return None
+    if isinstance(raw, bool):
+        raise RuntimeConfigurationError(f"{env_name} must be a positive integer")
+
+    try:
+        value = int(raw)
+    except (TypeError, ValueError) as exc:
+        raise RuntimeConfigurationError(
+            f"{env_name} must be a positive integer"
+        ) from exc
+
+    if value <= 0:
+        raise RuntimeConfigurationError(f"{env_name} must be greater than zero")
+    return value
+
+
 def resolve_workspace(workspace: str | Path | None = None) -> Path:
     """Resolve the workspace root while preserving explicit dependency injection."""
 
@@ -113,6 +174,11 @@ class RuntimeSettings:
     ollama_timeout: float
     ollama_interpretation_timeout: float
     log_level: str
+    ollama_analyst_assistance_timeout: float = (
+        _DEFAULT_OLLAMA_ANALYST_ASSISTANCE_TIMEOUT
+    )
+    ollama_analyst_assistance_num_ctx: int = _DEFAULT_OLLAMA_ANALYST_ASSISTANCE_NUM_CTX
+    ollama_analyst_assistance_num_predict: int | None = None
 
     @property
     def log_path(self) -> Path:
@@ -133,6 +199,20 @@ class RuntimeSettings:
             None,
             "OLLAMA_INTERPRETATION_TIMEOUT",
             ollama_timeout,
+        )
+        analyst_assistance_timeout = configured_positive_float(
+            None,
+            "OLLAMA_ANALYST_ASSISTANCE_TIMEOUT",
+            _DEFAULT_OLLAMA_ANALYST_ASSISTANCE_TIMEOUT,
+        )
+        analyst_assistance_num_ctx = configured_positive_int(
+            None,
+            "OLLAMA_ANALYST_ASSISTANCE_NUM_CTX",
+            _DEFAULT_OLLAMA_ANALYST_ASSISTANCE_NUM_CTX,
+        )
+        analyst_assistance_num_predict = configured_optional_positive_int(
+            None,
+            "OLLAMA_ANALYST_ASSISTANCE_NUM_PREDICT",
         )
         log_level = configured_text(
             None,
@@ -173,4 +253,7 @@ class RuntimeSettings:
             ollama_timeout=ollama_timeout,
             ollama_interpretation_timeout=interpretation_timeout,
             log_level=log_level,
+            ollama_analyst_assistance_timeout=analyst_assistance_timeout,
+            ollama_analyst_assistance_num_ctx=analyst_assistance_num_ctx,
+            ollama_analyst_assistance_num_predict=analyst_assistance_num_predict,
         )

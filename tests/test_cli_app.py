@@ -354,15 +354,26 @@ def test_build_runtime_injects_validated_workspace_and_creates_operational_log(t
         ollama_timeout=60.0,
         ollama_interpretation_timeout=30.0,
         log_level="INFO",
+        ollama_analyst_assistance_timeout=181.0,
+        ollama_analyst_assistance_num_ctx=9216,
+        ollama_analyst_assistance_num_predict=1536,
     )
 
-    _, core = cli_app.build_runtime(settings)
+    cli, core = cli_app.build_runtime(settings)
     try:
         assert core._raw_observation_store.workspace == tmp_path
         assert core._evidence_store.workspace == tmp_path
         assert core._finding_store.workspace == tmp_path
         assert core._report_store.workspace == tmp_path
         assert core._execution_failure_store.workspace == tmp_path
+        assert core._llm_manager._provider._timeout == 181.0
+        assert core._llm_manager._provider._inference_profile.options()["num_ctx"] == 9216
+        assert core._llm_manager._provider._inference_profile.options()["num_predict"] == 1536
+        assert core._llm_manager._provider._inference_profile.think is False
+        assert core._llm_manager._provider._inference_profile.num_ctx == 9216
+        assert cli._request_interpreter._provider._timeout == 30.0
+        assert "num_ctx" not in cli._request_interpreter._provider._inference_profile.options()
+        assert "num_predict" not in cli._request_interpreter._provider._inference_profile.options()
         assert settings.log_path.is_file()
         assert "runtime configured" in settings.log_path.read_text(encoding="utf-8")
     finally:

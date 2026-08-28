@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import replace
 from importlib.metadata import PackageNotFoundError, version
 from typing import Protocol
 
@@ -24,7 +25,11 @@ from centaurus.cli.cli import CLI
 from centaurus.cli.progress import RichRuntimeProgressReporter
 from centaurus.config import RuntimeConfigurationError, RuntimeSettings
 from centaurus.core.core import Core
-from centaurus.llm import LLMManager, OllamaProvider
+from centaurus.llm import (
+    ANALYST_ASSISTANCE_INFERENCE_PROFILE,
+    LLMManager,
+    OllamaProvider,
+)
 from centaurus.llm.exceptions import LLMError
 from centaurus.llm.ollama_intent_provider import OllamaIntentProvider
 from centaurus.llm.request_interpreter import RequestInterpreter
@@ -209,7 +214,12 @@ def build_runtime(
             provider=OllamaProvider(
                 base_url=runtime.ollama_base_url,
                 model=runtime.ollama_model,
-                timeout=runtime.ollama_timeout,
+                timeout=runtime.ollama_analyst_assistance_timeout,
+                inference_profile=replace(
+                    ANALYST_ASSISTANCE_INFERENCE_PROFILE,
+                    num_ctx=runtime.ollama_analyst_assistance_num_ctx,
+                    num_predict=runtime.ollama_analyst_assistance_num_predict,
+                ),
             )
         ),
         rules=DEFAULT_RULES,
@@ -230,10 +240,15 @@ def build_runtime(
 
     logger.info(
         "runtime configured workspace=%s ollama_base_url=%s ollama_model=%s "
-        "log_level=%s",
+        "ollama_analyst_assistance_timeout=%s "
+        "ollama_analyst_assistance_num_ctx=%s "
+        "ollama_analyst_assistance_num_predict=%s log_level=%s",
         runtime.workspace,
         runtime.ollama_base_url,
         runtime.ollama_model,
+        runtime.ollama_analyst_assistance_timeout,
+        runtime.ollama_analyst_assistance_num_ctx,
+        runtime.ollama_analyst_assistance_num_predict,
         runtime.log_level,
     )
     return cli, core

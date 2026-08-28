@@ -15,17 +15,24 @@ class OllamaInferenceProfile:
     top_k: int
     min_p: float
     seed: int
+    num_ctx: int | None = None
+    num_predict: int | None = None
 
     def options(self) -> dict[str, float | int]:
         """Return the Ollama ``options`` payload for this profile."""
 
-        return {
+        options: dict[str, float | int] = {
             "temperature": self.temperature,
             "top_p": self.top_p,
             "top_k": self.top_k,
             "min_p": self.min_p,
             "seed": self.seed,
         }
+        if self.num_ctx is not None:
+            options["num_ctx"] = self.num_ctx
+        if self.num_predict is not None:
+            options["num_predict"] = self.num_predict
+        return options
 
 
 # Qwen3 non-thinking candidate baseline used by both current logical roles.

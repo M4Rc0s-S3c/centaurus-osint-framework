@@ -256,10 +256,18 @@ class Core:
                 # LLM analyst assistance is operational and must not invalidate
                 # the completed domain investigation or its persisted Report.
                 logger.warning(
-                    "LLM analyst assistance failed investigation_id=%s error_type=%s message=%s",
+                    "LLM analyst assistance failed investigation_id=%s error_type=%s "
+                    "message=%s provider=%s role=%s cause_type=%s "
+                    "timeout_seconds=%s http_status=%s duration_seconds=%s",
                     investigation.id,
                     type(exc).__name__,
                     exc,
+                    getattr(exc, "provider", None),
+                    getattr(exc, "role", None),
+                    getattr(exc, "cause_type", type(exc).__name__),
+                    getattr(exc, "timeout_seconds", None),
+                    getattr(exc, "http_status", None),
+                    getattr(exc, "duration_seconds", None),
                 )
                 self._last_llm_output = None
 

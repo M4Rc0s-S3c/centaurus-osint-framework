@@ -59,6 +59,9 @@ def test_compose_exposes_complete_operational_configuration_surface() -> None:
         "OLLAMA_MODEL",
         "OLLAMA_TIMEOUT",
         "OLLAMA_INTERPRETATION_TIMEOUT",
+        "OLLAMA_ANALYST_ASSISTANCE_TIMEOUT",
+        "OLLAMA_ANALYST_ASSISTANCE_NUM_CTX",
+        "OLLAMA_ANALYST_ASSISTANCE_NUM_PREDICT",
         "CENTAURUS_WHOIS_TIMEOUT",
         "CENTAURUS_RDAP_TIMEOUT",
         "CENTAURUS_CRTSH_TIMEOUT",
@@ -69,3 +72,11 @@ def test_compose_exposes_complete_operational_configuration_surface() -> None:
 
     for variable in expected:
         assert f"{variable}:" in compose
+
+
+def test_compose_freezes_candidate_ollama_d2_role_defaults() -> None:
+    compose = (ROOT / "docker/compose.yml").read_text(encoding="utf-8")
+
+    assert 'OLLAMA_ANALYST_ASSISTANCE_TIMEOUT: "${OLLAMA_ANALYST_ASSISTANCE_TIMEOUT:-300}"' in compose
+    assert 'OLLAMA_ANALYST_ASSISTANCE_NUM_CTX: "${OLLAMA_ANALYST_ASSISTANCE_NUM_CTX:-8192}"' in compose
+    assert 'OLLAMA_ANALYST_ASSISTANCE_NUM_PREDICT: "${OLLAMA_ANALYST_ASSISTANCE_NUM_PREDICT:-}"' in compose
