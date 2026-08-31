@@ -1,258 +1,121 @@
-# PROJECT.md
+# Visión general del proyecto
 
-# CENTAURUS OSINT Framework
+**Estado:** FINAL · implementación y aceptación técnica cerradas en el alcance del TFM
 
-> Framework modular de inteligencia de fuentes abiertas (OSINT) orientado a equipos Blue Team y departamentos de TI de pequeñas y medianas organizaciones.
+## 1. Identidad
 
----
+**CENTAURUS OSINT Framework** es un framework modular de inteligencia de fuentes abiertas orientado a equipos Blue Team y departamentos IT de PYMEs. Forma parte de una distribución Linux autocontenida diseñada para realizar evaluaciones pasivas y trazables de exposición pública.
 
-# Información general
+## 2. Objetivo
 
-| Campo | Valor |
-|--------|-------|
-| Nombre del proyecto | CENTAURUS OSINT Framework |
-| Estado | Plataforma base operativa (v0.2.0) |
-| Tipo | Framework OSINT modular |
-| Plataforma objetivo | Debian GNU/Linux 13 |
-| Arquitectura | Modular basada en plugins |
-| Licencia | Pendiente de definir |
-| Repositorio | GitHub (privado) |
+Proporcionar un entorno local, trazable y extensible capaz de:
 
----
+- interpretar una petición de investigación en lenguaje natural;
+- construir una `Investigation` estructurada;
+- planificar de forma determinista las capacidades a ejecutar;
+- ejecutar tools OSINT mediante plugins;
+- preservar observaciones originales y normalizadas;
+- producir Findings mediante Rules deterministas;
+- consolidar el conocimiento en un Report persistente;
+- presentar el resultado al analista mediante CLI y asistencia LLM local acotada.
 
-# Objetivo
+## 3. Usuarios objetivo
 
-CENTAURUS OSINT Framework proporciona una plataforma autocontenida para la recopilación, correlación y análisis de información pública sobre activos corporativos mediante técnicas OSINT pasivas.
+- equipos Blue Team;
+- departamentos IT de PYMEs;
+- analistas de seguridad que necesiten una primera evaluación pasiva de exposición pública.
 
-El framework está diseñado para evolucionar mediante una arquitectura modular basada en **plugins** y un **Rule Engine** determinista, permitiendo incorporar nuevas capacidades sin modificar el núcleo del sistema.
+El TFM original menciona también consultoría e investigación de seguridad como contexto posible, pero el dominio funcional congelado se centra en **Public Exposure Assessment**.
 
----
+## 4. Alcance funcional
 
-# Principios de diseño
+### Target DOMAIN
 
-El proyecto se basa en los siguientes principios:
+Cobertura completa de la versión documentada mediante WHOIS, RDAP, DNSRecon, Sublist3r, crt.sh y TheHarvester.
 
-- Arquitectura modular.
-- Separación entre sistema operativo, plataforma y datos.
-- Infrastructure as Code (IaC).
-- Funcionamiento offline siempre que sea posible.
-- Uso de inteligencia artificial local.
-- Portabilidad.
-- Escalabilidad.
-- Mantenibilidad.
-- Extensibilidad mediante plugins.
-- Rule Engine desacoplado del Core.
-- Persistencia independiente del código fuente.
+### Target IP
 
----
+Cobertura limitada mediante RDAP.
 
-# Tecnologías seleccionadas
+### EMAIL y CERTIFICATE
 
-| Componente | Tecnología |
-|------------|------------|
-| Sistema operativo | Debian 13 |
-| Contenedores | Docker |
-| Orquestación | Docker Compose |
+Se conservan como conceptos de evolución/futuro. EMAIL no es Target operacional en la CLI vigente y CERTIFICATE permanece diferido como Investigation directa.
+
+## 5. Arquitectura
+
+CENTAURUS separa:
+
+- interfaz e interpretación de entrada;
+- orquestación Core;
+- planificación y ejecución;
+- tools/plugins;
+- Knowledge Pipeline;
+- Rules/RuleEngine;
+- reporting;
+- IA auxiliar;
+- persistencia;
+- infraestructura Docker/Ollama.
+
+El Core es el único custodio del lifecycle de `Investigation`. `Planner` selecciona las capacidades; ningún LLM ejecuta tools ni genera Findings.
+
+## 6. Inteligencia artificial: dos roles lógicos
+
+CENTAURUS utiliza el mismo servicio/modelo físico para dos responsabilidades distintas:
+
+- **LLM #1 — interpretación de entrada.** Propone exclusivamente un `Intent` del catálogo permitido dentro de `RequestInterpreter`. El Target se detecta y normaliza localmente. Si LLM #1 no puede producir una salida válida, la petición natural falla de forma cerrada antes de comenzar la investigación.
+- **LLM #2 — asistencia posterior al Report.** Trabaja después de existir el Report determinista y persistido. Produce una vista efímera de síntesis/explicación/advisory. Su fallo no modifica Evidence, Findings ni Report.
+
+La validación física final corroboró esta separación: una petición natural llegó a un Intent válido e inició una investigación real, lo que es coherente con la función de LLM #1 en el entrypoint normal. LLM #2 agotó el timeout de 300 s en hardware antiguo y el resultado autoritativo siguió disponible.
+
+## 7. Tecnologías del estado final
+
+| Área | Tecnología/decisión |
+|---|---|
+| Sistema objetivo | Debian GNU/Linux 13 |
+| Framework | Python 3.12 en la imagen de entrega |
+| Contenedorización | Docker + Docker Compose |
+| CLI | Typer + Rich + Prompt Toolkit |
+| HTTP | httpx |
 | LLM local | Ollama |
-| Modelo inicial | Qwen3:4B Instruct |
-| Control de versiones | Git |
-| Repositorio remoto | GitHub |
-| Autenticación Git | SSH (ED25519) |
-| Lenguaje principal | Python *(previsto)* |
+| Modelo | `qwen3:4b` |
+| Perfil LLM #2 D2 | `timeout=300`, `num_ctx=8192`, `num_predict=UNSET`, `think=false`, `keep_alive=0` |
+| Persistencia | Filesystem + JSON |
+| Logging | `logging` stdlib + RotatingFileHandler |
+| Testing | pytest |
 
----
+Pydantic, pydantic-settings, orjson y loguru aparecieron en formulaciones iniciales, pero no forman parte del runtime final documentado porque no existía necesidad demostrada.
 
-# Arquitectura de almacenamiento
+## 8. Distribución y artefactos finales
 
-| Partición | Punto de montaje | Propósito |
-|------------|------------------|-----------|
-| SYSTEM | `/` | Sistema operativo |
-| PLATFORM | `/opt/osint-framework` | Plataforma CENTAURUS |
-| WORKSPACE | `/workspace` | Evidencias, informes y datos persistentes |
+La misma entrega puede consumirse mediante tres rutas:
 
----
+- **OVA**: appliance Debian preconstruida y validada.
+- **Git + Docker Linux**: despliegue reproducible desde una revisión Git fijada.
+- **USB**: appliance física x86-64/UEFI materializada desde una imagen raw de 30.000 MiB.
 
-# Hardware de referencia
+Autoridades finales:
 
-| Recurso | Valor |
-|----------|-------|
-| CPU | 8 vCPU |
-| Memoria RAM | 8 GB |
-| Almacenamiento | 30 GB |
+- OVA: `CENTAURUS-C4-FINAL.ova`, 11.828.618.752 bytes, SHA-256 `d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868`.
+- imagen USB: `CENTAURUS-USB.img`, 31.457.280.000 bytes, SHA-256 `7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165`.
 
-Distribución recomendada:
+La imagen USB fue validada tras materialización física, arranque en VMware y, posteriormente, en bare-metal sobre un Toshiba Portege Z30-A con NIC Intel I218-V/e1000e. La política portable materializó la interfaz como `centaurus0`, obtuvo enlace Ethernet, DHCP y ruta por defecto. Esta evidencia **no** se extrapola a compatibilidad universal de hardware.
 
-| Disco | Tamaño | Uso |
-|--------|---------|----------------------|
-| Disco 1 | 5 GB | Sistema Operativo |
-| Disco 2 | 15 GB | Plataforma |
-| Disco 3 | 10 GB | Workspace |
+## 9. Qué no es CENTAURUS
 
----
+No es un agente autónomo, un escáner activo, una plataforma Red Team, un SIEM, un motor de Vulnerability Assessment ni una arquitectura distribuida. El LLM no controla tools ni genera Findings.
 
-# Convenciones del proyecto
+## 10. Modelo de trabajo OSINT
 
-## Hostname
+CENTAURUS formaliza pasos repetibles de un analista OSINT: delimitar una Investigation, planificar adquisición, preservar RAW, normalizar Evidence, aplicar Rules, producir Findings y consolidar un Report trazable. La IA se mantiene en las fronteras de interpretación/presentación y no sustituye la cadena determinista de conocimiento.
 
-```text
-centaurus
-```
+La explicación completa desde la perspectiva del analista se encuentra en `03_USO/OSINT_ANALYST_VIEW.md`.
 
-## Repositorio remoto
+## 11. Operación de la appliance
 
-```text
-git@github.com:M4Rc0s-S3c/centaurus-osint-framework.git
-```
+El analista inicia la appliance desde el host con `centaurus` **sin argumentos**. El wrapper exige TTY y autenticación fresca y delega exclusivamente en un broker privilegiado mínimo que abre el shell CENTAURUS; el usuario no recibe administración genérica de Docker.
 
-## Repositorio local
+El apagado se realiza fuera del shell mediante `centaurus-poweroff`, también de cero argumentos y con autenticación fresca. Ejecuta únicamente un apagado limpio y no concede `systemctl`, `reboot`, `halt` ni shell root generales.
 
-```text
-/opt/osint-framework/centaurus
-```
+## Base documental
 
-## Rama principal
-
-```text
-main
-```
-
-## Método de autenticación
-
-```text
-SSH (ED25519)
-```
-
-## Proyecto Docker Compose
-
-```text
-centaurus
-```
-
-## Red Docker
-
-```text
-centaurus-network
-```
-
----
-
-# Organización general
-
-```text
-/opt/osint-framework
-│
-├── centaurus/          ← Repositorio Git
-├── runtime/            ← Docker, containerd y Ollama
-├── models/             ← Modelos LLM
-├── cache/              ← Caché persistente
-└── lost+found/
-```
-
-El código fuente, la documentación, los archivos de configuración y la definición de la infraestructura (Docker Compose) residen exclusivamente dentro del repositorio Git (centaurus).
-
-Los componentes de ejecución (Docker, containerd y Ollama), los modelos de inteligencia artificial y la información temporal permanecen fuera del repositorio para mantener una separación clara entre código y estado de ejecución.
----
-
-# Componentes principales
-
-La arquitectura funcional del framework estará formada por los siguientes componentes:
-
-- CLI
-- Planner
-- Core
-- Plugin Manager
-- Executor
-- Evidence Manager
-- Rule Engine
-- Reporting Engine
-- LLM Manager
-
-La descripción detallada de cada componente puede consultarse en **ARCHITECTURE.md**.
-
----
-
-# Documentación
-
-La documentación del proyecto se organiza en documentos independientes, cada uno con una responsabilidad específica.
-
-El índice completo y el orden de lectura recomendado pueden consultarse en **README.md**.
-
-| Documento | Propósito |
-|-----------|-----------|
-| `PROJECT.md` | Información general e identidad del proyecto. |
-| `SPECIFICATION.md` | Especificación funcional del framework. |
-| `STANDARDS.md` | Estándares y convenciones oficiales. |
-| `ARCHITECTURE.md` | Arquitectura técnica del sistema. |
-| `STORAGE.md` | Arquitectura de almacenamiento. |
-| `INSTALL.md` | Instalación y preparación del entorno. |
-| `DEVELOPMENT.md` | Guía para el desarrollo. |
-| `ROADMAP.md` | Planificación y evolución del proyecto. |
-| `CHANGELOG.md` | Historial de cambios del proyecto. |
-
----
-
-# Estado actual
-
-## Infraestructura
-
-- [x] Instalación de Debian.
-- [x] Configuración UEFI.
-- [x] Arquitectura de almacenamiento.
-- [x] Configuración de puntos de montaje.
-- [x] Validación de red.
-- [x] OpenSSH Server operativo.
-- [x] Snapshot de infraestructura.
-- [x] Clon de desarrollo.
-- [x] Instalación de Git.
-- [x] Configuración de GitHub mediante SSH.
-- [x] Clonado del repositorio.
-- [x] Documentación base completada.
-- [x] Instalación de Docker Engine.
-- [x] Instalación de Docker Compose.
-- [x] Creación del entorno de contenedores.
-- [x] Integración de Ollama.
-- [x] Infrastructure as Code.
-- [x] Runtime de Docker desacoplado del sistema.
-- [x] Runtime de containerd desacoplado del sistema.
-- [x] Runtime de Ollama desacoplado del repositorio.
-- [x] Contenedor `centaurus-ollama` operativo.
-- [x] Red Docker `centaurus-network` operativa.
-- [x] Arquitectura de runtime validada.
-
-
----
-
-# Próximo hito
-
-# Próximo hito
-
-Inicio del desarrollo del Core Framework:
-
-- Gestor de configuración.
-- Sistema de logging.
-- Gestión del Workspace.
-- Motor de plugins.
-- API interna.
-- Desarrollo del CLI inicial.
-- Descarga del modelo Qwen3:4B Instruct.
-
----
-
-# Referencias
-
-La información funcional del proyecto se desarrolla en:
-
-- **SPECIFICATION.md**
-- **ARCHITECTURE.md**
-- **STANDARDS.md**
-
----
-
-# Historial
-
-| Versión | Fecha | Cambios |
-|----------|--------|---------|
-| 0.4 | Julio 2026 | Actualización del estado del proyecto tras completar la plataforma base. Incorporación de la filosofía Infrastructure as Code, reorganización de la estructura física del proyecto y documentación de la arquitectura de runtime (Docker, containerd y Ollama). |
-| 0.3 | Julio 2026 | Reorganización del documento, incorporación de la nueva estructura documental, actualización del estado del proyecto y preparación para la fase de desarrollo. |
-| 0.2 | Julio 2026 | Actualización de GitHub, autenticación SSH, estructura del repositorio y estado de la infraestructura. |
-| 0.1 | Julio 2026 | Creación del documento. |
+TFM-OSINT; Modelo Conceptual v3.5; ADR v3.2; Core v2.5; Runtime v2.10; CLI v1.6; Runtime Configuration v1.4; LLM v2.6; Release & Distribution v1.8; G4 USB Cierre Integral v1.1; G4-N7 Validación Física v1.0; Auditoría de Cobertura TFM v3.4.

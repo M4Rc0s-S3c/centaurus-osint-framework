@@ -1,147 +1,166 @@
-# ARCHITECTURE.md
+# Arquitectura de CENTAURUS
 
-# Arquitectura técnica del Framework OSINT
-# Información del proyecto
+**Estado:** FINAL · arquitectura estable y distribución final validada
 
-| Campo | Valor |
-|--------|-------|
-| Nombre | CENTAURUS OSINT Framework |
-| Repositorio | centaurus-osint-framework |
-| Plataforma | Debian 13 |
-| Arquitectura | Modular |
-| Contenedorización | Docker |
-| LLM local | Ollama |
-| Modelo inicial | Qwen3:4B Instruct |
+## 1. Propósito
 
-## Objetivo
+CENTAURUS es un framework OSINT modular orientado a **Public Exposure Assessment** para equipos Blue Team y departamentos IT de PYMEs. Separa adquisición, normalización, razonamiento determinista, reporting y asistencia lingüística.
 
-Definir la arquitectura técnica de referencia para el desarrollo del
-framework OSINT local orientado a equipos Blue Team.
+## 2. Principios estructurales
 
-## Decisiones tecnológicas adoptadas
+- `Investigation` organiza el dominio; la arquitectura no gira alrededor de tools o LLM.
+- **Core** es el único custodio de Investigation y autoridad de su lifecycle.
+- Core coordina el flujo macroscópico e integra conocimiento, pero **no debe mediar en cada colaboración interna**: son válidas dependencias expresamente definidas por contrato, como `Executor → PluginManager`.
+- Están prohibidas dependencias laterales no documentadas, acceso a implementaciones concretas saltándose contratos y transferencia de responsabilidades entre componentes.
+- Cada componente mantiene responsabilidad única y contrato público mínimo.
+- Plugins no se ejecutan desde Core ni Planner; Executor delega cada `ExecutionTask` en PluginManager.
+- El dominio no depende de Docker, Ollama, filesystem, plugins concretos ni interfaz.
+- La seguridad combina autoridad clara con controles explícitos en las fronteras relevantes.
+- Los componentes estructurales viven bajo el composition root/Core; recursos internos pesados pueden adquirirse/liberarse bajo demanda.
 
-  Componente                Tecnología seleccionada
-  ------------------------- -------------------------
-  Sistema operativo         Debian mínimo
-  Contenedorización         Docker + Docker Compose
-  Lenguaje                  Python 3
-  LLM local                 Ollama
-  Modelo LLM                Qwen3:4B Instruct
-  Interfaz CLI              Typer
-  Presentación en consola   Rich
-  Entrada interactiva       Prompt Toolkit
-  Comunicación HTTP         httpx
-  Modelado de datos         Pydantic
-  Calidad de código         Ruff
-  Pruebas                   Pytest
+## 3. Capas y conceptos
 
-## Principios de diseño
-
--   Ejecución completamente local.
--   Sin dependencias de servicios cloud.
--   Sin APIs comerciales obligatorias.
--   Arquitectura modular basada en plugins.
--   Análisis OSINT exclusivamente pasivo.
--   Separación entre recopilación de evidencias, correlación y
-    generación del informe.
--   Un único LLM para planificación y generación de informes.
-
-## Arquitectura lógica
-
-``` text
+```text
 Analista
-    │
-    ▼
-CLI (Typer + Rich + Prompt Toolkit)
-    │
-    ▼
-LLM Local (Ollama + Qwen3:4B Instruct)
-    │
-    ▼
-TaskPlan
-    │
-    ▼
-Core Framework
-    │
- ┌──┼───────────────┐
- ▼  ▼               ▼
-Plugin Manager  Executor  Evidence Manager
-                   │
-                   ▼
-             Herramientas OSINT
-                   │
-                   ▼
-        Normalización de evidencias
-                   │
-                   ▼
-              Rule Engine
-                   │
-                   ▼
-               Hallazgos
-                   │
-                   ▼
-LLM Local (Ollama + Qwen3:4B Instruct)
-                   │
-        ┌──────────┴──────────┐
-        ▼                     ▼
- CLI (Rich)          Informes Markdown / JSON
+  ↓
+CLI / RequestInterpreter
+  ↓
+StructuredRequest
+  ↓
+Core
+  ├─ Planner → ExecutionPlan / ExecutionTask
+  ├─ Executor → PluginManager → Plugin
+  ├─ EvidenceManager
+  ├─ RuleEngine
+  ├─ ReportManager
+  ├─ LLMManager
+  └─ Persistence Layer / Stores
+
+Dominio:
+Investigation · Target · Intent · Rule · Evidence · Finding · Report
 ```
 
-## Componentes
+### Dominio
 
-### LLM local
+- Investigation
+- Target
+- Intent
+- Rule
+- Evidence
+- Finding
+- Report
 
-Responsabilidades: - Interpretar la petición. - Generar el TaskPlan. -
-Redactar el informe final.
+### Aplicación / runtime
 
-El modelo no ejecuta herramientas ni determina el riesgo.
+- StructuredRequest
+- RequestInterpreter
+- Core
+- Planner
+- ExecutionPlan
+- ExecutionTask
+- Executor
+- PluginManager
+- RawObservation
+- EvidenceManager
+- ExecutionFailure
+- RuntimeProgressReporter/adapters
 
-### Core Framework
+`RuleEngine` es un servicio de dominio; `ReportManager` materializa el contrato de generación de Report bajo coordinación de Core. Los managers/componentes no se convierten por ello en conocimiento persistido.
 
-Coordina toda la ejecución mediante: - Plugin Manager - Executor -
-Evidence Manager - Rule Engine
+### Infraestructura/presentación
 
-### Herramientas del MVP
+- plugins concretos y herramientas externas;
+- stores/filesystem/JSON;
+- Ollama/provider LLM;
+- Docker/Compose;
+- logging;
+- HTTP/subprocess;
+- CLI/Rich/Prompt Toolkit.
 
--   whois_lookup
--   rdap_lookup
--   DNSRecon
--   Sublist3r
--   TheHarvester
--   crtsh_lookup
+## 4. Frontera de entrada
 
-## Workspace
+La interfaz puede realizar trabajo de aplicación previo, pero ninguna interfaz crea/modifica Investigation directamente.
 
-``` text
-workspace/
-├── reports/
-├── evidence/
-├── logs/
-├── cache/
-└── tmp/
+```text
+Lenguaje natural
+  ↓
+RequestInterpreter
+  ├─ TargetFactory (determinista)
+  └─ LLM #1 (Intent permitido)
+  ↓
+StructuredRequest
+  ↓
+Core crea Investigation
 ```
 
-El directorio será configurable y se montará como volumen Docker
-persistente.
+Core no recibe lenguaje natural ni utiliza LLM para planificar herramientas.
 
-## Flujo de ejecución
+## 5. Flujo funcional vigente
 
-1.  El analista realiza una petición desde la CLI.
-2.  El LLM interpreta la petición.
-3.  Se genera un TaskPlan.
-4.  El Core ejecuta las herramientas.
-5.  Las evidencias se normalizan y almacenan.
-6.  El Rule Engine genera los hallazgos.
-7.  El LLM redacta el informe.
-8.  El informe se presenta en la CLI y se almacena en Markdown y JSON.
+```text
+Investigation
+  ↓
+Planner → ExecutionPlan
+  ↓
+Executor recorre ExecutionTask secuencialmente
+  ↓
+PluginManager resuelve/invoca Plugin
+  ↓
+RawObservation
+  ↓ persist RAW
+Normalización tool-specific
+  ↓
+EvidenceManager → Evidence
+  ↓ persist Evidence
+RuleEngine + Rules → Finding(s)
+  ↓ persist Finding
+ReportManager → Report
+  ↓ persist Report (report.json + report.md)
+LLM #2
+  ↓
+presentación efímera/no autoritativa
+```
 
-## Decisiones congeladas del MVP
+Los fallos de tools se modelan mediante `ExecutionFailure`, se persisten separadamente y no entran en este flujo de conocimiento.
 
--   Un único LLM local (Ollama + Qwen3:4B Instruct).
--   Framework completamente dockerizado.
--   Análisis OSINT pasivo.
--   Arquitectura basada en plugins.
--   Rule Engine determinista.
--   CLI como única interfaz de usuario.
--   Informes en Markdown y JSON.
--   Workspace configurable e independiente del Core.
+## 6. Frontera de despliegue
+
+La arquitectura de componentes no implica un contenedor por componente. La frontera documentada de despliegue separa:
+
+- `centaurus-core`: framework y ejecución de tools;
+- `centaurus-ollama`: servicio LLM local.
+
+Las tools externas con runtimes Python incompatibles se aíslan mediante entornos dedicados de la versión de entrega sin modificar el contrato de plugin.
+
+### Plano host de la appliance
+
+Fuera del dominio/Core existe una frontera operacional mínima:
+
+```text
+usuario centaurus
+  ├─ `centaurus` → autenticación → broker runtime → shell CENTAURUS
+  └─ `centaurus-poweroff` → autenticación → helper poweroff → systemd poweroff
+```
+
+Esta frontera no convierte la CLI ni el Core en componentes privilegiados y no concede una capacidad `sudo` general al analista.
+
+## 7. Evolución
+
+La arquitectura conceptual se reabre cuando cambia el dominio, una frontera de autoridad o un contrato público real. Una nueva tool, versión o ruta física no constituye por sí sola evolución del dominio.
+
+## 8. Ajuste operacional OLLAMA-D2
+
+D2 refina únicamente la infraestructura de asistencia posterior al Report. LLM #2 utiliza un provider configurado para Reports grandes con `timeout=300`, `num_ctx=8192` y `num_predict=UNSET`; LLM #1 conserva su perfil previo. `think=false`, `keep_alive=0`, grounding y ausencia de reintentos se mantienen.
+
+La modificación no altera las dependencias de autoridad: Planner sigue seleccionando tools, RuleEngine sigue produciendo Findings y Report continúa siendo el extremo autoritativo/persistido. Un fallo de LLM #2 se degrada como fallo operacional de presentación.
+
+## 9. Materialización de distribución y alcance arquitectónico
+
+El cierre C4-RS2/G4 demuestra que OVA, Git + Docker Linux y USB son modalidades de empaquetado/materialización del mismo producto. La imagen USB conserva las fronteras lógicas SYSTEM/PLATFORM/WORKSPACE sobre un único GPT; esta diferencia física no modifica el modelo de dominio ni el lifecycle de Investigation.
+
+La validación N7 sobre una NIC física real confirma que `centaurus0` es el nombre lógico del uplink y no una dependencia de la vNIC E1000 de VMware. La evidencia física tampoco modifica las dependencias entre Core, Planner, plugins, RuleEngine, Report y LLM.
+
+
+## Base documental
+
+Constitución Arquitectónica v2.0; ADR v3.2; Modelo Conceptual v3.5; Contrato Core v2.5; Runtime v2.10; Knowledge Pipeline v2.1; Tools-Plugins v2.4; Contrato LLM v2.6; Reporting v1.5; OLLAMA-D2 R2.

@@ -1,319 +1,152 @@
-# STORAGE.md
+# Persistencia y trazabilidad
 
-# Arquitectura de almacenamiento del Framework OSINT
+**Estado:** FINAL · layout reconciliado con referencias de implementación real
 
-> **Estado:** Diseño revisado, actualizado y materializado
-> **Versión:** Storage v2.0
-> **Fecha de revisión:** 15/08/2026
-> **Base anterior:** Storage v1.1 — 11/08/2026
+## 1. Principio
 
-## Objetivo
+La persistencia pertenece a infraestructura y es coordinada por Core. Los objetos de dominio no conocen filesystem, JSON, rutas físicas ni naming.
 
-Definir la organización física y lógica del almacenamiento del framework, separando el sistema operativo,
-la plataforma de ejecución y los datos generados durante las investigaciones.
+`investigation_id` es el eje lógico de correlación/trazabilidad de los artefactos de una Investigation.
 
-La unidad lógica de trazabilidad de los artefactos persistidos es la **Investigation**, identificada por
-su `investigation_id`.
+## 2. Persistencia de conocimiento y auditoría
 
-Esta versión refleja el cierre de la Persistence Layer para los artefactos actualmente definidos:
-`RawObservation`, `Evidence`, `Finding` y `Report`.
+### Artefactos del Knowledge Pipeline
 
-La persistencia de la salida/narrativa generada por el LLM queda deliberadamente fuera de este cierre y será
-analizada durante la inspección técnica del bloque LLM.
+- `RawObservation` — objeto de aplicación persistido como registro original para auditoría/reproducibilidad;
+- `Evidence` — hecho normalizado de dominio;
+- `Finding` — conclusión determinista de dominio;
+- `Report` — snapshot autoritativo de dominio.
 
-## Principios de diseño
+### Artefactos operacionales separados
 
-- Separación entre sistema operativo, plataforma y datos.
-- `/workspace` constituye la zona persistente de datos del framework.
-- La persistencia pertenece a la infraestructura y no al dominio.
-- Core coordina el uso de la persistencia dentro del flujo de ejecución.
-- Los componentes especializados no gobiernan directamente la infraestructura de almacenamiento.
-- Todo artefacto persistible queda asociado inequívocamente a una Investigation.
-- `investigation_id` es el eje de trazabilidad.
-- La persistencia debe permitir trazabilidad, reproducibilidad y acceso posterior.
-- RAW y las representaciones normalizadas se conservan como artefactos diferenciados.
-- La implementación física de referencia es **Filesystem + JSON**.
-- Los objetos de dominio no conocen rutas físicas, JSON, Filesystem ni mecanismos concretos de persistencia.
-- Los artefactos históricos de conocimiento no se modifican ni se eliminan.
+- `ExecutionFailure` — fallo de ejecución persistible fuera del Knowledge Pipeline.
 
-## Unidad de trazabilidad: Investigation
+La salida de LLM #2 y el progreso runtime no se persisten como conocimiento.
 
-Cada `Investigation` posee un identificador único generado al crearse.
-
-```text
-Investigation
-    │
-    └── investigation_id
-            │
-            ├── RawObservation / RAW
-            ├── Evidence
-            ├── Finding
-            └── Report
-```
-
-No se genera un identificador paralelo para sustituir al `investigation_id` como referencia principal.
-
-## Persistence Layer
-
-La Persistence Layer / Storage Layer está situada en infraestructura.
-
-Su responsabilidad es proporcionar la frontera de almacenamiento de los artefactos persistibles de una investigación,
-encapsulando Filesystem y serialización.
-
-```text
-Core
- │
- │ investigation_id + artefacto
- ▼
-Persistence Layer
- │
- ▼
-Filesystem + JSON
-```
-
-La Persistence Layer no ejecuta plugins, planifica ejecuciones, transforma RAW en Evidence, evalúa Rules,
-genera Findings, genera Reports, contiene lógica de negocio ni modifica los objetos del dominio.
-
-## Estructura física
-
-```text
-/workspace/
-└── investigations/
-    └── <investigation-id>/
-        ├── raw/
-        ├── evidences/
-        │   └── normalized/
-        ├── findings/
-        └── reports/
-```
-
-Los nombres físicos concretos pueden contener información adicional necesaria para mantener unicidad y trazabilidad,
-pero no sustituyen `investigation_id` como referencia lógica.
-
-## Persistencia de RawObservation
-
-RAW conserva la representación original producida por el plugin.
-
-- no se normaliza antes de persistir;
-- no se sobrescribe;
-- es acumulativo;
-- incorpora `investigation_id` como eje de trazabilidad;
-- mantiene la información necesaria de secuencia y origen;
-- la escritura debe ser segura/atómica.
-
-## Persistencia de Evidence
-
-`Evidence` es producida por `EvidenceManager` después de la normalización.
-
-La persistencia pertenece a la Persistence Layer y es coordinada por Core.
-
-```text
-/workspace/investigations/<investigation-id>/evidences/normalized/
-```
-
-Evidence permanece desacoplada de las rutas físicas y del mecanismo de almacenamiento.
-
-## Persistencia de Finding
-
-`Finding` representa conocimiento derivado producido por el `RuleEngine`.
-
-### Decisión cerrada — FindingStore independiente
-
-A 15/08/2026 se cierra la decisión física que permanecía abierta en versiones anteriores:
-
-> **Finding se persiste mediante un `FindingStore` independiente.**
-
-La decisión es compatible con:
-
-- `Finding` como Value Object inmutable;
-- ownership de `Investigation`;
-- trazabilidad `Rule → Finding → Evidence`;
-- separación dominio–infraestructura;
-- autoridad de Core;
-- persistencia acumulativa del conocimiento.
-
-La Persistence Layer no crea Findings. Core coordina la persistencia del Finding ya producido por el RuleEngine.
-
-La implementación utiliza Filesystem + JSON.
-
-```text
-/workspace/investigations/<investigation-id>/findings/
-```
-
-Los Findings son acumulativos. No se definen operaciones `update`, `delete` ni `replace` para modificar conocimiento histórico.
-
-Cada Finding persistido conserva la información necesaria para reconstruir su trazabilidad hacia la Rule y las Evidence que lo sustentan.
-
-## Persistencia de Report
-
-`Report` forma parte de los artefactos persistibles de una Investigation.
-
-```text
-Findings
-   ↓
-ReportManager
-   ↓
-Report
-   ↓
-Core
-   ↓
-ReportStore
-```
-
-La persistencia física se realiza en:
-
-```text
-/workspace/investigations/<investigation-id>/reports/
-```
-
-Report mantiene la trazabilidad hacia los Findings que sustentan el conocimiento comunicado.
-
-`ReportManager` no persiste directamente el Report.
-
-## Relación Report / LLM
-
-El modelo conceptual mantiene:
-
-```text
-Finding[]
-   ↓
-ReportManager
-   ↓
-Report
-   ↓
-LLM
-   ↓
-presentación lingüística
-```
-
-El LLM no crea ni modifica el objeto `Report` del dominio.
-
-### Estado de persistencia de la salida LLM
-
-La persistencia de la narrativa o salida lingüística del LLM **no está cerrada en Storage v2.0**.
-
-Antes de implementarla deberán analizarse:
-
-- necesidad funcional;
-- naturaleza del artefacto;
-- relación con Report;
-- requisitos de reproducibilidad;
-- trazabilidad;
-- formato;
-- ciclo de vida;
-- estrategia física.
-
-No se introduce anticipadamente un `LLMStore` ni una nueva entidad de dominio.
-
-## Serialización
-
-La implementación de referencia utiliza:
-
-```text
-Filesystem + JSON
-```
-
-`orjson` puede utilizarse como mecanismo interno de serialización cuando corresponda.
-
-```text
-Domain/Application object
-        ↓
-Persistence Layer
-        ↓
-JSON
-        ↓
-Filesystem
-```
-
-## Escritura y consistencia
-
-La persistencia filesystem deberá evitar ficheros parcialmente escritos mediante mecanismos de escritura segura/atómica.
-
-Los artefactos históricos de conocimiento no se sobrescriben.
-
-## Acceso del analista
-
-El acceso humano a los artefactos persistidos se realiza directamente sobre el filesystem del workspace.
-
-No forma parte del alcance actual del TFM implementar una API de consulta, query layer o interfaz específica de acceso.
-
-```text
-Investigation
-    │
-    ├── RAW
-    ├── Evidence
-    ├── Finding
-    └── Report
-```
-
-## Puntos de montaje
-
-| Punto de montaje | Contenido |
-|---|---|
-| `/` | Sistema Debian mínimo, GRUB y configuración básica |
-| `/opt/osint-framework` | Plataforma, framework, plugins, rules, modelos, configuración y Docker |
-| `/workspace` | Investigaciones y artefactos persistidos |
-
-## Relación con Docker
-
-- La plataforma se ejecutará mediante Docker.
-- `/workspace` se montará como volumen persistente.
-- La actualización de la plataforma no afectará al contenido del workspace.
-- Los artefactos de las investigaciones permanecerán disponibles aunque se actualice o sustituya la plataforma.
-
-## Independencia de rutas
-
-El Core no contiene rutas físicas codificadas.
-
-Las ubicaciones concretas del workspace y de la Persistence Layer se obtienen mediante configuración.
-
-Core coordina las operaciones de persistencia, pero no conoce detalles de rutas, nombres físicos, serialización
-ni implementación concreta de los stores.
-
-## Portabilidad y mantenimiento
-
-La separación entre sistema, plataforma y workspace permite:
-
-- actualización independiente del sistema y la plataforma;
-- conservación de los datos generados;
-- copias de seguridad del workspace;
-- acceso a resultados desde otros equipos;
-- ejecución mediante Docker;
-- sustitución futura del mecanismo físico de almacenamiento sin modificar el dominio.
-
-## Stores actualmente definidos
+## 3. Stores
 
 ```text
 Persistence Layer
 ├── RawObservationStore
 ├── EvidenceStore
 ├── FindingStore
-└── ReportStore
+├── ReportStore
+└── ExecutionFailureStore      [operacional, separado]
 ```
 
-Todos los stores respetan la misma frontera arquitectónica: reciben el contexto de `investigation_id`,
-persisten artefactos ya producidos, no generan conocimiento, no aplican Rules, no modifican el dominio
-y encapsulan Filesystem y serialización.
+Los stores reciben artefactos ya producidos. No normalizan, no aplican Rules y no gobiernan lifecycle.
 
-## Estado de esta revisión
+## 4. Layout físico vigente
 
-Esta revisión sustituye Storage v1.1 de fecha 11/08/2026.
+La referencia técnica de implementación real de Tools/Plugins y el contrato de Persistence Layer materializan RAW y Evidence bajo la misma rama `evidences/`, manteniéndolos separados:
 
-Cambios principales:
+```text
+/workspace/
+└── investigations/
+    └── <investigation-id>/
+        ├── evidences/
+        │   ├── raw/
+        │   └── normalized/
+        ├── findings/
+        ├── reports/
+        └── execution/
+            └── failures/
+```
 
-- se mantiene `/workspace` como zona persistente;
-- se mantiene `Investigation` como unidad lógica de trazabilidad;
-- se mantiene Core como coordinador;
-- se mantiene Filesystem + JSON como implementación de referencia;
-- se confirma la persistencia física de RAW;
-- se incorpora y cierra la persistencia de Evidence;
-- se incorpora y cierra la persistencia de Report;
-- se incorpora y cierra la persistencia de Finding mediante **FindingStore independiente**;
-- se elimina la condición de "Finding persistence pendiente";
-- se actualiza la estructura física para representar RAW, Evidence, Finding y Report;
-- se mantienen los objetos de dominio desacoplados de la infraestructura;
-- se deja expresamente pendiente el análisis de si la salida del LLM debe persistirse.
+### Reconciliación documental de `raw/`
 
-**Fecha de revisión:** 15/08/2026
-**Versión:** Storage v2.0
-**Estado:** Diseño actualizado y alineado con la Persistence Layer implementada y validada.
+`STORAGE.md v2.0` mostró posteriormente RAW como `<id>/raw/`. Sin embargo:
+
+- el contrato de Persistence Layer v1.0 define `evidences/raw/`;
+- Tools-Plugins v2.4 documenta el `FilesystemRawObservationStore` de implementación real exactamente bajo `evidences/raw/`;
+- Tools-Plugins documenta asimismo `ExecutionFailure` bajo `execution/failures/`.
+
+Con la regla **autoridad temática + referencia de implementación real más específica**, la documentación oficial adopta `evidences/raw/` como ruta física vigente. La variante `<id>/raw/` se conserva únicamente como formulación histórica/desactualizada de `STORAGE.md v2.0` y deberá corregirse cuando ese documento fuente vuelva a versionarse.
+
+Esta reconciliación no depende del proceso USB: describe el layout lógico del workspace ya materializado por el framework.
+
+## 5. Convención RAW
+
+El naming documentado es:
+
+```text
+<investigation-id>_<sequence>-<source>.json
+```
+
+La secuencia pertenece a la Investigation, no a cada source. RAW es acumulativo, no se sobrescribe y conserva el `data` original estructurado.
+
+## 6. Evidence y Finding
+
+`EvidenceStore` persiste Evidence normalizada en `evidences/normalized/`.
+
+`FindingStore` persiste Findings independientemente del Report; un Finding no existe solo como contenido embebido de reporting.
+
+## 7. Report
+
+`ReportStore` persiste el mismo snapshot en:
+
+- `report.json` — representación autoritativa;
+- `report.md` — proyección determinista del mismo Report.
+
+Report conserva contexto/provenance y Findings, pero no `ExecutionFailure` ni estado operacional.
+
+## 8. ExecutionFailure
+
+`ExecutionFailureStore` conserva fallos operacionales bajo la rama `execution/failures/`.
+
+- no es RawObservation;
+- no es Evidence;
+- no es Finding;
+- no entra en RuleEngine;
+- no se incorpora al Report salvo que un futuro contrato aprobado redefina expresamente esa frontera.
+
+## 9. Inmutabilidad, acumulación y ausencia de rollback global
+
+- RAW no se sobrescribe;
+- Evidence histórica no se reemplaza destructivamente;
+- Findings son acumulativos;
+- Report es snapshot inmutable;
+- fallos operacionales conservan su evidencia de ejecución;
+- no se corrige el pasado modificando JSON históricos.
+
+CENTAURUS **no implementa una transacción global con rollback sobre todos los stores de una Investigation**. La persistencia representa una secuencia auditable de hechos y conocimiento producido, no una única escritura atómica del caso completo.
+
+Si una fase posterior falla:
+
+```text
+artefactos previos persistidos   → se conservan
+fase actual                      → falla
+Core                             → Investigation = FAILED
+artefactos downstream no creados → permanecen ausentes
+```
+
+Esta decisión preserva la trazabilidad forense. Un RAW o una Evidence que fueron realmente obtenidos antes de un fallo siguen siendo pruebas válidas de esa ejecución y no deben desaparecer por una compensación transaccional.
+
+La consecuencia es importante: **persistido no significa “investigación completada”**. Una Investigation `FAILED` puede contener artefactos válidos previos; únicamente un Report correctamente construido y persistido representa el snapshot final autoritativo de una Investigation que alcanzó esa fase.
+
+## 10. Trazabilidad
+
+```text
+investigation_id
+  ├─ evidences/raw/             → RawObservation
+  ├─ evidences/normalized/      → Evidence
+  ├─ findings/                  → Finding → Rule + Evidence(s)
+  ├─ reports/                   → Report → Finding(s)
+  └─ execution/failures/        → ExecutionFailure [operacional]
+```
+
+La cadena de explicación del conocimiento es:
+
+```text
+Report → Finding → Rule + Evidence → source/collected_at + RAW original correlacionable
+```
+
+La correspondencia RAW→Evidence se mantiene por la secuencia de ejecución, source/timestamp y mapping normalizador documentado; no se inventa un identificador de dominio adicional si el contrato no lo define.
+
+## 11. Tecnología y acceso
+
+La implementación de referencia es **Filesystem + JSON** bajo `/workspace`. El acceso humano directo al filesystem forma parte del alcance; no se exige query layer/API histórica para el TFM.
+
+## Base documental
+
+Persistence Layer Infrastructure Contract v1.0; Tools-Plugins v2.4; Runtime v2.10; Modelo Conceptual v3.5; Reporting v1.5; `STORAGE.md v2.0` como fuente histórica parcialmente superada en la ruta RAW.

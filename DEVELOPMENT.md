@@ -1,305 +1,107 @@
-# DEVELOPMENT.md
+# Guía de desarrollo
 
-# CENTAURUS OSINT Framework
-## Guía de Desarrollo
+**Estado:** FINAL
 
-> **Estado:** Documento de referencia para el desarrollo del MVP v1.0
+## 1. Disciplina
 
----
-
-# 1. Objetivo
-
-Este documento establece las directrices para el desarrollo de **CENTAURUS OSINT Framework**.
-
-Su finalidad es garantizar que todos los componentes se implementen siguiendo una arquitectura homogénea, modular, mantenible y fácilmente extensible.
-
----
-
-# 2. Filosofía del desarrollo
-
-Durante el desarrollo deberán respetarse las siguientes decisiones de diseño:
-
-- El Core nunca contendrá lógica específica de herramientas.
-- Todas las herramientas serán plugins independientes.
-- El Core únicamente orquestará la ejecución.
-- El LLM nunca ejecutará herramientas directamente.
-- El Rule Engine será el único responsable de generar hallazgos.
-- El LLM únicamente interpretará peticiones y redactará informes.
-- Todo el sistema deberá poder ejecutarse completamente en local.
-- Todo componente deberá ser fácilmente sustituible.
-
----
-
-# 3. Entorno de desarrollo
-
-## Sistema operativo
-
-- Debian GNU/Linux 13
-
-## Lenguaje principal
-
-- Python 3
-
-## Control de versiones
-
-- Git
-
-## Repositorio remoto
-
-```
-git@github.com:M4Rc0s-S3c/centaurus-osint-framework.git
+```text
+Diseño
+→ análisis arquitectónico
+→ aprobación
+→ implementación
+→ tests
+→ revisión
+→ commit
 ```
 
-## Repositorio local
-
-```
-/opt/osint-framework/centaurus
-```
-
-## Rama principal
-
-```
-main
-```
-
-## Autenticación
-
-- SSH
-- Claves ED25519
-
-No se utilizará autenticación HTTPS.
-
----
-
-# 4. Tecnologías
-
-| Componente | Tecnología |
-|------------|------------|
-| Contenedores | Docker |
-| Orquestación | Docker Compose |
-| LLM | Ollama |
-| Modelo inicial | Qwen3:4B Instruct |
+Un componente nuevo no se incorpora sin responsabilidad y contrato definidos.
 
----
+## 2. Principios
 
-# 5. Librerías previstas
+- diseñar antes de implementar;
+- YAGNI/KISS/SRP;
+- contratos públicos mínimos;
+- bajo acoplamiento y alta cohesión;
+- Core neutral respecto a tools;
+- dominio independiente de infraestructura;
+- configuración operacional separada de semántica analítica;
+- evolución incremental basada en necesidad demostrada.
 
-| Librería | Uso |
-|-----------|--------------------------------|
-| Typer | CLI |
-| Rich | Interfaz de consola |
-| Prompt Toolkit | Entrada interactiva |
-| httpx | Comunicación HTTP |
-| Pydantic | Modelos de datos |
-| Pytest | Testing |
-| Ruff | Calidad del código |
+## 3. Dependencias y colaboraciones
 
----
+No existe una prohibición absoluta de dependencias directas entre componentes. La regla vigente es:
 
-# 6. Organización del proyecto
+> una colaboración directa solo es válida si forma parte del contrato arquitectónico aprobado y respeta la responsabilidad de ambos extremos.
 
-```
-centaurus/
-│
-├── src/
-│   ├── core/
-│   ├── planner/
-│   ├── executor/
-│   ├── evidence/
-│   ├── reporting/
-│   ├── cli/
-│   └── llm/
-│
-├── plugins/
-│
-├── rules/
-│
-├── docker/
-│
-├── config/
-│
-├── scripts/
-│
-├── docs/
-│
-├── tests/
-│
-├── README.md
-├── PROJECT.md
-├── ARCHITECTURE.md
-├── STORAGE.md
-├── INSTALL.md
-├── DEVELOPMENT.md
-├── ROADMAP.md
-├── docker-compose.yml
-└── requirements.txt
-```
+Ejemplos canónicos:
 
-> Los datos persistentes (workspace, modelos, informes, evidencias y logs) no forman parte del repositorio Git y residen fuera del árbol del código.
+- Core → Planner;
+- Core → Executor;
+- Executor → PluginManager;
+- PluginManager → BasePlugin;
+- Core → EvidenceManager / RuleEngine / ReportManager / stores;
+- Core → RuntimeProgressReporter opcional.
 
----
+No se permiten:
 
-# 7. Flujo de trabajo con Git
+- dependencias laterales ad hoc para “acortar” el flujo;
+- acceso a una implementación concreta saltándose el contrato;
+- componentes que modifiquen directamente Investigation fuera de Core;
+- inversión accidental de ownership.
 
-Actualizar el repositorio:
+## 4. Plugins
 
-```bash
-git pull
-```
+Una nueva tool debe:
 
-Consultar estado:
+- implementar `BasePlugin.execute(parameters: dict) -> RawObservation`;
+- producir RAW válido o fallo contractual estable;
+- disponer de normalizador específico cuando corresponda;
+- no crear Evidence/Finding/Report;
+- no introducir lógica tool-specific en Core o RuleEngine;
+- documentar mapping RAW → Evidence;
+- incluir pruebas focales, integración y runtime real cuando dependa de tool externa.
 
-```bash
-git status
-```
+## 5. Rules
 
-Añadir cambios:
+Una Rule nueva comienza por una pregunta objetiva del dominio. Solo si una Rule real no puede expresarse con los operadores existentes se justifica ampliar RuleEngine.
 
-```bash
-git add .
-```
+## 6. LLM
 
-Crear commit:
+Prompts, schemas, grounding y perfiles respetan la separación LLM #1 / LLM #2. Parámetros semánticos permanecen versionados en código salvo necesidad operacional demostrada.
 
-```bash
-git commit -m "Descripción del cambio"
-```
+## 7. Persistencia
 
-Enviar cambios:
+- no codificar rutas físicas en objetos de dominio;
+- persistir RAW antes de normalizar;
+- conservar Evidence/Finding/Report como artefactos diferenciados;
+- persistir `ExecutionFailure` en la rama operacional separada;
+- no sobrescribir conocimiento histórico para “corregir” resultados.
 
-```bash
-git push
-```
+## 8. Git y calidad
 
----
+No realizar staging/commit mientras exista algún test fallando. Cada cierre revisa, según riesgo:
 
-# 8. Convenciones de desarrollo
+- diff de alcance;
+- `git diff --check`;
+- suite focal;
+- suite global;
+- smoke/runtime real cuando corresponda;
+- staging explícito;
+- revisión cached;
+- commit/push;
+- working tree limpio.
 
-## Core
+## 9. Qué no hacer
 
-El Core nunca contendrá código específico de herramientas.
+- funciones globales con lógica de negocio sin justificación arquitectónica;
+- acoplar RuleEngine a RAW/tool-specific schemas;
+- convertir variabilidad analítica en settings libres por comodidad;
+- reabrir arquitectura por estética;
+- convertir fallos operacionales en conocimiento;
+- permitir a LLM planificar/ejecutar fuera de contrato;
+- duplicar Target/Intent en artefactos efímeros si no existe necesidad contractual;
+- reintroducir la antigua regla de que toda llamada debe pasar físicamente por Core.
 
----
+## Base documental
 
-## Plugins
-
-Cada herramienta deberá implementarse como un plugin independiente.
-
-Cada plugin será responsable de:
-
-- recibir parámetros
-- ejecutar la herramienta
-- normalizar resultados
-- devolver evidencias al Core
-
----
-
-## Rules
-
-Las reglas estarán completamente desacopladas del código.
-
-Su función será:
-
-- analizar evidencias
-- detectar hallazgos
-- asignar severidad
-- generar recomendaciones
-
-Nunca deberán contener lógica propia de ejecución de herramientas.
-
----
-
-# 9. Flujo de desarrollo
-
-## Fase 1
-
-- Crear estructura del proyecto.
-- Configurar Docker.
-- Configurar CLI.
-
-## Fase 2
-
-- Implementar Core.
-- Plugin Manager.
-- Executor.
-
-## Fase 3
-
-- Implementar herramientas OSINT.
-
-## Fase 4
-
-- Evidence Manager.
-
-## Fase 5
-
-- Rule Engine.
-
-## Fase 6
-
-- Integración con Ollama.
-
-## Fase 7
-
-- Generación de informes.
-
-## Fase 8
-
-- Validación y pruebas.
-
----
-
-# 10. Calidad del código
-
-Antes de aceptar cualquier cambio deberán ejecutarse:
-
-- Ruff
-- Pytest
-
-El código deberá mantenerse:
-
-- tipado
-- documentado
-- modular
-- desacoplado
-
----
-
-# 11. Docker
-
-Todos los componentes deberán diseñarse pensando en su ejecución mediante Docker.
-
-Los datos persistentes se almacenarán fuera de los contenedores.
-
----
-
-# 12. Persistencia
-
-Toda la información generada deberá almacenarse dentro del Workspace.
-
-Nunca deberán utilizarse rutas absolutas codificadas en el código fuente.
-
----
-
-# 13. Objetivo del MVP
-
-Al finalizar el desarrollo el framework deberá ser capaz de:
-
-- Interpretar peticiones en lenguaje natural.
-- Generar un TaskPlan.
-- Ejecutar herramientas OSINT.
-- Normalizar evidencias.
-- Aplicar Rules.
-- Generar hallazgos.
-- Elaborar informes técnicos.
-- Mostrar resultados en la CLI.
-- Exportar informes en Markdown y JSON.
-
----
-
-# Historial
-
-| Versión | Fecha | Cambios |
-|----------|--------|---------|
-| 0.2 | Julio 2026 | Actualizada la arquitectura de desarrollo, Git, GitHub SSH, estructura del repositorio y motor de Rules. |
-| 0.1 | Julio 2026 | Documento inicial. |
+Constitución Arquitectónica v2.0; ADR v3.2; Ciclo de Cierre v1.16; Core/Plugin/Rule/LLM contracts consolidados; cierre OLLAMA-D2 R2.
