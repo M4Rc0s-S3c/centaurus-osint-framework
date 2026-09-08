@@ -8,13 +8,13 @@
 
 ### CREDENCIALES
 Las credenciales existentes son las siguientes:
-** Usuario => centaurus
-*** Password => centaurus
+**Usuario => centaurus**
+***Password => centaurus***
 
-** Usuario root => root
-*** Password root => root
+**Usuario root => root**
+***Password root => root***
 
-**** Las credenciales por defecto es recomendable cambiarlas y seguir las políticas de complejidad de credenciales para su uso
+***Las credenciales por defecto es recomendable cambiarlas y seguir las políticas de complejidad de credenciales para su uso***
 
 ## 2. Objetivo
 
