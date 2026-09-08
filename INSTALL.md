@@ -6,7 +6,21 @@
 **Fecha:** 29/08/2026  
 **Estado:** NOTA TÉCNICA · MODALIDAD GIT + DOCKER LINUX · GUÍA OPERATIVA  
 **Ámbito:** despliegue reproducible de CENTAURUS desde una copia de trabajo Git fijada a una revisión exacta sobre un host Linux con Docker Engine y Docker Compose  
-**Distribución relacionada:** modalidad Git + Docker Linux; distinta de la OVA y del modo Windows nativo  
+**Distribución relacionada:** modalidad Git + Docker Linux; distinta de la OVA y del modo Windows nativo
+
+------------------------------------------
+**Credenciales:**
+Las credenciales existentes son las siguientes:    
+>**Usuario: centaurus**    
+***Password => centaurus***    
+
+>**Usuario root => root**    
+***Password => root***
+
+***Las credenciales por defecto es recomendable cambiarlas y seguir las políticas de complejidad de credenciales para su uso***
+
+------------------------------------------
+>
 
 > **Naturaleza de la nota.** Este documento explica cómo obtener, construir, validar y utilizar CENTAURUS directamente desde Git sobre Linux mediante Docker. No sustituye al proceso formal de Release Factory/resellado de una OVA ni convierte una rama `main` mutable en una versión de entrega. La identidad de una instalación debe fijarse siempre mediante un commit o tag de versión concreto.
 
