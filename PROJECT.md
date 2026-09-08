@@ -6,13 +6,19 @@
 
 **CENTAURUS OSINT Framework** es un framework modular de inteligencia de fuentes abiertas orientado a equipos Blue Team y departamentos IT de PYMEs. Forma parte de una distribución Linux autocontenida diseñada para realizar evaluaciones pasivas y trazables de exposición pública.
 
-### CREDENCIALES
+## 1.1. Credenciales
 Las credenciales existentes son las siguientes:
-**Usuario => centaurus**
+
+**Usuario => centaurus** 
+
 ***Password => centaurus***
 
+------------------------------------------
 **Usuario root => root**
-***Password root => root***
+
+***Password => root***
+
+--------------------------------------------
 
 ***Las credenciales por defecto es recomendable cambiarlas y seguir las políticas de complejidad de credenciales para su uso***
 
