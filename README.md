@@ -1,76 +1,245 @@
-# CENTAURUS OSINT Framework — Documentación oficial FINAL · REV4
+# CENTAURUS OSINT Framework
 
-**Versión de paquete:** v1.6  
-**Estado documental:** FINAL · reconciliado contra la baseline consolidada final v1.8  
-**Fecha de corte documental:** 31-08-2026
+[Español](README.md) | [English](README.en.md)
 
-Esta emisión constituye el **freeze editorial final de la línea REV4**. Se deriva de `CENTAURUS_DOCUMENTACION_CONSOLIDADA_ES_FINAL_v1.8_31-08-2026_G4_N7_PHYSICAL_CLOSED`, que permanece como **baseline técnica/documental consolidada FINAL e inmutable**. REV4 v1.6 no modifica arquitectura, código, OVA ni imagen USB: corrige estructura y redacción, sincroniza Markdown/DOCX y separa la documentación académica de la trazabilidad interna del proceso.
+CENTAURUS es un framework OSINT modular y orientado a ejecución local, diseñado para equipos Blue Team, análisis de seguridad y entornos IT.
 
-## 1. Estado final incorporado
+Proporciona un flujo reproducible para recopilar información pública, normalizar evidencias, aplicar reglas de análisis deterministas y generar informes de investigación trazables, manteniendo las decisiones operativas fuera del modelo de lenguaje.
 
-Hechos documentales vigentes:
+## Características principales
 
-- `C4-RS2/Broker-D2 = FINAL_ACCEPTED`: OVA final `CENTAURUS-C4-FINAL.ova`, **11.828.618.752 bytes**, SHA-256 `d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868`.
-- la OVA anterior de SHA-256 `85e62517669b8daf25fb42ba1623ef58725485e307075f16c31fef3a9177690c` permanece como `HISTORICAL_NO_GO / DO_NOT_DISTRIBUTE`.
-- `G4 R0–R6 = CLOSED / PASS`: imagen raw, materialización física, validación GPT/payload byte-exacta, arranque desde USB en VMware, Docker/Ollama/Core, investigación real y persistencia tras reinicio.
-- imagen raw final: `CENTAURUS-USB.img`, **31.457.280.000 bytes**, SHA-256 `7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165`.
-- `G4-N7 = CLOSED / PASS` para la plataforma física observada: Toshiba Portege Z30-A, Intel I218-V/e1000e, `centaurus0`, enlace Ethernet 1 Gb/s Full Duplex, DHCP y ruta por defecto.
-- investigación bare-metal: 6 Evidence, 4 Findings y Report persistido. El único fallo de adquisición persistido fue `crt.sh` por error upstream HTTP 404.
-- **LLM #1 — interpretación corroborada por el flujo natural observado**: la petición llegó a un Intent válido e inició la Investigation. Esta evidencia de flujo no se presenta como un marcador telemétrico independiente `LLM1=PASS`.
-- **LLM #2 = TIMEOUT_NON_BLOCKING** en ese hardware: `role=analyst_assistance`, `ReadTimeout`, 300 s. El Report ya existente permaneció autoritativo y la investigación finalizó correctamente en modo degradado.
-- no se atribuye causalidad demostrada del timeout a la CPU antigua; se registra únicamente como factor plausible de recursos/rendimiento y no se formula rendimiento universal.
-- `OLLAMA-D2 R2 = CLOSED / PASS`: commit `fe6ae9c9d81362d456f4cb35f5700a535d13b4bc`; perfil LLM #2 `timeout=300`, `num_ctx=8192`, `num_predict=UNSET`, `think=false`, `keep_alive=0`, sin reintentos automáticos.
-- suite focal D2: **82 tests PASS**; suite global post-D2: **561 tests PASS**. No existe delta de código posterior que cambie esa baseline.
-- `report.json` permanece como representación autoritativa del Report; `report.md` es su proyección determinista; la asistencia LLM #2 es efímera y no autoritativa.
+- Arquitectura modular basada en plugins.
+- Recopilación OSINT pasiva.
+- Flujo determinista `Evidence -> Findings -> Report`.
+- Integración con LLM local mediante Ollama.
+- Separación entre el informe autoritativo determinista y la asistencia no autoritativa del LLM.
+- Workspace persistente para investigaciones, evidencias, hallazgos, informes y logs.
+- Despliegue Git + Docker sobre Linux.
+- Distribución como appliance VMware.
+- Distribución mediante imagen USB arrancable.
+- Modelo de ejecución local-first.
+- Licencia Apache 2.0.
 
-## 2. Alcance técnico cerrado
+## Capacidades OSINT incluidas
 
-Quedan cerrados en el alcance documentado del TFM:
+La versión actual integra seis herramientas/capacidades OSINT:
 
-- arquitectura, modelo de dominio, Core y Knowledge Pipeline;
-- plugins/tools, Rules/RuleEngine y reporting;
-- persistencia y trazabilidad;
-- seguridad del framework y runtime;
-- C4-PRIV-1, C4-PRIV-2, NET-N4 y OLLAMA-D2;
-- resellado correctivo C4-RS2/Broker-D2 y promoción de la OVA final;
-- G4 USB R0–R6;
-- G4-N7 físico para la plataforma observada;
-- documentación consolidada fuente v1.8.
+- WHOIS lookup
+- RDAP lookup
+- DNSRecon
+- Sublist3r
+- TheHarvester
+- crt.sh lookup
 
-## 3. Límites deliberados de las conclusiones
+La arquitectura permite incorporar nuevas herramientas mediante el modelo de plugins sin rediseñar el Core.
 
-No queda un hito técnico obligatorio del producto pendiente dentro del alcance aceptado. La documentación final mantiene, no obstante, límites explícitos:
+## Arquitectura resumida
 
-- compatibilidad universal con cualquier firmware, CPU, controlador USB o NIC: **NO DEMOSTRADA**;
-- rendimiento universal de LLM local sobre hardware arbitrario: **NO DEMOSTRADO**;
-- causalidad exacta del timeout de LLM #2 sobre el portátil antiguo: **NO DEMOSTRADA**;
-- la publicación o distribución pública de los artefactos queda fuera del alcance de esta documentación académica.
+```text
+Analista
+   |
+   v
+CLI / petición en lenguaje natural
+   |
+   v
+LLM #1 - Interpretación del Intent
+   |
+   v
+TargetFactory
+   |
+   v
+Planner
+   |
+   v
+Ejecución del Core
+   |
+   +--> Plugins / fuentes OSINT
+   |        |
+   |        v
+   |   Observaciones raw
+   |        |
+   |        v
+   |   Normalización
+   |        |
+   v        v
+EvidenceManager
+   |
+   v
+Evidence
+   |
+   v
+RuleEngine
+   |
+   v
+Findings
+   |
+   v
+Report determinista
+   |
+   +--> report.json   (autoritativo)
+   +--> report.md     (proyección determinista)
+   |
+   v
+LLM #2 - Asistencia al analista
+          grounded, efímera,
+          no autoritativa, fail-soft
+```
 
-## 4. Orden de lectura recomendado en el repositorio
+El modelo de lenguaje no ejecuta herramientas OSINT de forma autónoma ni genera hallazgos autoritativos. La ejecución operativa y las conclusiones técnicas permanecen trazables mediante componentes deterministas.
 
-La raíz del repositorio mantiene los nombres históricos de los documentos principales para no romper referencias existentes. Para comprender la fotografía final se recomienda:
+## Inicio rápido - Git + Docker
 
-1. `PROJECT.md` — identidad, propósito, alcance y modalidades de distribución.
-2. `SPECIFICATION.md` — requisitos funcionales y no funcionales.
-3. `STANDARDS.md` — normas y convenciones vigentes.
-4. `ARCHITECTURE.md` — arquitectura global del framework.
-5. `STORAGE.md` — persistencia, layout y trazabilidad.
-6. `INSTALL.md` — despliegue reproducible desde Git + Docker sobre Linux.
-7. `DEVELOPMENT.md` — disciplina y guía de desarrollo.
+### Requisitos
 
-La documentación académica completa, incluidos modelo de dominio, Core Runtime, Knowledge Pipeline, plugins, Rules, seguridad, guía de usuario y notas de despliegue OVA/USB/Windows/GPU, se conserva en `CENTAURUS_DOCUMENTACION_OFICIAL_FINAL_REV4_DOCX_MD_ES_v1.6`.
+Host Linux con:
 
-## 5. Regla de autoridad
+- Git
+- Python 3
+- Docker Engine
+- Docker Compose
+- acceso a Docker para el usuario de despliegue
 
-La autoridad se determina por **materia + última decisión explícitamente aceptada**. La baseline consolidada v1.8 es la fuente técnica final de esta edición. Las versiones históricas y los artefactos de proceso se preservan en el archivo completo de trazabilidad, pero no forman parte del paquete académico limpio ni prevalecen sobre los cierres posteriores.
+Clonar el repositorio:
 
-## 6. Evolución de la línea REV4
+```bash
+git clone https://github.com/M4Rc0s-S3c/centaurus-osint-framework.git
+cd centaurus-osint-framework
+```
 
-- **v1.1:** cierre C4-PRIV-1/2 y OLLAMA-D2, actualización del entrypoint/apagado y baseline de 561 tests.
-- **v1.2:** notas técnicas Windows y GPU/Ollama.
-- **v1.3:** nota técnica Git + Docker Linux.
-- **v1.4:** cierre C4-RS2/Broker-D2, G4 USB R0–R6 y N7 físico; actualización de la distinción operacional LLM #1 / LLM #2.
-- **v1.5:** notas técnicas específicas de despliegue OVA/VMware y USB.
-- **v1.6:** freeze editorial final; corrección estructural y lingüística, sincronización MD/DOCX y separación entre entrega académica limpia y trazabilidad interna.
+Para utilizar la release pública actual:
 
-Las notas técnicas complementarias no modifican la autoridad de los contratos del Core ni de la baseline técnica v1.8.
+```bash
+git checkout v1.0.0
+```
+
+A continuación, seguir el procedimiento documentado en [`INSTALL.md`](INSTALL.md).
+
+El bootstrap de release está disponible mediante:
+
+```bash
+./scripts/bootstrap_linux_release.sh
+```
+
+> Los prerrequisitos exactos, la preparación del entorno y los pasos de validación se definen en `INSTALL.md`. Debe utilizarse ese documento como procedimiento de despliegue, no este README como runbook completo.
+
+## Credenciales de la appliance
+
+La appliance distribuida en OVA/USB utiliza por defecto:
+
+### Usuario estándar
+
+```text
+Usuario: centaurus
+Contraseña: centaurus
+```
+
+### Root
+
+```text
+Usuario: root
+Contraseña: root
+```
+
+Se recomienda cambiar las credenciales por defecto después del primer uso cuando el entorno vaya a permanecer desplegado.
+
+## Modalidades de distribución
+
+CENTAURUS contempla varias modalidades de distribución.
+
+### Git + Docker
+
+Recomendada cuando el framework se despliega desde código fuente sobre un host Linux compatible.
+
+El repositorio incluye el Core, las definiciones Docker/Compose, locks de dependencias, scripts de inicialización y documentación de despliegue.
+
+### Appliance VMware
+
+Puede utilizarse una OVA preconstruida cuando se prefiera una appliance virtual autocontenida.
+
+### Imagen USB arrancable
+
+Puede materializarse una imagen raw arrancable sobre un dispositivo de almacenamiento adecuado para ejecución portable.
+
+> La OVA y la imagen raw USB son artefactos de release y no se almacenan directamente en este repositorio Git.
+
+## Windows
+
+Windows nativo puede utilizarse para desarrollo, ejecución del Core y flujos locales con Ollama.
+
+No se presenta Windows como equivalente a la distribución completa Linux + Docker para todas las herramientas OSINT integradas ni para el runtime endurecido de contenedores. Consulta [`INSTALL.md`](INSTALL.md) y [`PROJECT.md`](PROJECT.md) para conocer el alcance documentado.
+
+## LLM local
+
+CENTAURUS utiliza Ollama para las capacidades locales de lenguaje.
+
+El diseño actual separa dos roles lógicos de LLM:
+
+- **LLM #1 - interpretación:** convierte una petición en lenguaje natural en un Intent validado.
+- **LLM #2 - asistencia al analista:** actúa después de que exista el Report determinista y es no autoritativo y fail-soft.
+
+El informe determinista continúa siendo válido aunque la asistencia al analista no esté disponible o agote su timeout.
+
+## Persistencia
+
+Los datos de runtime se mantienen fuera de la imagen de aplicación, en un workspace persistente.
+
+Entre los datos persistidos se incluyen normalmente:
+
+```text
+workspace/
+├── reports/
+├── evidence/
+├── logs/
+├── cache/
+└── tmp/
+```
+
+Consulta [`STORAGE.md`](STORAGE.md) para el modelo autoritativo de persistencia.
+
+## Pruebas
+
+El repositorio incluye la suite automatizada bajo:
+
+```text
+tests/
+```
+
+En un entorno de desarrollo/pruebas preparado:
+
+```bash
+python -m pytest
+```
+
+Consulta [`DEVELOPMENT.md`](DEVELOPMENT.md) para las pautas de desarrollo y validación.
+
+## Documentación
+
+Orden de lectura recomendado:
+
+1. [`PROJECT.md`](PROJECT.md) - identidad del proyecto, alcance y modalidades de distribución.
+2. [`INSTALL.md`](INSTALL.md) - despliegue e instalación.
+3. [`ARCHITECTURE.md`](ARCHITECTURE.md) - arquitectura del framework.
+4. [`SPECIFICATION.md`](SPECIFICATION.md) - especificación funcional y no funcional.
+5. [`STORAGE.md`](STORAGE.md) - persistencia y trazabilidad.
+6. [`STANDARDS.md`](STANDARDS.md) - convenciones y estándares del proyecto.
+7. [`DEVELOPMENT.md`](DEVELOPMENT.md) - flujo de desarrollo.
+
+## Release
+
+Release pública actual:
+
+**[v1.0.0](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.0)**
+
+La entrega académica del TFM quedó congelada de forma independiente y continúa siendo reproducible desde el commit de entrega documentado en los materiales presentados. Los cambios posteriores del repositorio limitados a documentación pública y licencia no alteran esa fotografía académica congelada.
+
+## Uso responsable
+
+CENTAURUS está orientado a OSINT legítimo, Blue Team, seguridad defensiva, investigación y evaluaciones autorizadas.
+
+El usuario es responsable de garantizar que el uso de fuentes públicas, herramientas de terceros e información recopilada cumple la legislación aplicable, los términos de las fuentes y las políticas de su organización.
+
+## Licencia
+
+CENTAURUS se distribuye bajo la **Apache License, Version 2.0**.
+
+Consulta [`LICENSE`](LICENSE) para el texto completo de la licencia y [`NOTICE`](NOTICE) para la información de atribución.
