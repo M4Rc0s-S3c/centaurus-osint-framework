@@ -1,136 +1,211 @@
 # Especificación funcional
 
-**Estado:** FINAL · alcance funcional y distribución técnica aceptados
+[Inicio](README.md) · [Proyecto](PROJECT.md) · [Arquitectura](ARCHITECTURE.md) · [Instalación](INSTALL.md)
 
 ## 1. Propósito
 
-Definir qué debe hacer CENTAURUS según el estado funcional consolidado, sustituyendo las formulaciones tempranas en las que el LLM generaba un `TaskPlan` o RuleEngine asignaba severidades/recomendaciones.
+Este documento define el comportamiento funcional público de CENTAURUS.
+
+La implementación actual utiliza planificación determinista y mantiene al LLM fuera de la selección/ejecución de herramientas y de la generación autoritativa de hallazgos.
 
 ## 2. Requisitos funcionales
 
 ### FR-01 — Entrada en lenguaje natural
 
-El analista puede iniciar una investigación desde la CLI mediante lenguaje natural.
+El analista puede iniciar una investigación mediante la CLI utilizando lenguaje natural.
 
 ### FR-02 — Interpretación estructurada
 
-La entrada se transforma en `StructuredRequest` antes de llegar al Core. Target se detecta/normaliza de forma determinista y **LLM #1** se limita a clasificar un Intent permitido.
+La entrada se transforma en `StructuredRequest`.
 
-### FR-03 — Creación y gobierno de Investigation
+- `TargetFactory` detecta y normaliza el `Target` de forma determinista.
+- LLM #1 clasifica únicamente un `Intent` permitido.
 
-Core crea una nueva `Investigation` y es la única autoridad sobre su lifecycle y la integración de conocimiento.
+### FR-03 — Gobierno de Investigation
+
+El Core crea `Investigation` y gobierna su ciclo de vida.
 
 ### FR-04 — Planificación determinista
 
-Planner construye `ExecutionPlan` y `ExecutionTask` según Target/capacidades. El LLM no selecciona tools.
+`Planner` construye `ExecutionPlan` y `ExecutionTask` a partir del `Target`, `Intent` y capacidades disponibles.
+
+El LLM no selecciona herramientas.
 
 ### FR-05 — Ejecución modular
 
-Executor y PluginManager ejecutan plugins bajo contrato `BasePlugin` sin acoplar Core a tools concretas.
+`Executor` y `PluginManager` ejecutan plugins mediante contratos explícitos.
 
 ### FR-06 — Preservación RAW
 
-Cada ejecución válida produce `RawObservation` y se conserva su representación original estructurada para auditoría/reproducibilidad.
+Cada ejecución válida puede producir `RawObservation`, que se conserva para auditoría y reproducibilidad.
 
 ### FR-07 — Normalización y Evidence
 
-La salida RAW se transforma mediante normalizador específico y EvidenceManager en Evidence normalizada, sin introducir interpretación.
+La salida RAW se transforma mediante normalización específica en `Evidence`, sin introducir conclusiones analíticas.
 
 ### FR-08 — Análisis determinista
 
-RuleEngine evalúa Rules explícitas y produce Findings trazables hacia Rule y Evidence soporte.
+`RuleEngine` evalúa `Rules` y produce `Findings` trazables hacia las evidencias que los soportan.
 
 ### FR-09 — Reporting
 
-ReportManager construye un Report persistente a partir de Findings proporcionados por Core. `report.json` es autoritativo y `report.md` es una proyección determinista.
+`ReportManager` construye y persiste el informe.
+
+```text
+report.json → autoritativo
+report.md   → proyección determinista
+```
 
 ### FR-10 — Asistencia LLM posterior
 
-**LLM #2** puede producir síntesis, implicaciones potenciales y recomendaciones advisory grounded a partir de una proyección controlada del Report. Su salida es efímera y no autoritativa. El perfil productivo es `timeout=300`, `num_ctx=8192`, `num_predict=UNSET`, `think=false`, `keep_alive=0`, sin reintentos automáticos.
+LLM #2 puede producir ayuda de síntesis y explicación a partir del `Report`.
 
-### FR-11 — Política de fallo multi-tool
+Su salida:
 
-Una tool puede fallar sin invalidar todo el trabajo cuando existe conocimiento válido. Los fallos operacionales se conservan fuera del Knowledge Pipeline y una ejecución parcial puede terminar con Report utilizable.
+- es grounded;
+- es efímera;
+- no es autoritativa;
+- no modifica `Evidence`, `Findings` o `Report`;
+- falla en modo fail-soft.
+
+Perfil actual:
+
+```text
+timeout=300
+num_ctx=8192
+num_predict=UNSET
+think=false
+keep_alive=0
+```
+
+### FR-11 — Fallo parcial de herramientas
+
+El fallo de una herramienta no invalida necesariamente toda la investigación cuando existe conocimiento válido suficiente.
+
+Los errores se representan como `ExecutionFailure` y permanecen fuera del Knowledge Pipeline.
 
 ### FR-12 — Descubrimiento offline
 
-La CLI ofrece `capabilities` y `capabilities --rules` sin requerir Ollama ni crear Investigation.
+La CLI ofrece:
+
+```bash
+centaurus capabilities
+centaurus capabilities --rules
+```
+
+sin necesidad de iniciar una investigación.
 
 ### FR-13 — Progreso interactivo
 
-En TTY se ofrece progreso efímero de ejecución. En non-TTY esa superficie se silencia sin cambiar el contrato funcional.
+En TTY puede mostrarse progreso efímero.
+
+En ejecución no interactiva esa superficie puede silenciarse sin alterar el contrato funcional.
 
 ### FR-14 — Persistencia trazable
 
-RawObservation, Evidence, Finding y Report se asocian a `investigation_id` y se conservan en `/workspace` mediante la Persistence Layer.
+Los artefactos se correlacionan mediante `investigation_id` y se conservan bajo `/workspace`.
 
-### FR-15 — Punto de entrada operacional de la appliance
+### FR-15 — Punto de entrada de la appliance
 
-En la appliance C4, el usuario `centaurus` inicia el runtime mediante el comando host `centaurus` sin argumentos. El wrapper requiere TTY y autenticación y no concede administración Docker/Compose general.
+El usuario estándar puede iniciar el runtime mediante:
+
+```bash
+centaurus
+```
 
 ### FR-16 — Apagado controlado
 
-Después de salir del shell, el usuario `centaurus` puede ejecutar `centaurus-poweroff`, comando host autenticado y de cero argumentos que realiza únicamente un apagado limpio.
+El apagado limpio de la appliance se realiza mediante:
+
+```bash
+centaurus-poweroff
+```
 
 ### FR-17 — Distribución reproducible
 
-La versión de entrega dispone de OVA final aceptada, modalidad Git + Docker Linux y una imagen raw USB de identidad congelada. Las modalidades comparten el mismo producto y no redefinen el dominio.
+El producto puede consumirse mediante:
 
-### FR-18 — Portabilidad de red de la appliance física
+- Git + Docker Linux;
+- OVA VMware;
+- imagen USB arrancable.
 
-La política de naming debe materializar el uplink físico como `centaurus0` sin depender de la vNIC E1000 de VMware. La aceptación bare-metal cerrada demuestra este contrato en una Intel I218-V/e1000e con enlace, DHCP y ruta por defecto.
+### FR-18 — Portabilidad de red
+
+La appliance utiliza `centaurus0` como nombre lógico del uplink y evita depender de un modelo concreto de vNIC VMware.
 
 ## 3. Cobertura operacional
 
-| Target | Cobertura documentada |
+| Target | Cobertura |
 |---|---|
-| DOMAIN | completa · siete tareas sobre seis tools |
-| IP | limitada · RDAP |
-| EMAIL | no operacional |
+| DOMAIN | principal/completa en la versión actual |
+| IP | limitada mediante RDAP |
+| EMAIL | no operacional como Target directo |
 | CERTIFICATE | diferido |
 
-## 4. Requisitos no funcionales
+## 4. Herramientas integradas
+
+La versión actual incluye:
+
+- WHOIS;
+- RDAP;
+- DNSRecon;
+- Sublist3r;
+- TheHarvester;
+- crt.sh.
+
+La incorporación de nuevas herramientas se realiza mediante plugins.
+
+## 5. Requisitos no funcionales
+
+CENTAURUS debe mantener:
 
 - ejecución local del framework y LLM;
-- arquitectura modular/extensible;
+- modularidad;
 - bajo acoplamiento;
 - reproducibilidad;
-- trazabilidad y auditabilidad;
+- trazabilidad;
 - persistencia desacoplada del dominio;
-- seguridad por diseño y mínimo privilegio;
+- mínimo privilegio;
 - funcionamiento sin APIs comerciales obligatorias;
-- capacidad de degradación parcial ante fallos upstream;
-- degradación fail-soft de LLM #2 cuando el proveedor falla después de existir Report;
-- tests como especificación ejecutable de contratos;
-- validación de la distribución mediante OVA y medio físico real;
-- no extrapolar una plataforma física validada a compatibilidad universal.
+- degradación parcial ante fallos upstream;
+- degradación fail-soft de LLM #2;
+- pruebas automatizadas de contratos;
+- separación entre producto y modalidad de distribución.
 
-## 5. Exclusiones
+## 6. Exclusiones
 
-- escaneo activo y pentesting;
-- agentes autónomos/tool calling LLM;
-- RAG/embeddings/memoria persistente de IA;
-- GUI/Web/API como requisito del TFM;
-- multiusuario/alta disponibilidad/distribución horizontal;
-- scoring/severidad/confidence estructurados en Rule/Finding;
-- query layer histórica desde CLI;
-- CERTIFICATE operativo hasta decisión/implementación específica posterior;
-- garantía universal de rendimiento LLM en cualquier CPU;
-- garantía universal de compatibilidad con cualquier firmware, controlador USB o NIC.
+No forman parte del alcance actual:
 
-## 6. Criterio de aceptación funcional y de distribución
+- escaneo activo;
+- explotación/pentesting automatizado;
+- agentes autónomos con tool calling LLM;
+- RAG/embeddings como requisito del producto;
+- GUI/Web/API obligatoria;
+- alta disponibilidad o distribución horizontal;
+- garantía universal de rendimiento LLM;
+- garantía universal de compatibilidad con cualquier hardware.
 
-El recorrido funcional está aceptado cuando la solicitud estructurada produce y preserva conocimiento trazable hasta Report con suite verde y validación runtime. La distribución técnica queda aceptada en el alcance demostrado por:
+## 7. Criterios de aceptación
 
-- OVA C4-RS2/Broker-D2 `FINAL_ACCEPTED`;
-- G4 R0–R6 `CLOSED/PASS`;
-- imagen `CENTAURUS-USB.img` congelada y materializada físicamente;
-- arranque, runtime e investigación real desde USB;
-- reinicio/persistencia;
-- N7 bare-metal `CLOSED/PASS` para la plataforma observada.
+Una investigación funcional debe preservar la cadena:
 
-En la prueba física final, el flujo natural llegó a un Intent válido e inició la Investigation, lo que corrobora la función de interpretación de LLM #1. LLM #2 agotó su timeout de 300 s; esa degradación fue no bloqueante y no invalidó el Report.
+```text
+RAW
+  ↓
+Evidence
+  ↓
+Finding
+  ↓
+Report
+```
 
-## Base documental
+con trazabilidad suficiente para explicar el origen del conocimiento.
 
-TFM-OSINT; Modelo Conceptual v3.5; Core v2.5; Runtime v2.10; Tools-Plugins v2.4; Rules/RuleEngine; Reporting v1.5; Runtime Configuration v1.4; CLI v1.6; Contrato LLM v2.6; C4-RS2/Broker-D2; G4 USB Cierre Integral v1.1; G4-N7 v1.0; Release & Distribution v1.8; Auditoría de Cobertura TFM v3.4.
+Una degradación de LLM #2 no invalida un `Report` ya construido y persistido.
+
+## 8. Documentación relacionada
+
+- [`PROJECT.md`](PROJECT.md)
+- [`ARCHITECTURE.md`](ARCHITECTURE.md)
+- [`STORAGE.md`](STORAGE.md)
+- [`INSTALL.md`](INSTALL.md)
