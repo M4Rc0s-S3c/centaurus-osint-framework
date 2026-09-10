@@ -235,13 +235,13 @@ Consulta [`DEVELOPMENT.md`](DEVELOPMENT.md) para las pautas de desarrollo y vali
 
 Orden de lectura recomendado:
 
-1. [`PROJECT.md`](PROJECT.md) - identidad del proyecto, alcance y modalidades de distribución.
-2. [`INSTALL.md`](INSTALL.md) - despliegue e instalación.
-3. [`ARCHITECTURE.md`](ARCHITECTURE.md) - arquitectura del framework.
-4. [`SPECIFICATION.md`](SPECIFICATION.md) - especificación funcional y no funcional.
-5. [`STORAGE.md`](STORAGE.md) - persistencia y trazabilidad.
-6. [`STANDARDS.md`](STANDARDS.md) - convenciones y estándares del proyecto.
-7. [`DEVELOPMENT.md`](DEVELOPMENT.md) - flujo de desarrollo.
+1. [`PROJECT.md`](PROJECT.md) · [English](PROJECT.en.md) - identidad del proyecto, alcance y modalidades de distribución.
+2. [`INSTALL.md`](INSTALL.md) · [English](INSTALL.en.md) - despliegue e instalación.
+3. [`ARCHITECTURE.md`](ARCHITECTURE.md) · [English](ARCHITECTURE.en.md) - arquitectura del framework.
+4. [`SPECIFICATION.md`](SPECIFICATION.md) · [English](SPECIFICATION.en.md) - especificación funcional y no funcional.
+5. [`STORAGE.md`](STORAGE.md) · [English](STORAGE.en.md) - persistencia y trazabilidad.
+6. [`STANDARDS.md`](STANDARDS.md) · [English](STANDARDS.en.md) - convenciones y estándares del proyecto.
+7. [`DEVELOPMENT.md`](DEVELOPMENT.md) · [English](DEVELOPMENT.en.md) - flujo de desarrollo.
 
 ## Release
 

@@ -1,5 +1,6 @@
 # Guía de desarrollo
 
+[Español](DEVELOPMENT.md) | [English](DEVELOPMENT.en.md)
 [Inicio](README.md) · [Arquitectura](ARCHITECTURE.md) · [Estándares](STANDARDS.md)
 
 ## 1. Flujo de trabajo
@@ -204,7 +205,7 @@ Antes de proponer un cambio:
 3. añadir/actualizar pruebas;
 4. actualizar documentación pública afectada;
 5. comprobar licencias de dependencias incorporadas;
-6. respetar [`LICENSE`](LICENSE) y [`NOTICE.md`](NOTICE.md).
+6. respetar [`LICENSE`](LICENSE) y [`NOTICE`](NOTICE).
 
 ## 14. Documentación relacionada
 

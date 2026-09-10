@@ -1,5 +1,6 @@
 # Instalación y despliegue
 
+[Español](INSTALL.md) | [English](INSTALL.en.md)
 [Inicio](README.md) · [Proyecto](PROJECT.md) · [Arquitectura](ARCHITECTURE.md)
 
 Este documento describe la modalidad **Git + Docker sobre Linux**.

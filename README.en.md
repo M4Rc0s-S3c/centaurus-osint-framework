@@ -235,13 +235,13 @@ See [`DEVELOPMENT.md`](DEVELOPMENT.md) for development and validation guidance.
 
 Recommended reading order:
 
-1. [`PROJECT.md`](PROJECT.md) - project identity, scope and distribution modes.
-2. [`INSTALL.md`](INSTALL.md) - deployment and installation.
-3. [`ARCHITECTURE.md`](ARCHITECTURE.md) - framework architecture.
-4. [`SPECIFICATION.md`](SPECIFICATION.md) - functional and non-functional specification.
-5. [`STORAGE.md`](STORAGE.md) - persistence and traceability.
-6. [`STANDARDS.md`](STANDARDS.md) - conventions and project standards.
-7. [`DEVELOPMENT.md`](DEVELOPMENT.md) - development workflow.
+1. [`PROJECT.en.md`](PROJECT.en.md) · [Español](PROJECT.md) - project identity, scope and distribution modes.
+2. [`INSTALL.en.md`](INSTALL.en.md) · [Español](INSTALL.md) - deployment and installation.
+3. [`ARCHITECTURE.en.md`](ARCHITECTURE.en.md) · [Español](ARCHITECTURE.md) - framework architecture.
+4. [`SPECIFICATION.en.md`](SPECIFICATION.en.md) · [Español](SPECIFICATION.md) - functional and non-functional specification.
+5. [`STORAGE.en.md`](STORAGE.en.md) · [Español](STORAGE.md) - persistence and traceability.
+6. [`STANDARDS.en.md`](STANDARDS.en.md) · [Español](STANDARDS.md) - conventions and project standards.
+7. [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md) · [Español](DEVELOPMENT.md) - development workflow.
 
 ## Release
 

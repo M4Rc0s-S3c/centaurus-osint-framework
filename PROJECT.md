@@ -1,5 +1,6 @@
 # Visión general del proyecto
 
+[Español](PROJECT.md) | [English](PROJECT.en.md)
 [Inicio](README.md) · [Arquitectura](ARCHITECTURE.md) · [Instalación](INSTALL.md) · [Especificación](SPECIFICATION.md)
 
 ## 1. Identidad
