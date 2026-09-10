@@ -154,13 +154,32 @@ The repository contains the Core, Docker/Compose definitions, dependency locks, 
 
 ### VMware appliance
 
-A prebuilt OVA can be used when a self-contained virtual appliance is preferred.
+The prebuilt VMware appliance is available through external storage:
+
+**[Access the CENTAURUS-C4-FINAL.ova download (Google Drive)](https://drive.google.com/drive/folders/1Anvan2lh-KQzQMDvvv_nTqSjfdSnTpdT?usp=sharing)**
+
+Published artifact identity:
+
+```text
+File: CENTAURUS-C4-FINAL.ova
+SIZE_BYTES: 11828618752
+SHA256: d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868
+```
+
+Always verify the SHA-256 after downloading the artifact.
 
 ### Bootable USB image
 
-A raw bootable image can be materialized onto suitable removable storage for portable execution.
+The raw USB image has been validated, but its external publication is still pending.
 
-> OVA and raw USB images are release artifacts and are not stored directly in this Git repository.
+```text
+File: CENTAURUS-USB.img
+SIZE_BYTES: 31457280000
+SHA256: 7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165
+PUBLICATION_STATUS: PENDING
+```
+
+> OVA and raw USB binaries are external artifacts and are not stored directly in this Git repository.
 
 ## Windows
 

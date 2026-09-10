@@ -139,13 +139,27 @@ Consulta [`INSTALL.md`](INSTALL.md).
 
 ### Appliance VMware
 
-Distribución como OVA preconstruida para VMware.
+La OVA preconstruida se distribuye mediante almacenamiento externo:
+
+**[CENTAURUS-C4-FINAL.ova — Google Drive](https://drive.google.com/drive/folders/1Anvan2lh-KQzQMDvvv_nTqSjfdSnTpdT?usp=sharing)**
+
+```text
+SIZE_BYTES=11828618752
+SHA256=d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868
+```
 
 ### Imagen USB arrancable
 
-Imagen raw para materialización sobre un dispositivo de almacenamiento adecuado.
+La imagen raw USB está validada y pendiente de publicación externa:
 
-Los binarios OVA/USB no se almacenan directamente en este repositorio Git.
+```text
+Fichero=CENTAURUS-USB.img
+SIZE_BYTES=31457280000
+SHA256=7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165
+PUBLICATION_STATUS=PENDING
+```
+
+Los binarios OVA/USB no se almacenan directamente en este repositorio Git. La integridad de cada artefacto debe verificarse mediante su SHA-256.
 
 ## 9. Credenciales de la appliance
 

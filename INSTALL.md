@@ -212,9 +212,48 @@ Cambia las credenciales por defecto después del primer uso cuando la appliance 
 
 ## 12. OVA y USB
 
-La OVA y la imagen USB son artefactos externos a Git.
+La OVA y la imagen USB son artefactos externos a Git. El repositorio no contiene estos binarios de gran tamaño.
 
-El repositorio no contiene los binarios de gran tamaño.
+### OVA VMware
+
+La OVA pública está disponible en:
+
+**[CENTAURUS-C4-FINAL.ova — Google Drive](https://drive.google.com/drive/folders/1Anvan2lh-KQzQMDvvv_nTqSjfdSnTpdT?usp=sharing)**
+
+Antes de importarla, verifica su identidad:
+
+```text
+Fichero=CENTAURUS-C4-FINAL.ova
+SIZE_BYTES=11828618752
+SHA256=d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868
+```
+
+En Linux:
+
+```bash
+sha256sum CENTAURUS-C4-FINAL.ova
+```
+
+En PowerShell:
+
+```powershell
+Get-FileHash .\CENTAURUS-C4-FINAL.ova -Algorithm SHA256
+```
+
+El hash calculado debe coincidir exactamente con el valor publicado.
+
+### Imagen USB
+
+La imagen USB validada es:
+
+```text
+Fichero=CENTAURUS-USB.img
+SIZE_BYTES=31457280000
+SHA256=7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165
+PUBLICATION_STATUS=PENDING
+```
+
+Su enlace público se incorporará cuando finalice la publicación externa.
 
 La documentación de Git + Docker no debe interpretarse como procedimiento de materialización directa de la imagen USB ni como procedimiento de resellado de una OVA.
 
