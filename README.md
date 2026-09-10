@@ -242,4 +242,4 @@ El usuario es responsable de garantizar que el uso de fuentes públicas, herrami
 
 CENTAURUS se distribuye bajo la **Apache License, Version 2.0**.
 
-Consulta [`LICENSE`](LICENSE) para el texto completo de la licencia y [`NOTICE`](NOTICE) para la información de atribución.
+Consulta [`LICENSE`](LICENSE) para el texto completo de la licencia y [`NOTICE.md`](NOTICE.md) para la información de atribución.

@@ -204,7 +204,7 @@ Antes de proponer un cambio:
 3. añadir/actualizar pruebas;
 4. actualizar documentación pública afectada;
 5. comprobar licencias de dependencias incorporadas;
-6. respetar [`LICENSE`](LICENSE) y [`NOTICE`](NOTICE).
+6. respetar [`LICENSE`](LICENSE) y [`NOTICE.md`](NOTICE.md).
 
 ## 14. Documentación relacionada
 

@@ -201,4 +201,4 @@ El usuario es responsable de cumplir la legislación aplicable, los términos de
 
 CENTAURUS se distribuye bajo **Apache License 2.0**.
 
-Consulta [`LICENSE`](LICENSE) y [`NOTICE`](NOTICE).
+Consulta [`LICENSE`](LICENSE) y [`NOTICE.md`](NOTICE.md).

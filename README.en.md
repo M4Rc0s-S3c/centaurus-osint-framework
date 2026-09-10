@@ -242,4 +242,4 @@ Users are responsible for ensuring that their use of public sources, third-party
 
 CENTAURUS is licensed under the **Apache License, Version 2.0**.
 
-See [`LICENSE`](LICENSE) for the full license text and [`NOTICE`](NOTICE) for attribution information.
+See [`LICENSE`](LICENSE) for the full license text and [`NOTICE.md`](NOTICE.md) for attribution information.
