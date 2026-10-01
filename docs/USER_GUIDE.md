@@ -1,5 +1,7 @@
 # CENTAURUS · Guía de uso
 
+[Español](USER_GUIDE.md) | [English](USER_GUIDE.en.md)
+
 [Inicio](../README.md) · [Instalación](INSTALL.md) · [Persistencia](STORAGE.md)
 
 **Versión documental:** 1.0

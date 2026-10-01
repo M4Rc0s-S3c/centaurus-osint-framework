@@ -248,7 +248,7 @@ Orden de lectura recomendado:
 
 1. [`PROJECT.md`](docs/PROJECT.md) · [English](docs/PROJECT.en.md) - identidad del proyecto, alcance y modalidades de distribución.
 2. [`INSTALL.md`](docs/INSTALL.md) · [English](docs/INSTALL.en.md) - despliegue e instalación.
-3. [Guía de uso](docs/USER_GUIDE.md) - primera sesión, interpretación de resultados y resolución de incidencias.
+3. [`USER_GUIDE.md`](docs/USER_GUIDE.md) · [English](docs/USER_GUIDE.en.md) - primera sesión, interpretación de resultados y resolución de incidencias.
 4. [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [English](docs/ARCHITECTURE.en.md) - arquitectura del framework.
 5. [`SPECIFICATION.md`](docs/SPECIFICATION.md) · [English](docs/SPECIFICATION.en.md) - especificación funcional y no funcional.
 6. [`STORAGE.md`](docs/STORAGE.md) · [English](docs/STORAGE.en.md) - persistencia y trazabilidad.

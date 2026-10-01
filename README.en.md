@@ -248,7 +248,7 @@ Recommended reading order:
 
 1. [`PROJECT.en.md`](docs/PROJECT.en.md) · [Español](docs/PROJECT.md) - project identity, scope and distribution modes.
 2. [`INSTALL.en.md`](docs/INSTALL.en.md) · [Español](docs/INSTALL.md) - deployment and installation.
-3. [User guide (Spanish)](docs/USER_GUIDE.md) - first session, result interpretation and troubleshooting.
+3. [`USER_GUIDE.en.md`](docs/USER_GUIDE.en.md) · [Español](docs/USER_GUIDE.md) - first session, result interpretation and troubleshooting.
 4. [`ARCHITECTURE.en.md`](docs/ARCHITECTURE.en.md) · [Español](docs/ARCHITECTURE.md) - framework architecture.
 5. [`SPECIFICATION.en.md`](docs/SPECIFICATION.en.md) · [Español](docs/SPECIFICATION.md) - functional and non-functional specification.
 6. [`STORAGE.en.md`](docs/STORAGE.en.md) · [Español](docs/STORAGE.md) - persistence and traceability.
