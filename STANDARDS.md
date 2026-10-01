@@ -129,4 +129,4 @@ Según el alcance, revisar además:
 
 ## 12. Licencia
 
-Las contribuciones y redistribuciones deben respetar [`LICENSE`](LICENSE) y [`NOTICE`](NOTICE).
+Las contribuciones y redistribuciones deben respetar [`LICENSE`](LICENSE) y [`NOTICE.md`](NOTICE.md).
