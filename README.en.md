@@ -207,15 +207,21 @@ The deterministic report remains valid even if analyst assistance is unavailable
 
 Runtime data is kept outside the application image in a persistent workspace.
 
-Typical persisted data includes:
+Each investigation’s artifacts are stored in the persistent workspace, organized by investigation ID:
 
 ```text
 workspace/
-├── reports/
-├── evidence/
-├── logs/
-├── cache/
-└── tmp/
+└── investigations/
+    └── <investigation-id>/
+        ├── evidences/
+        │   ├── raw/
+        │   └── normalized/
+        ├── findings/
+        ├── reports/
+        │   ├── report.json
+        │   └── report.md
+        └── execution/
+            └── failures/
 ```
 
 See [`STORAGE.en.md`](docs/STORAGE.en.md) for the authoritative storage model.
@@ -242,11 +248,12 @@ Recommended reading order:
 
 1. [`PROJECT.en.md`](docs/PROJECT.en.md) · [Español](docs/PROJECT.md) - project identity, scope and distribution modes.
 2. [`INSTALL.en.md`](docs/INSTALL.en.md) · [Español](docs/INSTALL.md) - deployment and installation.
-3. [`ARCHITECTURE.en.md`](docs/ARCHITECTURE.en.md) · [Español](docs/ARCHITECTURE.md) - framework architecture.
-4. [`SPECIFICATION.en.md`](docs/SPECIFICATION.en.md) · [Español](docs/SPECIFICATION.md) - functional and non-functional specification.
-5. [`STORAGE.en.md`](docs/STORAGE.en.md) · [Español](docs/STORAGE.md) - persistence and traceability.
-6. [`STANDARDS.en.md`](docs/STANDARDS.en.md) · [Español](docs/STANDARDS.md) - conventions and project standards.
-7. [`DEVELOPMENT.en.md`](docs/DEVELOPMENT.en.md) · [Español](docs/DEVELOPMENT.md) - development workflow.
+3. [User guide (Spanish)](docs/USER_GUIDE.md) - first session, result interpretation and troubleshooting.
+4. [`ARCHITECTURE.en.md`](docs/ARCHITECTURE.en.md) · [Español](docs/ARCHITECTURE.md) - framework architecture.
+5. [`SPECIFICATION.en.md`](docs/SPECIFICATION.en.md) · [Español](docs/SPECIFICATION.md) - functional and non-functional specification.
+6. [`STORAGE.en.md`](docs/STORAGE.en.md) · [Español](docs/STORAGE.md) - persistence and traceability.
+7. [`STANDARDS.en.md`](docs/STANDARDS.en.md) · [Español](docs/STANDARDS.md) - conventions and project standards.
+8. [`DEVELOPMENT.en.md`](docs/DEVELOPMENT.en.md) · [Español](docs/DEVELOPMENT.md) - development workflow.
 
 ## Release
 

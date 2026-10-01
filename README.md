@@ -207,15 +207,21 @@ El informe determinista continúa siendo válido aunque la asistencia al analist
 
 Los datos de runtime se mantienen fuera de la imagen de aplicación, en un workspace persistente.
 
-Entre los datos persistidos se incluyen normalmente:
+Los artefactos de cada investigación se conservan en el workspace persistente, organizados por su identificador:
 
 ```text
 workspace/
-├── reports/
-├── evidence/
-├── logs/
-├── cache/
-└── tmp/
+└── investigations/
+    └── <investigation-id>/
+        ├── evidences/
+        │   ├── raw/
+        │   └── normalized/
+        ├── findings/
+        ├── reports/
+        │   ├── report.json
+        │   └── report.md
+        └── execution/
+            └── failures/
 ```
 
 Consulta [`STORAGE.md`](docs/STORAGE.md) para el modelo autoritativo de persistencia.
@@ -242,11 +248,12 @@ Orden de lectura recomendado:
 
 1. [`PROJECT.md`](docs/PROJECT.md) · [English](docs/PROJECT.en.md) - identidad del proyecto, alcance y modalidades de distribución.
 2. [`INSTALL.md`](docs/INSTALL.md) · [English](docs/INSTALL.en.md) - despliegue e instalación.
-3. [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [English](docs/ARCHITECTURE.en.md) - arquitectura del framework.
-4. [`SPECIFICATION.md`](docs/SPECIFICATION.md) · [English](docs/SPECIFICATION.en.md) - especificación funcional y no funcional.
-5. [`STORAGE.md`](docs/STORAGE.md) · [English](docs/STORAGE.en.md) - persistencia y trazabilidad.
-6. [`STANDARDS.md`](docs/STANDARDS.md) · [English](docs/STANDARDS.en.md) - convenciones y estándares del proyecto.
-7. [`DEVELOPMENT.md`](docs/DEVELOPMENT.md) · [English](docs/DEVELOPMENT.en.md) - flujo de desarrollo.
+3. [Guía de uso](docs/USER_GUIDE.md) - primera sesión, interpretación de resultados y resolución de incidencias.
+4. [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [English](docs/ARCHITECTURE.en.md) - arquitectura del framework.
+5. [`SPECIFICATION.md`](docs/SPECIFICATION.md) · [English](docs/SPECIFICATION.en.md) - especificación funcional y no funcional.
+6. [`STORAGE.md`](docs/STORAGE.md) · [English](docs/STORAGE.en.md) - persistencia y trazabilidad.
+7. [`STANDARDS.md`](docs/STANDARDS.md) · [English](docs/STANDARDS.en.md) - convenciones y estándares del proyecto.
+8. [`DEVELOPMENT.md`](docs/DEVELOPMENT.md) · [English](docs/DEVELOPMENT.en.md) - flujo de desarrollo.
 
 ## Release
 
