@@ -170,14 +170,19 @@ Se recomienda verificar siempre el SHA-256 después de la descarga.
 
 ### Imagen USB arrancable
 
-La imagen raw USB está validada, pero su publicación externa está pendiente.
+La imagen raw USB está disponible mediante almacenamiento externo:
+
+**[Acceder a la descarga de CENTAURUS-USB.img](https://tinyurl.com/42wumj8b)**
+
+Identidad del artefacto publicado:
 
 ```text
 Fichero: CENTAURUS-USB.img
 SIZE_BYTES: 31457280000
 SHA256: 7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165
-PUBLICATION_STATUS: PENDING
 ```
+
+Se recomienda verificar siempre el SHA-256 después de la descarga.
 
 > Los binarios OVA/USB son artefactos externos y no se almacenan directamente en este repositorio Git.
 

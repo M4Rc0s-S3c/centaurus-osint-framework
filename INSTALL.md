@@ -245,16 +245,31 @@ El hash calculado debe coincidir exactamente con el valor publicado.
 
 ### Imagen USB
 
-La imagen USB validada es:
+La imagen USB pública está disponible en:
+
+**[CENTAURUS-USB.img — descarga](https://tinyurl.com/42wumj8b)**
+
+Antes de materializarla, verifica su identidad:
 
 ```text
 Fichero=CENTAURUS-USB.img
 SIZE_BYTES=31457280000
 SHA256=7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165
-PUBLICATION_STATUS=PENDING
 ```
 
-Su enlace público se incorporará cuando finalice la publicación externa.
+En Linux:
+
+```bash
+sha256sum CENTAURUS-USB.img
+```
+
+En PowerShell:
+
+```powershell
+Get-FileHash .\CENTAURUS-USB.img -Algorithm SHA256
+```
+
+El hash calculado debe coincidir exactamente con el valor publicado.
 
 La documentación de Git + Docker no debe interpretarse como procedimiento de materialización directa de la imagen USB ni como procedimiento de resellado de una OVA.
 

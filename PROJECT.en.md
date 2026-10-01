@@ -150,13 +150,13 @@ SHA256=d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868
 
 ### Bootable USB image
 
-The raw USB image has been validated and is pending external publication:
+The raw USB image is distributed through external storage:
+
+**[CENTAURUS-USB.img — download](https://tinyurl.com/42wumj8b)**
 
 ```text
-File=CENTAURUS-USB.img
 SIZE_BYTES=31457280000
 SHA256=7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165
-PUBLICATION_STATUS=PENDING
 ```
 
 OVA/USB binaries are not stored directly in this Git repository. Verify artifact integrity using the published SHA-256.

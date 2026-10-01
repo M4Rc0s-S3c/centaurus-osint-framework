@@ -170,14 +170,19 @@ Always verify the SHA-256 after downloading the artifact.
 
 ### Bootable USB image
 
-The raw USB image has been validated, but its external publication is still pending.
+The raw USB image is available through external storage:
+
+**[Access the CENTAURUS-USB.img download](https://tinyurl.com/42wumj8b)**
+
+Published artifact identity:
 
 ```text
 File: CENTAURUS-USB.img
 SIZE_BYTES: 31457280000
 SHA256: 7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165
-PUBLICATION_STATUS: PENDING
 ```
+
+Always verify the SHA-256 after downloading the artifact.
 
 > OVA and raw USB binaries are external artifacts and are not stored directly in this Git repository.
 
