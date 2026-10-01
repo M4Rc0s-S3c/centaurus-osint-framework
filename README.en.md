@@ -112,7 +112,7 @@ For the current public release:
 git checkout v1.0.0
 ```
 
-Then follow the deployment procedure documented in [`INSTALL.md`](INSTALL.md).
+Then follow the deployment procedure documented in [`INSTALL.en.md`](INSTALL.en.md).
 
 The release bootstrap is provided through:
 
@@ -120,7 +120,7 @@ The release bootstrap is provided through:
 ./scripts/bootstrap_linux_release.sh
 ```
 
-> The exact prerequisites, environment preparation and validation steps are defined in `INSTALL.md`. Follow that document rather than treating this README as the complete deployment runbook.
+> The exact prerequisites, environment preparation and validation steps are defined in `INSTALL.en.md`. Follow that document rather than treating this README as the complete deployment runbook.
 
 ## Appliance credentials
 
@@ -190,7 +190,7 @@ Always verify the SHA-256 after downloading the artifact.
 
 Native Windows can be used for development, Core execution and local Ollama workflows.
 
-Windows is not presented as equivalent to the complete Linux + Docker distribution for all integrated OSINT tools or for the hardened container runtime. See [`INSTALL.md`](INSTALL.md) and [`PROJECT.md`](PROJECT.md) for the documented scope.
+Windows is not presented as equivalent to the complete Linux + Docker distribution for all integrated OSINT tools or for the hardened container runtime. See [`INSTALL.en.md`](INSTALL.en.md) and [`PROJECT.en.md`](PROJECT.en.md) for the documented scope.
 
 ## Local LLM
 
@@ -218,7 +218,7 @@ workspace/
 └── tmp/
 ```
 
-See [`STORAGE.md`](STORAGE.md) for the authoritative storage model.
+See [`STORAGE.en.md`](STORAGE.en.md) for the authoritative storage model.
 
 ## Tests
 
@@ -234,7 +234,7 @@ In a prepared development/test environment:
 python -m pytest
 ```
 
-See [`DEVELOPMENT.md`](DEVELOPMENT.md) for development and validation guidance.
+See [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md) for development and validation guidance.
 
 ## Documentation
 
