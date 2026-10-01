@@ -2,7 +2,7 @@
 
 [Español](DEVELOPMENT.md) | [English](DEVELOPMENT.en.md)
 
-[Home](README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Standards](STANDARDS.en.md)
+[Home](../README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Standards](STANDARDS.en.md)
 
 ## 1. Workflow
 
@@ -206,7 +206,7 @@ Before proposing a change:
 3. add/update tests;
 4. update affected public documentation;
 5. review licenses of new dependencies;
-6. comply with [`LICENSE`](LICENSE) and [`NOTICE.md`](NOTICE.md).
+6. comply with [`LICENSE`](../LICENSE) and [`NOTICE.md`](../NOTICE.md).
 
 ## 14. Related documentation
 

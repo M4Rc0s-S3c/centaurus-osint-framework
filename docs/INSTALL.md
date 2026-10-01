@@ -1,7 +1,7 @@
 # Instalación y despliegue
 
 [Español](INSTALL.md) | [English](INSTALL.en.md)
-[Inicio](README.md) · [Proyecto](PROJECT.md) · [Arquitectura](ARCHITECTURE.md)
+[Inicio](../README.md) · [Proyecto](PROJECT.md) · [Arquitectura](ARCHITECTURE.md)
 
 Este documento describe la modalidad **Git + Docker sobre Linux**.
 
@@ -382,7 +382,7 @@ El `Report` determinista ya persistido sigue siendo autoritativo. La asistencia 
 
 ## 19. Documentación relacionada
 
-- [`README.md`](README.md)
+- [`README.md`](../README.md)
 - [`PROJECT.md`](PROJECT.md)
 - [`ARCHITECTURE.md`](ARCHITECTURE.md)
 - [`SPECIFICATION.md`](SPECIFICATION.md)

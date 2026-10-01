@@ -112,7 +112,7 @@ For the current public release:
 git checkout v1.0.0
 ```
 
-Then follow the deployment procedure documented in [`INSTALL.en.md`](INSTALL.en.md).
+Then follow the deployment procedure documented in [`INSTALL.en.md`](docs/INSTALL.en.md).
 
 The release bootstrap is provided through:
 
@@ -120,7 +120,7 @@ The release bootstrap is provided through:
 ./scripts/bootstrap_linux_release.sh
 ```
 
-> The exact prerequisites, environment preparation and validation steps are defined in `INSTALL.en.md`. Follow that document rather than treating this README as the complete deployment runbook.
+> The exact prerequisites, environment preparation and validation steps are defined in `docs/INSTALL.en.md`. Follow that document rather than treating this README as the complete deployment runbook.
 
 ## Appliance credentials
 
@@ -190,7 +190,7 @@ Always verify the SHA-256 after downloading the artifact.
 
 Native Windows can be used for development, Core execution and local Ollama workflows.
 
-Windows is not presented as equivalent to the complete Linux + Docker distribution for all integrated OSINT tools or for the hardened container runtime. See [`INSTALL.en.md`](INSTALL.en.md) and [`PROJECT.en.md`](PROJECT.en.md) for the documented scope.
+Windows is not presented as equivalent to the complete Linux + Docker distribution for all integrated OSINT tools or for the hardened container runtime. See [`INSTALL.en.md`](docs/INSTALL.en.md) and [`PROJECT.en.md`](docs/PROJECT.en.md) for the documented scope.
 
 ## Local LLM
 
@@ -218,7 +218,7 @@ workspace/
 └── tmp/
 ```
 
-See [`STORAGE.en.md`](STORAGE.en.md) for the authoritative storage model.
+See [`STORAGE.en.md`](docs/STORAGE.en.md) for the authoritative storage model.
 
 ## Tests
 
@@ -234,19 +234,19 @@ In a prepared development/test environment:
 python -m pytest
 ```
 
-See [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md) for development and validation guidance.
+See [`DEVELOPMENT.en.md`](docs/DEVELOPMENT.en.md) for development and validation guidance.
 
 ## Documentation
 
 Recommended reading order:
 
-1. [`PROJECT.en.md`](PROJECT.en.md) · [Español](PROJECT.md) - project identity, scope and distribution modes.
-2. [`INSTALL.en.md`](INSTALL.en.md) · [Español](INSTALL.md) - deployment and installation.
-3. [`ARCHITECTURE.en.md`](ARCHITECTURE.en.md) · [Español](ARCHITECTURE.md) - framework architecture.
-4. [`SPECIFICATION.en.md`](SPECIFICATION.en.md) · [Español](SPECIFICATION.md) - functional and non-functional specification.
-5. [`STORAGE.en.md`](STORAGE.en.md) · [Español](STORAGE.md) - persistence and traceability.
-6. [`STANDARDS.en.md`](STANDARDS.en.md) · [Español](STANDARDS.md) - conventions and project standards.
-7. [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md) · [Español](DEVELOPMENT.md) - development workflow.
+1. [`PROJECT.en.md`](docs/PROJECT.en.md) · [Español](docs/PROJECT.md) - project identity, scope and distribution modes.
+2. [`INSTALL.en.md`](docs/INSTALL.en.md) · [Español](docs/INSTALL.md) - deployment and installation.
+3. [`ARCHITECTURE.en.md`](docs/ARCHITECTURE.en.md) · [Español](docs/ARCHITECTURE.md) - framework architecture.
+4. [`SPECIFICATION.en.md`](docs/SPECIFICATION.en.md) · [Español](docs/SPECIFICATION.md) - functional and non-functional specification.
+5. [`STORAGE.en.md`](docs/STORAGE.en.md) · [Español](docs/STORAGE.md) - persistence and traceability.
+6. [`STANDARDS.en.md`](docs/STANDARDS.en.md) · [Español](docs/STANDARDS.md) - conventions and project standards.
+7. [`DEVELOPMENT.en.md`](docs/DEVELOPMENT.en.md) · [Español](docs/DEVELOPMENT.md) - development workflow.
 
 ## Release
 

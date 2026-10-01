@@ -1,7 +1,7 @@
 # Persistencia y trazabilidad
 
 [Español](STORAGE.md) | [English](STORAGE.en.md)
-[Inicio](README.md) · [Arquitectura](ARCHITECTURE.md) · [Especificación](SPECIFICATION.md)
+[Inicio](../README.md) · [Arquitectura](ARCHITECTURE.md) · [Especificación](SPECIFICATION.md)
 
 ## 1. Principio
 

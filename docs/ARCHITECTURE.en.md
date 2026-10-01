@@ -2,7 +2,7 @@
 
 [Español](ARCHITECTURE.md) | [English](ARCHITECTURE.en.md)
 
-[Home](README.en.md) · [Project](PROJECT.en.md) · [Specification](SPECIFICATION.en.md) · [Storage](STORAGE.en.md)
+[Home](../README.en.md) · [Project](PROJECT.en.md) · [Specification](SPECIFICATION.en.md) · [Storage](STORAGE.en.md)
 
 ## 1. Purpose
 

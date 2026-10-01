@@ -2,7 +2,7 @@
 
 [Español](PROJECT.md) | [English](PROJECT.en.md)
 
-[Home](README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Installation](INSTALL.en.md) · [Specification](SPECIFICATION.en.md)
+[Home](../README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Installation](INSTALL.en.md) · [Specification](SPECIFICATION.en.md)
 
 ## 1. Identity
 
@@ -203,7 +203,7 @@ Users are responsible for complying with applicable law, source terms and organi
 
 ## 12. Related documentation
 
-- [`README.en.md`](README.en.md)
+- [`README.en.md`](../README.en.md)
 - [`INSTALL.en.md`](INSTALL.en.md)
 - [`ARCHITECTURE.en.md`](ARCHITECTURE.en.md)
 - [`SPECIFICATION.en.md`](SPECIFICATION.en.md)
@@ -215,4 +215,4 @@ Users are responsible for complying with applicable law, source terms and organi
 
 CENTAURUS is distributed under the **Apache License 2.0**.
 
-See [`LICENSE`](LICENSE) and [`NOTICE.md`](NOTICE.md).
+See [`LICENSE`](../LICENSE) and [`NOTICE.md`](../NOTICE.md).

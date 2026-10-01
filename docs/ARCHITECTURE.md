@@ -1,7 +1,7 @@
 # Arquitectura de CENTAURUS
 
 [Español](ARCHITECTURE.md) | [English](ARCHITECTURE.en.md)
-[Inicio](README.md) · [Proyecto](PROJECT.md) · [Especificación](SPECIFICATION.md) · [Persistencia](STORAGE.md)
+[Inicio](../README.md) · [Proyecto](PROJECT.md) · [Especificación](SPECIFICATION.md) · [Persistencia](STORAGE.md)
 
 ## 1. Propósito
 

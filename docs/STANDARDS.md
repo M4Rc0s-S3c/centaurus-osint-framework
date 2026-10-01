@@ -1,7 +1,7 @@
 # Estándares del proyecto
 
 [Español](STANDARDS.md) | [English](STANDARDS.en.md)
-[Inicio](README.md) · [Arquitectura](ARCHITECTURE.md) · [Desarrollo](DEVELOPMENT.md)
+[Inicio](../README.md) · [Arquitectura](ARCHITECTURE.md) · [Desarrollo](DEVELOPMENT.md)
 
 ## 1. Arquitectura
 
@@ -129,4 +129,4 @@ Según el alcance, revisar además:
 
 ## 12. Licencia
 
-Las contribuciones y redistribuciones deben respetar [`LICENSE`](LICENSE) y [`NOTICE.md`](NOTICE.md).
+Las contribuciones y redistribuciones deben respetar [`LICENSE`](../LICENSE) y [`NOTICE.md`](../NOTICE.md).

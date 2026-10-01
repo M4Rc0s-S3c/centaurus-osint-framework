@@ -2,7 +2,7 @@
 
 [Español](STORAGE.md) | [English](STORAGE.en.md)
 
-[Home](README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Specification](SPECIFICATION.en.md)
+[Home](../README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Specification](SPECIFICATION.en.md)
 
 ## 1. Principle
 

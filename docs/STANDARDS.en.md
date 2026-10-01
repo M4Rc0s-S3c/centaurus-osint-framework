@@ -2,7 +2,7 @@
 
 [Español](STANDARDS.md) | [English](STANDARDS.en.md)
 
-[Home](README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Development](DEVELOPMENT.en.md)
+[Home](../README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Development](DEVELOPMENT.en.md)
 
 ## 1. Architecture
 
@@ -130,4 +130,4 @@ Depending on scope, also review:
 
 ## 12. License
 
-Contributions and redistributions must comply with [`LICENSE`](LICENSE) and [`NOTICE.md`](NOTICE.md).
+Contributions and redistributions must comply with [`LICENSE`](../LICENSE) and [`NOTICE.md`](../NOTICE.md).

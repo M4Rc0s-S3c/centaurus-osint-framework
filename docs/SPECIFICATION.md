@@ -1,7 +1,7 @@
 # Especificación funcional
 
 [Español](SPECIFICATION.md) | [English](SPECIFICATION.en.md)
-[Inicio](README.md) · [Proyecto](PROJECT.md) · [Arquitectura](ARCHITECTURE.md) · [Instalación](INSTALL.md)
+[Inicio](../README.md) · [Proyecto](PROJECT.md) · [Arquitectura](ARCHITECTURE.md) · [Instalación](INSTALL.md)
 
 ## 1. Propósito
 

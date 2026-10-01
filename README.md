@@ -112,7 +112,7 @@ Para utilizar la release pública actual:
 git checkout v1.0.0
 ```
 
-A continuación, seguir el procedimiento documentado en [`INSTALL.md`](INSTALL.md).
+A continuación, seguir el procedimiento documentado en [`INSTALL.md`](docs/INSTALL.md).
 
 El bootstrap de release está disponible mediante:
 
@@ -120,7 +120,7 @@ El bootstrap de release está disponible mediante:
 ./scripts/bootstrap_linux_release.sh
 ```
 
-> Los prerrequisitos exactos, la preparación del entorno y los pasos de validación se definen en `INSTALL.md`. Debe utilizarse ese documento como procedimiento de despliegue, no este README como runbook completo.
+> Los prerrequisitos exactos, la preparación del entorno y los pasos de validación se definen en `docs/INSTALL.md`. Debe utilizarse ese documento como procedimiento de despliegue, no este README como runbook completo.
 
 ## Credenciales de la appliance
 
@@ -190,7 +190,7 @@ Se recomienda verificar siempre el SHA-256 después de la descarga.
 
 Windows nativo puede utilizarse para desarrollo, ejecución del Core y flujos locales con Ollama.
 
-No se presenta Windows como equivalente a la distribución completa Linux + Docker para todas las herramientas OSINT integradas ni para el runtime endurecido de contenedores. Consulta [`INSTALL.md`](INSTALL.md) y [`PROJECT.md`](PROJECT.md) para conocer el alcance documentado.
+No se presenta Windows como equivalente a la distribución completa Linux + Docker para todas las herramientas OSINT integradas ni para el runtime endurecido de contenedores. Consulta [`INSTALL.md`](docs/INSTALL.md) y [`PROJECT.md`](docs/PROJECT.md) para conocer el alcance documentado.
 
 ## LLM local
 
@@ -218,7 +218,7 @@ workspace/
 └── tmp/
 ```
 
-Consulta [`STORAGE.md`](STORAGE.md) para el modelo autoritativo de persistencia.
+Consulta [`STORAGE.md`](docs/STORAGE.md) para el modelo autoritativo de persistencia.
 
 ## Pruebas
 
@@ -234,19 +234,19 @@ En un entorno de desarrollo/pruebas preparado:
 python -m pytest
 ```
 
-Consulta [`DEVELOPMENT.md`](DEVELOPMENT.md) para las pautas de desarrollo y validación.
+Consulta [`DEVELOPMENT.md`](docs/DEVELOPMENT.md) para las pautas de desarrollo y validación.
 
 ## Documentación
 
 Orden de lectura recomendado:
 
-1. [`PROJECT.md`](PROJECT.md) · [English](PROJECT.en.md) - identidad del proyecto, alcance y modalidades de distribución.
-2. [`INSTALL.md`](INSTALL.md) · [English](INSTALL.en.md) - despliegue e instalación.
-3. [`ARCHITECTURE.md`](ARCHITECTURE.md) · [English](ARCHITECTURE.en.md) - arquitectura del framework.
-4. [`SPECIFICATION.md`](SPECIFICATION.md) · [English](SPECIFICATION.en.md) - especificación funcional y no funcional.
-5. [`STORAGE.md`](STORAGE.md) · [English](STORAGE.en.md) - persistencia y trazabilidad.
-6. [`STANDARDS.md`](STANDARDS.md) · [English](STANDARDS.en.md) - convenciones y estándares del proyecto.
-7. [`DEVELOPMENT.md`](DEVELOPMENT.md) · [English](DEVELOPMENT.en.md) - flujo de desarrollo.
+1. [`PROJECT.md`](docs/PROJECT.md) · [English](docs/PROJECT.en.md) - identidad del proyecto, alcance y modalidades de distribución.
+2. [`INSTALL.md`](docs/INSTALL.md) · [English](docs/INSTALL.en.md) - despliegue e instalación.
+3. [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [English](docs/ARCHITECTURE.en.md) - arquitectura del framework.
+4. [`SPECIFICATION.md`](docs/SPECIFICATION.md) · [English](docs/SPECIFICATION.en.md) - especificación funcional y no funcional.
+5. [`STORAGE.md`](docs/STORAGE.md) · [English](docs/STORAGE.en.md) - persistencia y trazabilidad.
+6. [`STANDARDS.md`](docs/STANDARDS.md) · [English](docs/STANDARDS.en.md) - convenciones y estándares del proyecto.
+7. [`DEVELOPMENT.md`](docs/DEVELOPMENT.md) · [English](docs/DEVELOPMENT.en.md) - flujo de desarrollo.
 
 ## Release
 

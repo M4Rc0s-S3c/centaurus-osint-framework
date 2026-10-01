@@ -2,7 +2,7 @@
 
 [Español](INSTALL.md) | [English](INSTALL.en.md)
 
-[Home](README.en.md) · [Project](PROJECT.en.md) · [Architecture](ARCHITECTURE.en.md)
+[Home](../README.en.md) · [Project](PROJECT.en.md) · [Architecture](ARCHITECTURE.en.md)
 
 This document describes the **Git + Docker on Linux** deployment mode.
 
@@ -383,7 +383,7 @@ The already-persisted deterministic `Report` remains authoritative. LLM #2 assis
 
 ## 19. Related documentation
 
-- [`README.en.md`](README.en.md)
+- [`README.en.md`](../README.en.md)
 - [`PROJECT.en.md`](PROJECT.en.md)
 - [`ARCHITECTURE.en.md`](ARCHITECTURE.en.md)
 - [`SPECIFICATION.en.md`](SPECIFICATION.en.md)

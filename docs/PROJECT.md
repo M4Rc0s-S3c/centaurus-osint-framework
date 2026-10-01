@@ -1,7 +1,7 @@
 # Visión general del proyecto
 
 [Español](PROJECT.md) | [English](PROJECT.en.md)
-[Inicio](README.md) · [Arquitectura](ARCHITECTURE.md) · [Instalación](INSTALL.md) · [Especificación](SPECIFICATION.md)
+[Inicio](../README.md) · [Arquitectura](ARCHITECTURE.md) · [Instalación](INSTALL.md) · [Especificación](SPECIFICATION.md)
 
 ## 1. Identidad
 
@@ -204,7 +204,7 @@ El usuario es responsable de cumplir la legislación aplicable, los términos de
 
 ## 12. Documentación relacionada
 
-- [`README.md`](README.md)
+- [`README.md`](../README.md)
 - [`INSTALL.md`](INSTALL.md)
 - [`ARCHITECTURE.md`](ARCHITECTURE.md)
 - [`SPECIFICATION.md`](SPECIFICATION.md)
@@ -216,4 +216,4 @@ El usuario es responsable de cumplir la legislación aplicable, los términos de
 
 CENTAURUS se distribuye bajo **Apache License 2.0**.
 
-Consulta [`LICENSE`](LICENSE) y [`NOTICE.md`](NOTICE.md).
+Consulta [`LICENSE`](../LICENSE) y [`NOTICE.md`](../NOTICE.md).
