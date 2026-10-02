@@ -163,25 +163,54 @@ El modelo se almacena de forma persistente fuera del contenedor de aplicación.
 
 La inicialización verifica/aprovisiona el modelo según los scripts y la cadena de suministro versionados.
 
-## 9. Arranque y uso
+## 9. Arranque, uso y parada
 
-Tras completar el bootstrap, sigue las instrucciones que emita el propio script.
-
-La ejecución del Core en Docker se realiza bajo demanda mediante Docker Compose.
-
-Para conocer las capacidades disponibles desde CENTAURUS:
+Los siguientes comandos se ejecutan desde el checkout utilizado para el bootstrap, en el host Linux. Usa exactamente el directorio de datos elegido en el paso 5. En cada nueva terminal, prepara las rutas; si elegiste otra ubicación, sustituye el valor del ejemplo:
 
 ```bash
-centaurus capabilities
+export CENTAURUS_DATA_ROOT="$HOME/.local/share/centaurus"
+CENTAURUS_ENV_FILE="$CENTAURUS_DATA_ROOT/compose.env"
 ```
 
-o desde el contexto de ejecución definido por la instalación.
+Antes de continuar, comprueba que `CENTAURUS_ENV_FILE` apunta al fichero generado por el bootstrap. No uses un fichero vacío ni omitas `--env-file`: las rutas por defecto de Compose pueden apuntar a otro workspace.
 
-Consulta la ayuda:
+Abre la sesión interactiva del Core:
 
 ```bash
-centaurus --help
+docker compose --env-file "$CENTAURUS_ENV_FILE" -f docker/compose.yml --profile framework run --rm centaurus-core
 ```
+
+El comando por defecto abre `centaurus shell`. Sigue [`USER_GUIDE.md`](USER_GUIDE.md) para usar la sesión y salir. El Core se elimina al terminar; el workspace del host se conserva.
+
+Para consultar capacidades y ayuda sin iniciar una investigación ni arrancar dependencias:
+
+```bash
+docker compose --env-file "$CENTAURUS_ENV_FILE" -f docker/compose.yml --profile framework run -T --rm --no-deps centaurus-core centaurus capabilities --rules
+docker compose --env-file "$CENTAURUS_ENV_FILE" -f docker/compose.yml --profile framework run -T --rm --no-deps centaurus-core centaurus --help
+```
+
+Ejecuta una sesión cada vez. Para detener el despliegue, sal antes de todas las sesiones del Core y después ejecuta:
+
+```bash
+docker compose --env-file "$CENTAURUS_ENV_FILE" -f docker/compose.yml --profile framework down
+```
+
+Los directorios persistentes del host no se borran. Para volver a iniciar el servicio LLM:
+
+```bash
+docker compose --env-file "$CENTAURUS_ENV_FILE" -f docker/compose.yml up -d centaurus-ollama
+```
+
+Después puede abrirse otra sesión del Core con el comando anterior. Si el servicio acaba de arrancar, espera a que esté disponible antes de utilizar funciones LLM.
+
+Para diagnóstico, consulta el log del Core y la salida del servicio LLM:
+
+```bash
+tail -n 50 "$CENTAURUS_DATA_ROOT/workspace/logs/centaurus.log"
+docker logs --tail 50 centaurus-ollama
+```
+
+El log del Core se crea al inicializar la aplicación. Revisa los ajustes admitidos y las diferencias entre host y contenedor en [`CONFIGURATION.md`](CONFIGURATION.md).
 
 ## 10. Workspace
 
@@ -190,6 +219,8 @@ Las investigaciones se conservan bajo el workspace persistente.
 El layout lógico se documenta en [`STORAGE.md`](STORAGE.md).
 
 No borres el workspace si necesitas preservar trazabilidad o resultados históricos.
+
+Antes de mantenimiento o cambios de versión, detén las investigaciones y el despliegue. Respalda `workspace/` y `compose.env` del host; conserva también `ollama/` si necesitas restaurar sin descargar de nuevo el modelo. Guarda la identidad de release/commit junto a la copia y conserva permisos y propietarios al restaurar.
 
 ## 11. Credenciales de la appliance
 
@@ -214,6 +245,8 @@ Cambia las credenciales por defecto después del primer uso cuando la appliance 
 ## 12. OVA y USB
 
 La OVA y la imagen USB son artefactos externos a Git. El repositorio no contiene estos binarios de gran tamaño.
+
+Los procedimientos paso a paso están en [`DEPLOYMENT_OVA.md`](DEPLOYMENT_OVA.md) y [`DEPLOYMENT_USB.md`](DEPLOYMENT_USB.md).
 
 ### OVA VMware
 
@@ -388,3 +421,9 @@ El `Report` determinista ya persistido sigue siendo autoritativo. La asistencia 
 - [`SPECIFICATION.md`](SPECIFICATION.md)
 - [`STORAGE.md`](STORAGE.md)
 - [`DEVELOPMENT.md`](DEVELOPMENT.md)
+- [`USER_GUIDE.md`](USER_GUIDE.md)
+- [`CONFIGURATION.md`](CONFIGURATION.md)
+- [`RULES_AND_RULE_ENGINE.md`](RULES_AND_RULE_ENGINE.md)
+- [`DEPLOYMENT_OVA.md`](DEPLOYMENT_OVA.md)
+- [`DEPLOYMENT_USB.md`](DEPLOYMENT_USB.md)
+- [`SECURITY_ARCHITECTURE.md`](SECURITY_ARCHITECTURE.md)

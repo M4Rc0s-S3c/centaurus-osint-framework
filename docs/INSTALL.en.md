@@ -164,25 +164,54 @@ The model is stored persistently outside the application container.
 
 Initialization verifies/provisions the model using versioned scripts and supply-chain definitions.
 
-## 9. Start and use
+## 9. Startup, use and shutdown
 
-After bootstrap completes, follow the instructions emitted by the script.
-
-The Docker Core runs on demand through Docker Compose.
-
-To inspect CENTAURUS capabilities:
+Run these commands on the Linux host, from the checkout used for bootstrap. Use the exact data directory selected in step 5. Prepare the paths in each new terminal; replace the example value if you selected another location:
 
 ```bash
-centaurus capabilities
+export CENTAURUS_DATA_ROOT="$HOME/.local/share/centaurus"
+CENTAURUS_ENV_FILE="$CENTAURUS_DATA_ROOT/compose.env"
 ```
 
-or from the execution context defined by the installation.
+Before continuing, check that `CENTAURUS_ENV_FILE` points to the bootstrap-generated file. Do not use an empty file or omit `--env-file`: Compose defaults may point to a different workspace.
 
-Help:
+Open an interactive Core session:
 
 ```bash
-centaurus --help
+docker compose --env-file "$CENTAURUS_ENV_FILE" -f docker/compose.yml --profile framework run --rm centaurus-core
 ```
+
+The default command opens `centaurus shell`. Follow [`USER_GUIDE.en.md`](USER_GUIDE.en.md) to use and exit the session. Core is removed on exit; the host workspace persists.
+
+To inspect capabilities and help without starting an investigation or dependencies:
+
+```bash
+docker compose --env-file "$CENTAURUS_ENV_FILE" -f docker/compose.yml --profile framework run -T --rm --no-deps centaurus-core centaurus capabilities --rules
+docker compose --env-file "$CENTAURUS_ENV_FILE" -f docker/compose.yml --profile framework run -T --rm --no-deps centaurus-core centaurus --help
+```
+
+Run one session at a time. To stop the deployment, exit all Core sessions first, then run:
+
+```bash
+docker compose --env-file "$CENTAURUS_ENV_FILE" -f docker/compose.yml --profile framework down
+```
+
+Host persistent directories are not deleted. To restart the LLM service:
+
+```bash
+docker compose --env-file "$CENTAURUS_ENV_FILE" -f docker/compose.yml up -d centaurus-ollama
+```
+
+Then open another Core session using the earlier command. If the service has just started, wait for it to become available before using LLM functions.
+
+For diagnosis, inspect the Core log and LLM service output:
+
+```bash
+tail -n 50 "$CENTAURUS_DATA_ROOT/workspace/logs/centaurus.log"
+docker logs --tail 50 centaurus-ollama
+```
+
+The Core log is created when the application initializes. See [`CONFIGURATION.en.md`](CONFIGURATION.en.md) for supported settings and host/container differences.
 
 ## 10. Workspace
 
@@ -191,6 +220,8 @@ Investigations are stored under the persistent workspace.
 The logical layout is documented in [`STORAGE.en.md`](STORAGE.en.md).
 
 Do not delete the workspace if traceability or historical results must be preserved.
+
+Before maintenance or version changes, stop investigations and the deployment. Back up the host `workspace/` and `compose.env`; retain `ollama/` too if you need to restore without downloading the model again. Keep the release/commit identity with the backup and preserve permissions and ownership when restoring.
 
 ## 11. Appliance credentials
 
@@ -215,6 +246,8 @@ Change default credentials after first use when the appliance will remain deploy
 ## 12. OVA and USB
 
 OVA and USB are external artifacts. The repository does not contain these large binaries.
+
+For step-by-step procedures, see [`DEPLOYMENT_OVA.en.md`](DEPLOYMENT_OVA.en.md) and [`DEPLOYMENT_USB.en.md`](DEPLOYMENT_USB.en.md).
 
 ### VMware OVA
 
@@ -389,3 +422,9 @@ The already-persisted deterministic `Report` remains authoritative. LLM #2 assis
 - [`SPECIFICATION.en.md`](SPECIFICATION.en.md)
 - [`STORAGE.en.md`](STORAGE.en.md)
 - [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)
+- [`USER_GUIDE.en.md`](USER_GUIDE.en.md)
+- [`CONFIGURATION.en.md`](CONFIGURATION.en.md)
+- [`RULES_AND_RULE_ENGINE.en.md`](RULES_AND_RULE_ENGINE.en.md)
+- [`DEPLOYMENT_OVA.en.md`](DEPLOYMENT_OVA.en.md)
+- [`DEPLOYMENT_USB.en.md`](DEPLOYMENT_USB.en.md)
+- [`SECURITY_ARCHITECTURE.en.md`](SECURITY_ARCHITECTURE.en.md)

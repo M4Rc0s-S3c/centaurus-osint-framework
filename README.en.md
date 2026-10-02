@@ -254,6 +254,11 @@ Recommended reading order:
 6. [`STORAGE.en.md`](docs/STORAGE.en.md) · [Español](docs/STORAGE.md) - persistence and traceability.
 7. [`STANDARDS.en.md`](docs/STANDARDS.en.md) · [Español](docs/STANDARDS.md) - conventions and project standards.
 8. [`DEVELOPMENT.en.md`](docs/DEVELOPMENT.en.md) · [Español](docs/DEVELOPMENT.md) - development workflow.
+9. [`CONFIGURATION.en.md`](docs/CONFIGURATION.en.md) · [Español](docs/CONFIGURATION.md) - runtime variables, defaults and deployment differences.
+10. [`RULES_AND_RULE_ENGINE.en.md`](docs/RULES_AND_RULE_ENGINE.en.md) · [Español](docs/RULES_AND_RULE_ENGINE.md) - rule catalog and finding interpretation.
+11. [`DEPLOYMENT_OVA.en.md`](docs/DEPLOYMENT_OVA.en.md) · [Español](docs/DEPLOYMENT_OVA.md) - OVA import, operation and maintenance.
+12. [`DEPLOYMENT_USB.en.md`](docs/DEPLOYMENT_USB.en.md) · [Español](docs/DEPLOYMENT_USB.md) - raw image writing, boot and persistence.
+13. [`SECURITY_ARCHITECTURE.en.md`](docs/SECURITY_ARCHITECTURE.en.md) · [Español](docs/SECURITY_ARCHITECTURE.md) - trust boundaries, hardening and failure handling.
 
 ## Release
 

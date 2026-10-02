@@ -254,6 +254,11 @@ Orden de lectura recomendado:
 6. [`STORAGE.md`](docs/STORAGE.md) · [English](docs/STORAGE.en.md) - persistencia y trazabilidad.
 7. [`STANDARDS.md`](docs/STANDARDS.md) · [English](docs/STANDARDS.en.md) - convenciones y estándares del proyecto.
 8. [`DEVELOPMENT.md`](docs/DEVELOPMENT.md) · [English](docs/DEVELOPMENT.en.md) - flujo de desarrollo.
+9. [`CONFIGURATION.md`](docs/CONFIGURATION.md) · [English](docs/CONFIGURATION.en.md) - variables de runtime, valores por defecto y diferencias de despliegue.
+10. [`RULES_AND_RULE_ENGINE.md`](docs/RULES_AND_RULE_ENGINE.md) · [English](docs/RULES_AND_RULE_ENGINE.en.md) - catálogo de reglas e interpretación de hallazgos.
+11. [`DEPLOYMENT_OVA.md`](docs/DEPLOYMENT_OVA.md) · [English](docs/DEPLOYMENT_OVA.en.md) - importación, uso y mantenimiento de la OVA.
+12. [`DEPLOYMENT_USB.md`](docs/DEPLOYMENT_USB.md) · [English](docs/DEPLOYMENT_USB.en.md) - escritura de la imagen raw, arranque y persistencia.
+13. [`SECURITY_ARCHITECTURE.md`](docs/SECURITY_ARCHITECTURE.md) · [English](docs/SECURITY_ARCHITECTURE.en.md) - límites de confianza, endurecimiento y tratamiento de fallos.
 
 ## Release
 
