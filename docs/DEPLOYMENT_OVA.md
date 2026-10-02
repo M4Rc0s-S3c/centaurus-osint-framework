@@ -10,6 +10,19 @@ La OVA distribuye una appliance preconstruida con Debian, Docker, Core, herramie
 
 Utiliza un entorno VMware compatible con importación OVA y con el perfil de hardware x86-64 incluido. Reserva capacidad para importar los discos virtuales y conservar el crecimiento del workspace. El tamaño de la descarga no representa todo el espacio de ejecución necesario.
 
+Perfil de recursos de la máquina virtual documentado para la distribución:
+
+| Recurso | Asignación |
+| --- | --- |
+| CPU | 8 vCPU |
+| Memoria RAM | 8 GiB |
+| Almacenamiento virtual | 29 GiB totales en tres discos |
+| Disco SYSTEM | 5 GiB |
+| Disco PLATFORM | 17 GiB |
+| Disco WORKSPACE | 7 GiB |
+
+Son recursos asignados a la appliance, no los requisitos totales del host. Reserva memoria y espacio adicionales para el sistema operativo del host, la OVA descargada, snapshots y copias. La capacidad de los discos virtuales es distinta del tamaño del fichero OVA y del espacio que ocupen sus ficheros en cada momento.
+
 La configuración de referencia utiliza tres discos lógicos: SYSTEM, PLATFORM y WORKSPACE. Para el primer arranque conserva el perfil de hardware incluido, su firmware y la interfaz E1000 con red NAT. La baseline funciona con CPU; la aceleración GPU no es un requisito.
 
 ## 2. Descarga e identidad

@@ -10,6 +10,19 @@ The OVA ships a prebuilt appliance with Debian, Docker, Core, tools and Ollama w
 
 Use a VMware environment supporting OVA import and the embedded x86-64 hardware profile. Allow enough capacity to import the virtual disks and retain workspace growth. Download size does not represent all storage required for operation.
 
+Documented virtual-machine resource profile:
+
+| Resource | Allocation |
+| --- | --- |
+| CPU | 8 vCPU |
+| RAM | 8 GiB |
+| Virtual storage | 29 GiB total across three disks |
+| SYSTEM disk | 5 GiB |
+| PLATFORM disk | 17 GiB |
+| WORKSPACE disk | 7 GiB |
+
+These are the appliance's allocated resources, not the total host requirements. Allow additional host RAM and storage for its operating system, the downloaded OVA, snapshots and backups. Virtual disk capacity is distinct from the OVA file size and the space currently occupied by its files.
+
 The reference configuration uses three logical disks: SYSTEM, PLATFORM and WORKSPACE. Preserve the included hardware profile, firmware and E1000 interface with NAT networking for first boot. The baseline runs on CPU; GPU acceleration is not required.
 
 ## 2. Download and identity
