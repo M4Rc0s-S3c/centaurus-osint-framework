@@ -57,6 +57,8 @@ Limited coverage through RDAP.
 
 Kept as evolution concepts. They are not currently part of complete operational coverage as direct investigation `Target` types.
 
+See [`SPECIFICATION.en.md`](SPECIFICATION.en.md) for details.
+
 ## 5. Architecture
 
 CENTAURUS explicitly separates:
@@ -145,6 +147,8 @@ SHA256=d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868
 ```
 
 ### Bootable USB image
+
+Writing and first-boot procedure: [`DEPLOYMENT_USB.en.md`](DEPLOYMENT_USB.en.md).
 
 The raw USB image is distributed through external storage:
 

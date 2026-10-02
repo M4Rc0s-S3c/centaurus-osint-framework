@@ -137,6 +137,8 @@ Always verify the SHA-256 after downloading the artifact.
 
 ### Bootable USB image
 
+Writing and first-boot procedure: [`DEPLOYMENT_USB.en.md`](docs/DEPLOYMENT_USB.en.md).
+
 The raw USB image is available through external storage:
 
 **[Access the CENTAURUS-USB.img download](https://tinyurl.com/42wumj8b)**
@@ -237,6 +239,7 @@ Recommended reading order:
 14. [`DEPLOYMENT_GIT_DOCKER.en.md`](docs/DEPLOYMENT_GIT_DOCKER.en.md) · [Español](docs/DEPLOYMENT_GIT_DOCKER.md) - deployment from source on Linux.
 15. [`DEPLOYMENT_WINDOWS.en.md`](docs/DEPLOYMENT_WINDOWS.en.md) · [Español](docs/DEPLOYMENT_WINDOWS.md) - local Core setup on Windows.
 16. [`TROUBLESHOOTING.en.md`](docs/TROUBLESHOOTING.en.md) · [Español](docs/TROUBLESHOOTING.md) - issue diagnosis across deployment modes.
+17. [`GPU_OLLAMA_DOCKER.en.md`](docs/GPU_OLLAMA_DOCKER.en.md) · [Español](docs/GPU_OLLAMA_DOCKER.md) - optional experimental acceleration, without project GPU certification.
 
 ## Release
 

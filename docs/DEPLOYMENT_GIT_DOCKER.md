@@ -285,11 +285,9 @@ No borres el workspace si necesitas preservar trazabilidad o resultados históri
 
 Antes de mantenimiento o cambios de versión, detén las investigaciones y el despliegue. Respalda `workspace/` y `compose.env` del host; conserva también `ollama/` si necesitas restaurar sin descargar de nuevo el modelo. Guarda la identidad de release/commit junto a la copia y conserva permisos y propietarios al restaurar.
 
-## 11. GPU
+## 11. GPU opcional y experimental
 
-La baseline funcional no depende de GPU.
-
-Ollama puede utilizar aceleración compatible cuando el host y el runtime la proporcionan, pero la GPU no forma parte del contrato mínimo de despliegue.
+La baseline funcional utiliza CPU. La propuesta de aceleración de Ollama sobre Linux + Docker está documentada en [`GPU_OLLAMA_DOCKER.md`](GPU_OLLAMA_DOCKER.md). Es una variante experimental sin validación de hardware por CENTAURUS; el repositorio no distribuye overlays GPU. La guía describe ejemplos locales, requisitos, comprobaciones y reversión a CPU.
 
 ## 12. Verificación básica
 

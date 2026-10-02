@@ -106,7 +106,40 @@ Resuelve la discrepancia seleccionando el directorio de datos correcto para esa 
 
 Un fallo en la fase de modelo no implica que el bootstrap no haya cambiado nada: en ese punto ya se han actualizado la etiqueta local del Core y el propietario del directorio workspace. Conserva el error, revisa el estado resultante y utiliza la identidad de imagen registrada previamente si necesitas revertir. El bootstrap no revierte automáticamente esos cambios.
 
-## 6. Logs y datos para el diagnóstico
+## 6. Windows nativo
+
+| Síntoma | Comprobación y actuación |
+| --- | --- |
+| `centaurus` no se reconoce | Usa `.\.venv\Scripts\centaurus.exe` o `.\.venv\Scripts\python.exe -m centaurus`. Comprueba `Get-Command centaurus -ErrorAction SilentlyContinue` y `where.exe centaurus` si esperabas encontrarlo en `PATH`. |
+| No existe `centaurus.exe` o aparece módulo no encontrado | Revisa `.\.venv\Scripts\python.exe -m pip show centaurus` y reinstala el paquete en ese mismo entorno conforme a la guía Windows. |
+| No está claro qué entorno usa el lanzador | Consulta `.\.venv\Scripts\python.exe -c "import sysconfig; print(sysconfig.get_path('scripts'))"`. No copies el lanzador fuera de su entorno. |
+| PowerShell bloquea la activación de `.venv` | Ejecuta directamente los programas de `.venv\Scripts`; no necesitas cambiar `ExecutionPolicy`. |
+| Falla la creación del workspace | Define `CENTAURUS_WORKSPACE` con una ruta Windows del usuario y comprueba permisos. Una variable persistida en el perfil se aplica a nuevas consolas. |
+| `ollama list` no muestra `qwen3:4b` | Descarga el modelo con `ollama pull qwen3:4b` y vuelve a comprobar la lista. |
+| LLM no responde | Revisa el proceso Ollama y `OLLAMA_BASE_URL`; el valor directo por defecto es `http://localhost:11434`. |
+| DOMAIN termina con cobertura parcial | Revisa `ExecutionFailure` y disponibilidad de `dnsrecon`, `sublist3r` y `theHarvester`, además de los fallos de fuentes externas. No mezcles sus locks con los del Core. |
+| LLM #2 tarda o falla | Utiliza el informe persistido y revisa recursos y configuración; disponer de GPU no resuelve por sí solo contexto o validación. |
+
+Procedimiento: [`DEPLOYMENT_WINDOWS.md`](DEPLOYMENT_WINDOWS.md). La comprobación de capacidades es estática y no demuestra paridad de herramientas con Docker.
+
+## 7. GPU experimental en Linux + Docker
+
+Estas comprobaciones pertenecen a la variante experimental de [`GPU_OLLAMA_DOCKER.md`](GPU_OLLAMA_DOCKER.md); no implican soporte GPU certificado en OVA/USB.
+
+| Síntoma | Comprobación y actuación |
+| --- | --- |
+| `nvidia-smi` falla en el host | Resuelve compatibilidad y driver antes de modificar CENTAURUS. |
+| El host ve NVIDIA pero un contenedor de prueba no | Revisa NVIDIA Container Toolkit y configuración del runtime Docker. Cualquier reinicio de Docker requiere planificar su efecto sobre otros servicios. |
+| Docker reserva GPU pero Ollama usa CPU | Comprueba logs, compatibilidad de la imagen fijada con GPU/driver y uso real durante inferencia. Una reserva no demuestra aceleración. |
+| No aparece `/dev/kfd` en la vía ROCm | Revisa el driver y la compatibilidad del host antes de aplicar el perfil AMD. |
+| ROCm devuelve permisos denegados | Revisa acceso a dispositivos y grupos; no añadas `privileged` como solución. |
+| La imagen ROCm no coincide con la identidad CPU | Son imágenes distintas. La variante necesita identidad y validación de suministro propias; no omitas las comprobaciones del bootstrap para declararla válida. |
+| Falta memoria GPU | Revisa carga, modelo, contexto y VRAM. Valida cualquier cambio de parámetros y evita ocultar el problema con reintentos automáticos. |
+| Tras suspensión o reinicio vuelve a CPU | Revalida detección del acelerador y consulta las indicaciones del proveedor para esa versión. |
+| Repetir el bootstrap desactiva la variante | El script solo utiliza Compose base. Tras finalizar y verificar CPU, vuelve a evaluar el overlay local conforme a la guía GPU. |
+| GPU funciona pero falla la investigación | Separa fallo de inferencia, Core y fuentes; conserva el diagnóstico y el informe determinista si existe. |
+
+## 8. Logs y datos para el diagnóstico
 
 En OVA/USB, el log operativo es `/workspace/logs/centaurus.log`. En Git + Docker se encuentra bajo el directorio persistente elegido. Desde el host, con `CENTAURUS_DATA_ROOT` definido con la ruta utilizada en el bootstrap:
 
@@ -118,3 +151,11 @@ docker logs --tail 50 centaurus-ollama
 El log del Core se crea al inicializar la aplicación. Si no existe, comprueba la ruta, los permisos y si el fallo ocurrió antes de esa inicialización. Los errores de fuentes y los artefactos de investigación se conservan por separado según [`STORAGE.md`](STORAGE.md).
 
 Al comunicar una incidencia incluye modalidad, versión o identidad del artefacto, etapa, mensaje exacto e identificador de investigación si existe. Adjunta solo los fragmentos necesarios y revisa objetivos, datos personales y cualquier información sensible antes de compartirlos. Conserva una copia de resultados antes de realizar mantenimiento.
+
+En Windows nativo, con `CENTAURUS_WORKSPACE` definido en la sesión PowerShell actual:
+
+```powershell
+Get-Content "$env:CENTAURUS_WORKSPACE\logs\centaurus.log" -Tail 100
+```
+
+Para ampliar temporalmente el detalle, define `$env:CENTAURUS_LOG_LEVEL = "DEBUG"` antes de iniciar el Core y restaura después `$env:CENTAURUS_LOG_LEVEL = "INFO"`. Revisa el contenido de los logs antes de compartirlos.

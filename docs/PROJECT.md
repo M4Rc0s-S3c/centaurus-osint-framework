@@ -56,6 +56,8 @@ Cobertura limitada mediante RDAP.
 
 Se mantienen como conceptos de evolución. No forman parte de la cobertura operacional completa actual como `Target` de investigación directa.
 
+Consulta [`SPECIFICATION.md`](SPECIFICATION.md) para el detalle.
+
 ## 5. Arquitectura
 
 CENTAURUS separa explícitamente:
@@ -146,6 +148,8 @@ SHA256=d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868
 ```
 
 ### Imagen USB arrancable
+
+Procedimiento de escritura y primer arranque: [`DEPLOYMENT_USB.md`](DEPLOYMENT_USB.md).
 
 La imagen raw USB se distribuye mediante almacenamiento externo:
 

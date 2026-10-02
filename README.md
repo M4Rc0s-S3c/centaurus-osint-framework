@@ -137,6 +137,8 @@ Se recomienda verificar siempre el SHA-256 después de la descarga.
 
 ### Imagen USB arrancable
 
+Procedimiento de escritura y primer arranque: [`DEPLOYMENT_USB.md`](docs/DEPLOYMENT_USB.md).
+
 La imagen raw USB está disponible mediante almacenamiento externo:
 
 **[Acceder a la descarga de CENTAURUS-USB.img](https://tinyurl.com/42wumj8b)**
@@ -237,6 +239,7 @@ Orden de lectura recomendado:
 14. [`DEPLOYMENT_GIT_DOCKER.md`](docs/DEPLOYMENT_GIT_DOCKER.md) · [English](docs/DEPLOYMENT_GIT_DOCKER.en.md) - despliegue desde código sobre Linux.
 15. [`DEPLOYMENT_WINDOWS.md`](docs/DEPLOYMENT_WINDOWS.md) · [English](docs/DEPLOYMENT_WINDOWS.en.md) - preparación del Core local en Windows.
 16. [`TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) · [English](docs/TROUBLESHOOTING.en.md) - diagnóstico de incidencias en las distintas modalidades.
+17. [`GPU_OLLAMA_DOCKER.md`](docs/GPU_OLLAMA_DOCKER.md) · [English](docs/GPU_OLLAMA_DOCKER.en.md) - aceleración opcional experimental, sin certificación GPU del proyecto.
 
 ## Release
 
