@@ -8,7 +8,9 @@
 
 `CENTAURUS-USB.img` is a complete raw disk image containing the appliance and its partition layout. It is written to a physical device; copying the file into a USB folder does not create bootable media.
 
-The target computer must support x86-64 and UEFI boot. Reference validation used a Toshiba Z30-A with Intel I218-V Ethernet and the `e1000e` driver. That reference does not guarantee universal compatibility with other adapters, Wi-Fi or GPUs. The baseline uses CPU.
+The target computer must support x86-64 and UEFI boot. Reference validation used a Toshiba Z30-A with Intel I218-V Ethernet and the `e1000e` driver. That reference does not guarantee compatibility with every Ethernet adapter or GPU. The baseline uses CPU.
+
+**Networking requires a wired Ethernet connection and a compatible network adapter.** The distributed USB image has no Wi-Fi driver or Wi-Fi connection manager deployed; Wi-Fi is not a supported connection method in this distribution. Connect an Ethernet cable to a network with DHCP and access to the required OSINT sources.
 
 The device must provide **at least `31457280000` actual bytes**. Check its capacity in bytes: a commercial “32 GB” label is not a substitute. Allow additional storage for the original image on the computer performing the write.
 

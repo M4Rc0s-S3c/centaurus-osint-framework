@@ -10,49 +10,71 @@ Use a specific release/tag for a reproducible deployment. Public release: [v1.0.
 
 ## 1. Requirements
 
-Linux host with:
+Use a Linux amd64/x86-64 host to reproduce the reference platform, with:
 
-- Git;
-- Python 3;
-- Docker Engine;
-- Docker Compose (`docker compose`);
-- Docker access for the deployment user;
-- Internet access during first provisioning when images, dependencies or the LLM model must be downloaded;
-- sufficient space for images, cache, model and workspace.
+- Git and Python 3 available on the host; host Python generates and verifies artifacts, while production Core runs in its container;
+- Docker Engine installed and running;
+- the Docker Compose plugin, available as `docker compose`;
+- a deployment user able to run `docker info` without adding privilege elevation inside the bootstrap flow;
+- Internet access during initial build/provisioning to obtain pinned images, dependencies and the Ollama model;
+- storage for Docker images, build cache, the model and the growing investigation workspace.
 
-The formal Git + Docker mode targets Linux.
+As a project sizing reference, **8 GiB of RAM and around 30 GiB of storage** provide reasonable headroom for the CPU baseline and investigation data. These are planning figures, not hard limits checked by bootstrap or a guarantee for every workload. Allow extra space for repeated builds, backups and accumulated results; larger inference workloads may require more memory.
 
-Native Windows can be used for development and local Core execution, but it is not presented as equivalent to the complete Linux + Docker distribution.
+Bootstrap stops if a prerequisite check fails. Its initial checks are:
+
+```bash
+command -v git
+command -v python3
+command -v docker
+[ "$(uname -s)" = "Linux" ]
+docker info
+docker compose version
+```
+
+**Administrative boundary:** access through the `docker` group grants powerful control over the host. Docker access belongs to host administration; the socket is not mounted inside `centaurus-core`. This deployment model does not replace the restricted analyst entry point of the OVA/USB appliance.
+
+Ollama does not need to be installed on the host: it runs in a container. GPU acceleration is not required. For native Windows scope, see [`DEPLOYMENT_WINDOWS.en.md`](DEPLOYMENT_WINDOWS.en.md).
 
 ## 2. Deployment architecture
 
-```text
-LINUX HOST
-│
-├── CENTAURUS Git checkout
-│   ├── docker/
-│   ├── requirements-*.lock
-│   └── scripts/bootstrap_linux_release.sh
-│
-├── CENTAURUS_DATA_ROOT
-│   ├── compose.env
-│   ├── compose.rendered.yml
-│   ├── ollama/
-│   └── workspace/
-│
-└── Docker Engine
-    ├── centaurus-ollama
-    └── centaurus-core:local
+The checkout contains `docker/Dockerfile`, `docker/compose.yml`, `docker/supply-chain.lock.json`, `requirements-*.lock` and `scripts/bootstrap_linux_release.sh`. The data directory is separate from the build image and retains the model and results.
+
+```mermaid
+flowchart TD
+    subgraph host["HOST LINUX"]
+        repo["Checkout Git CENTAURUS"]
+        subgraph data["CENTAURUS_DATA_ROOT"]
+            env["compose.env · 0600"]
+            rendered["compose.rendered.yml"]
+            models["ollama/models · qwen3:4b"]
+            workspace["workspace · investigations + logs"]
+        end
+        subgraph docker["Docker Engine"]
+            core["centaurus-core:local"]
+            ollama["centaurus-ollama"]
+            llm["centaurus-llm-network · internal=true"]
+            egress["centaurus-egress-network"]
+        end
+    end
+    repo --> core
+    env --> rendered
+    rendered --> core
+    rendered --> ollama
+    models -->|"bind RO: /root/.ollama"| ollama
+    workspace -->|"bind RW: /workspace"| core
+    core --- llm
+    ollama --- llm
+    core --- egress
+    egress --> sources["OSINT sources"]
 ```
 
-Principles:
-
-- `centaurus-core` contains the framework and integrated tools;
-- `centaurus-ollama` provides the local LLM;
-- the Core runs on demand;
-- the Ollama model persists outside the application image;
-- the workspace persists outside the container;
-- Ollama does not need to expose its port to the host in normal deployment.
+| Component | Execution and persistence |
+| --- | --- |
+| Core | On-demand, ephemeral execution through `docker compose run --rm`; `UID:GID 1000:1000`, read-only root filesystem and temporary `/tmp` in tmpfs. |
+| Workspace | Host bind mount writable at `/workspace`; contains `investigations/<id>/` and `logs/centaurus.log`. |
+| Ollama | Persistent service with a read-only model bind mount; no port published on the host and `OLLAMA_NO_CLOUD=1`. |
+| Networks | Core and Ollama share the internal LLM network. Only Core joins the egress network to reach OSINT sources. |
 
 ## 3. Obtain the code
 
@@ -102,7 +124,11 @@ NO → copy .git into the Core image
 
 ## 5. Persistent directory
 
-If no other location is defined, bootstrap uses the data directory expected by the script.
+When `CENTAURUS_DATA_ROOT` is unset or empty, bootstrap uses:
+
+```text
+${XDG_DATA_HOME:-$HOME/.local/share}/centaurus
+```
 
 To set it explicitly:
 
@@ -126,27 +152,74 @@ $CENTAURUS_DATA_ROOT/
 └── workspace/
 ```
 
-Do not use as `CENTAURUS_DATA_ROOT` a shared folder containing unrelated data without reviewing permissions/ownership first.
+The generated `compose.env` contains only the host paths for Ollama and the workspace (`CENTAURUS_OLLAMA_HOST_DIR` and `CENTAURUS_WORKSPACE_HOST_DIR`) and is created with mode `0600`. Bootstrap regenerates it, so preserve any later custom settings before rerunning.
+
+**Workspace ownership:** initialization runs the image once as root to set the mounted workspace directory owner to `1000:1000`. The current command changes that directory itself, not its contents recursively. `CENTAURUS_DATA_ROOT` must therefore be dedicated to CENTAURUS, rather than a shared folder containing unrelated data. Review existing file permissions when reusing a workspace.
+
+Settings and overrides: [`CONFIGURATION.en.md`](CONFIGURATION.en.md). Persistence layout: [`STORAGE.en.md`](STORAGE.en.md).
 
 ## 6. Official initialization
 
-With a clean checkout:
+With a clean checkout, a pinned version and the data directory selected:
 
 ```bash
 ./scripts/bootstrap_linux_release.sh
 ```
 
-Bootstrap performs host/Git checks, prepares the persistent root, builds the Core image, validates dependencies, provisions/verifies Ollama and performs runtime checks.
+Bootstrap executes the following control sequence:
 
-Do not replace it with a manual `docker compose up` when trying to reproduce the documented mode.
+```mermaid
+flowchart TD
+    N0["Check host and clean Git identity"]
+    N1["Create data root + compose.env"]
+    N2["Generate deterministic Core build bundle"]
+    N3["Extract into a checked temporary directory"]
+    N4["Build centaurus-core:g2-candidate --no-cache"]
+    N5["pip check: Core + DNSRecon + Sublist3r + TheHarvester"]
+    N6["Tag centaurus-core:local"]
+    N7["Set workspace directory owner to 1000:1000"]
+    N8["Verify / provision qwen3:4b"]
+    N9["Render Compose"]
+    N10["Start centaurus-ollama"]
+    N11["Verify effective Ollama image identity"]
+    N12["Smoke: centaurus capabilities"]
+    N13["LINUX_BOOTSTRAP=PASS"]
+    N0 --> N1 --> N2 --> N3 --> N4 --> N5 --> N6 --> N7 --> N8 --> N9 --> N10 --> N11 --> N12 --> N13
+```
+
+The final marker means bootstrap completed, including its static capability smoke check. It does not establish successful inference or a real investigation on this host. The local Core tag is updated before model and Compose checks; a later failure does not automatically roll it back. Preserve the previous image identity and persistent data before updating.
+
+### 6.1. Deterministic Core build bundle
+
+Bootstrap invokes `python3 scripts/create_core_build_bundle.py` and produces `dist/centaurus-core-build_v1.0.zip`. The package contains the Dockerfile, `pyproject.toml`, runtime locks, supply-chain lock and `src/`. It is extracted into a temporary directory after checking archive paths. Docker builds from that package, rather than the whole checkout; `.git`, tests, documentation and Python build/cache metadata are excluded. Deterministic packaging does not by itself guarantee byte-identical Docker images.
+
+### 6.2. Tool isolation
+
+The Dockerfile installs Core and creates three separate virtual environments:
+
+```text
+/opt/centaurus-tools/dnsrecon
+/opt/centaurus-tools/sublist3r
+/opt/centaurus-tools/theharvester
+```
+
+Executables are exposed through links in `/usr/local/bin`. This separation avoids mixing incompatible third-party dependency trees into Core. It isolates dependencies; it is not a separate security sandbox for each tool.
 
 ## 7. Supply chain
 
-The repository includes dependency locks and a supply chain under `docker/`.
+[`supply-chain.lock.json`](../docker/supply-chain.lock.json) records:
 
-Builds should use the versions/digests pinned by the selected release.
+- the Python base image digest, platform and Python/pip versions;
+- the Ollama image digest and runtime version;
+- DNSRecon, Sublist3r and TheHarvester sources, versions or commits, source hashes, locks and virtual-environment paths;
+- build-backend versions (`setuptools` and `flit_core`);
+- the identity of `qwen3:4b`: manifest, configuration, model, template, license and parameter digests.
 
-Tool environments requiring incompatible dependencies are isolated inside the execution image.
+The Dockerfile and dependency locks are build inputs; the supply-chain file records their reference identities and supplies the model verifier. Preserve consistency among these files for the selected release. Recording a hash in this file does not mean every build step automatically checks every recorded hash.
+
+Bootstrap builds with `--no-cache`, then runs `pip check` in four containers with `--network none`: Core and each of the three tool environments. It updates `centaurus-core:local` only after those checks pass. These checks establish installed dependency consistency, not complete source integrity or binary reproducibility.
+
+See [`SECURITY_ARCHITECTURE.en.md`](SECURITY_ARCHITECTURE.en.md) for security controls and their limits.
 
 ## 8. Ollama model
 
@@ -256,3 +329,4 @@ Do not reuse identities or hashes from an older version to declare a newer one v
 - [`STORAGE.en.md`](STORAGE.en.md)
 - [`SECURITY_ARCHITECTURE.en.md`](SECURITY_ARCHITECTURE.en.md)
 - [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)
+- [`USER_GUIDE.en.md`](USER_GUIDE.en.md)

@@ -34,7 +34,7 @@ findmnt /workspace
 systemctl --failed --no-pager
 ```
 
-The reference logical interface is `centaurus0` using DHCP. In VMware, check the E1000 adapter, its NAT connection and the environment's DHCP service. On USB, check the NIC and driver; validation on one computer does not guarantee universal compatibility. Avoid renaming interfaces without diagnosing the cause.
+The reference logical interface is `centaurus0` using DHCP. In VMware, check the E1000 adapter, its NAT connection and the environment's DHCP service. **The USB distribution requires wired Ethernet:** connect the cable and check link, a compatible NIC/driver and DHCP. No Wi-Fi driver or connection manager is deployed in the image; do not rely on Wi-Fi for networking. Validation on one computer does not guarantee compatibility with every Ethernet adapter. Avoid renaming interfaces without diagnosing the cause.
 
 If `centaurus` fails before showing the shell, check that it runs as user `centaurus`, without arguments, from a TTY and without another active session. If the message indicates an integrity or Docker failure, retain the diagnosis and request administrative attention. Do not change manifests or grant general Docker access to bypass verification.
 
@@ -54,10 +54,29 @@ If results appear elsewhere or the workspace seems missing, check that `--env-fi
 
 See [`DEPLOYMENT_GIT_DOCKER.en.md`](DEPLOYMENT_GIT_DOCKER.en.md) for startup and shutdown, and [`CONFIGURATION.en.md`](CONFIGURATION.en.md) for variable and path resolution.
 
+### 4.1. Prerequisite and build failures
+
+| Message or symptom | Likely cause and action |
+| --- | --- |
+| `missing prerequisite: git`, `missing prerequisite: python3` or `missing prerequisite: docker` | Install the missing host prerequisite and repeat the initial checks. |
+| `Git + Docker distribution is certified on Linux only` | The host is not Linux; use the deployment mode appropriate to that system. |
+| `Docker Engine is not available to the current user` | Check the service with `systemctl status docker`, then `docker info` and host access policy. |
+| `Docker Compose plugin is required` | Check that the Compose plugin is installed and `docker compose version` works. |
+| `release checkout must be clean before bootstrap` | Preserve or reconcile changes and untracked files; do not delete work merely to pass the check. |
+| The checkout does not match `CENTAURUS_RELEASE_COMMIT` | Compare `git rev-parse HEAD` with the intended release and select the correct commit. |
+| Downloading dependencies fails during build | Keep the error and review connectivity and pinned artifact availability. Do not treat an incomplete build as validated. |
+| `pip check` fails | The candidate environment is inconsistent; do not promote or use that candidate as the new validated image. Bootstrap stops before updating the local tag. |
+| Workspace write error | Check ownership, permissions and the generated host bind path. Normal Core uses `1000:1000`; bootstrap changes the workspace directory owner, not all existing files recursively. |
+| `HOME` or `EROFS` error in an external tool | Check the Compose override `HOME=/tmp/centaurus` and `/tmp` tmpfs. Keep the read-only root filesystem. |
+| Disk usage grows after repeated builds | Inspect `docker system df` and `docker builder du`. Plan selective cleanup while preserving images needed for rollback and persistent data; avoid indiscriminate pruning. |
+
 ## 5. Ollama, requests and results
 
 | Situation | Interpretation and action |
 | --- | --- |
+| `centaurus-ollama` does not start | Inspect `docker logs --tail 50 centaurus-ollama` and `docker inspect centaurus-ollama`; check image, model and configuration. |
+| Core cannot reach Ollama | Review service status and the internal LLM network in Compose. Do not publish port `11434` on the host as a diagnostic shortcut. |
+| `existing Ollama state does not match the release` | Bootstrap found incompatible existing content and stops; follow section 5.1 before retrying. |
 | Model unavailable | Check the Ollama service, configured URL and persistent store. In Git + Docker use the versioned verification/provisioning scripts; on the appliance request administrative diagnosis. |
 | LLM error during interpretation | LLM #1 can prevent investigation startup. Keep the message and check the service/model before retrying. |
 | `Invalid request` | Check the target and write a simple request using a supported type; see `/capabilities` inside the shell. |
@@ -70,6 +89,22 @@ See [`DEPLOYMENT_GIT_DOCKER.en.md`](DEPLOYMENT_GIT_DOCKER.en.md) for startup and
 Local inference does not remove the need for networking when querying OSINT sources. Timeout and context settings are in [`CONFIGURATION.en.md`](CONFIGURATION.en.md); increasing them does not guarantee sufficient resources or valid responses.
 
 On native Windows, use the virtual environment prepared in [`DEPLOYMENT_WINDOWS.en.md`](DEPLOYMENT_WINDOWS.en.md). A tool appearing in the catalog does not demonstrate that its executable or dependencies are available on Windows.
+
+### 5.1. Existing Ollama state incompatible with the release
+
+Git + Docker bootstrap verifies the model against `docker/supply-chain.lock.json`. If it matches, it reuses the model and prints `MODEL_ALREADY_VALID=PASS`. If the Ollama directory is empty, it provisions the required model. If the directory contains data but verification fails, it stops instead of silently deleting or overwriting that state.
+
+From the selected release checkout, with `CENTAURUS_DATA_ROOT` set to the data directory actually used, inspect verification output:
+
+```bash
+python3 scripts/verify_ollama_model.py \
+  --models-root "$CENTAURUS_DATA_ROOT/ollama/models" \
+  --supply-chain docker/supply-chain.lock.json
+```
+
+Resolve the mismatch by selecting the correct data root for that release, restoring the expected model from a verified copy, or explicitly choosing a new empty data root for a separate installation. Do not delete an existing Ollama directory automatically. A separate data root does not itself isolate Compose project/container names or enable simultaneous deployments.
+
+A model-stage failure does not mean bootstrap made no changes: the Core local tag and workspace directory ownership have already been updated at that point. Preserve the error, inspect the resulting state and use the previously recorded image identity if rollback is needed. Bootstrap provides no automatic rollback of those changes.
 
 ## 6. Logs and diagnostic information
 

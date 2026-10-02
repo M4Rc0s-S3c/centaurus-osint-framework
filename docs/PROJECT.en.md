@@ -163,57 +163,24 @@ Reproducible deployment from the public repository on a compatible Linux host.
 
 See [`DEPLOYMENT_GIT_DOCKER.en.md`](DEPLOYMENT_GIT_DOCKER.en.md).
 
-## 9. Appliance credentials
-
-### Standard user
-
-```text
-Username: centaurus
-Password: centaurus
-```
-
-### Root
-
-```text
-Username: root
-Password: root
-```
-
-Change default credentials after first access when the environment will remain deployed.
-
-## 10. Appliance operation
-
-The standard user starts CENTAURUS with:
-
-```bash
-centaurus
-```
-
-Controlled shutdown is performed outside the shell with:
-
-```bash
-centaurus-poweroff
-```
-
-The architecture avoids granting generic Docker administration to the operational user.
-
-## 11. Responsible use
+## 9. Responsible use
 
 CENTAURUS is intended for legitimate OSINT, defensive security, research and authorized assessments.
 
 Users are responsible for complying with applicable law, source terms and organizational policy.
 
-## 12. Related documentation
+## 10. Related documentation
 
 - [`README.en.md`](../README.en.md)
 - [`INSTALL.en.md`](INSTALL.en.md)
+- [`USER_GUIDE.en.md`](USER_GUIDE.en.md)
 - [`ARCHITECTURE.en.md`](ARCHITECTURE.en.md)
 - [`SPECIFICATION.en.md`](SPECIFICATION.en.md)
 - [`STORAGE.en.md`](STORAGE.en.md)
 - [`STANDARDS.en.md`](STANDARDS.en.md)
 - [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)
 
-## 13. License
+## 11. License
 
 CENTAURUS is distributed under the **Apache License 2.0**.
 

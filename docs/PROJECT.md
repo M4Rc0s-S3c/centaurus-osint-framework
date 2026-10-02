@@ -164,57 +164,24 @@ Despliegue reproducible desde el repositorio público sobre un host Linux compat
 
 Consulta [`DEPLOYMENT_GIT_DOCKER.md`](DEPLOYMENT_GIT_DOCKER.md).
 
-## 9. Credenciales de la appliance
-
-### Usuario estándar
-
-```text
-Usuario: centaurus
-Contraseña: centaurus
-```
-
-### Root
-
-```text
-Usuario: root
-Contraseña: root
-```
-
-Se recomienda cambiar las credenciales por defecto después del primer acceso cuando el entorno vaya a permanecer desplegado.
-
-## 10. Operación de la appliance
-
-El usuario estándar inicia CENTAURUS mediante:
-
-```bash
-centaurus
-```
-
-El apagado controlado se realiza fuera del shell mediante:
-
-```bash
-centaurus-poweroff
-```
-
-La arquitectura evita conceder administración Docker genérica al usuario operativo.
-
-## 11. Uso responsable
+## 9. Uso responsable
 
 CENTAURUS está destinado a OSINT legítimo, seguridad defensiva, investigación y evaluaciones autorizadas.
 
 El usuario es responsable de cumplir la legislación aplicable, los términos de las fuentes consultadas y las políticas de su organización.
 
-## 12. Documentación relacionada
+## 10. Documentación relacionada
 
 - [`README.md`](../README.md)
 - [`INSTALL.md`](INSTALL.md)
+- [`USER_GUIDE.md`](USER_GUIDE.md)
 - [`ARCHITECTURE.md`](ARCHITECTURE.md)
 - [`SPECIFICATION.md`](SPECIFICATION.md)
 - [`STORAGE.md`](STORAGE.md)
 - [`STANDARDS.md`](STANDARDS.md)
 - [`DEVELOPMENT.md`](DEVELOPMENT.md)
 
-## 13. Licencia
+## 11. Licencia
 
 CENTAURUS se distribuye bajo **Apache License 2.0**.
 
