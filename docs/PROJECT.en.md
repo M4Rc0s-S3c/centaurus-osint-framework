@@ -131,13 +131,9 @@ keep_alive=0
 
 ## 8. Distribution modes
 
-### Git + Docker
-
-Reproducible deployment from the public repository on a compatible Linux host.
-
-See [`INSTALL.en.md`](INSTALL.en.md).
-
 ### VMware appliance
+
+The OVA is the main distribution. Import and first-use procedure: [`DEPLOYMENT_OVA.en.md`](DEPLOYMENT_OVA.en.md).
 
 The prebuilt OVA is distributed through external storage:
 
@@ -160,6 +156,12 @@ SHA256=7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165
 ```
 
 OVA/USB binaries are not stored directly in this Git repository. Verify artifact integrity using the published SHA-256.
+
+### Git + Docker
+
+Reproducible deployment from the public repository on a compatible Linux host.
+
+See [`DEPLOYMENT_GIT_DOCKER.en.md`](DEPLOYMENT_GIT_DOCKER.en.md).
 
 ## 9. Appliance credentials
 

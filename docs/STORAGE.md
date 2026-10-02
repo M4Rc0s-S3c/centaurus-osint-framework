@@ -179,7 +179,7 @@ RAW original correlacionable
 
 La modalidad Git + Docker utiliza un directorio persistente del host que se monta en `/workspace`.
 
-La ubicación exacta se documenta en [`INSTALL.md`](INSTALL.md).
+La ubicación exacta se documenta en [`DEPLOYMENT_GIT_DOCKER.md`](DEPLOYMENT_GIT_DOCKER.md).
 
 Los datos de investigación no forman parte de la imagen Docker ni del repositorio Git.
 

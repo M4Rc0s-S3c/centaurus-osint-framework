@@ -78,4 +78,4 @@ Protect the workspace and backups: they may contain collected public information
 
 Assistance telemetry is not intended to dump full prompts or reports. This does not mean that every log is free of sensitive information; error messages and execution context require review.
 
-Change initial appliance credentials in persistent deployments, keep secrets outside Git and maintain consistent backups before changing the runtime. Specific procedures are in [`INSTALL.en.md`](INSTALL.en.md), [`DEPLOYMENT_OVA.en.md`](DEPLOYMENT_OVA.en.md) and [`DEPLOYMENT_USB.en.md`](DEPLOYMENT_USB.en.md).
+Change initial appliance credentials in persistent deployments, keep secrets outside Git and maintain consistent backups before changing the runtime. Specific procedures are in [`DEPLOYMENT_GIT_DOCKER.en.md`](DEPLOYMENT_GIT_DOCKER.en.md), [`DEPLOYMENT_OVA.en.md`](DEPLOYMENT_OVA.en.md) and [`DEPLOYMENT_USB.en.md`](DEPLOYMENT_USB.en.md).

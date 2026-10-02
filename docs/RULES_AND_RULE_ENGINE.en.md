@@ -54,7 +54,7 @@ No findings does not certify that a target is secure. It can reflect unmet condi
 
 ## 5. Inspection and maintenance
 
-In the Core CLI, `centaurus capabilities --rules` lists available rules without starting an investigation. To access Core through Compose, use [`INSTALL.en.md`](INSTALL.en.md). In the appliance shell, use the capability help described in [`USER_GUIDE.en.md`](USER_GUIDE.en.md); the host wrapper accepts zero arguments.
+In the Core CLI, `centaurus capabilities --rules` lists available rules without starting an investigation. To access Core through Compose, use [`DEPLOYMENT_GIT_DOCKER.en.md`](DEPLOYMENT_GIT_DOCKER.en.md). In the appliance shell, use the capability help described in [`USER_GUIDE.en.md`](USER_GUIDE.en.md); the host wrapper accepts zero arguments.
 
 The catalog and its conditions are maintained in code. Semantic changes should explicitly manage identifiers and versions, include tests with normalized evidence and review their effect on reports. See [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md) and [`STANDARDS.en.md`](STANDARDS.en.md).
 

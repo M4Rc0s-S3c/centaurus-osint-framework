@@ -51,7 +51,7 @@ Compose defaults to `http://centaurus-ollama:11434` and sets the default interpr
 
 After bootstrap, the Git + Docker administrator can add variables interpolated by Compose to the generated `compose.env`. Preserve its two paths and always select that file with `--env-file`. Exported shell variables may override file values; inspect the environment when diagnosing differences.
 
-Bootstrap regenerates `compose.env`. Keep a copy of custom settings before running it again and check which options the selected version supports. Follow [`INSTALL.en.md`](INSTALL.en.md) for startup, shutdown and logs.
+Bootstrap regenerates `compose.env`. Keep a copy of custom settings before running it again and check which options the selected version supports. Follow [`DEPLOYMENT_GIT_DOCKER.en.md`](DEPLOYMENT_GIT_DOCKER.en.md) for startup, shutdown and logs.
 
 Changing `OLLAMA_MODEL` does not download or validate a new model: provisioning and model identity belong to the supply chain. Ollama mounts the model store read-only during normal operation.
 

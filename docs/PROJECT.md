@@ -132,13 +132,9 @@ keep_alive=0
 
 CENTAURUS puede utilizarse mediante tres modalidades.
 
-### Git + Docker
-
-Despliegue reproducible desde el repositorio público sobre un host Linux compatible.
-
-Consulta [`INSTALL.md`](INSTALL.md).
-
 ### Appliance VMware
+
+La OVA es la distribución principal. Procedimiento de importación y primer uso: [`DEPLOYMENT_OVA.md`](DEPLOYMENT_OVA.md).
 
 La OVA preconstruida se distribuye mediante almacenamiento externo:
 
@@ -161,6 +157,12 @@ SHA256=7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165
 ```
 
 Los binarios OVA/USB no se almacenan directamente en este repositorio Git. La integridad de cada artefacto debe verificarse mediante su SHA-256.
+
+### Git + Docker
+
+Despliegue reproducible desde el repositorio público sobre un host Linux compatible.
+
+Consulta [`DEPLOYMENT_GIT_DOCKER.md`](DEPLOYMENT_GIT_DOCKER.md).
 
 ## 9. Credenciales de la appliance
 

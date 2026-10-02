@@ -14,9 +14,9 @@ Proporciona un flujo reproducible para recopilar información pública, normaliz
 - Integración con LLM local mediante Ollama.
 - Separación entre el informe autoritativo determinista y la asistencia no autoritativa del LLM.
 - Workspace persistente para investigaciones, evidencias, hallazgos, informes y logs.
-- Despliegue Git + Docker sobre Linux.
 - Distribución como appliance VMware.
 - Distribución mediante imagen USB arrancable.
+- Despliegue Git + Docker sobre Linux.
 - Modelo de ejecución local-first.
 - Licencia Apache 2.0.
 
@@ -87,40 +87,11 @@ LLM #2 - Asistencia al analista
 
 El modelo de lenguaje no ejecuta herramientas OSINT de forma autónoma ni genera hallazgos autoritativos. La ejecución operativa y las conclusiones técnicas permanecen trazables mediante componentes deterministas.
 
-## Inicio rápido - Git + Docker
+## Inicio rápido — OVA VMware
 
-### Requisitos
+La OVA preconstruida es la distribución principal de CENTAURUS. Sigue [`DEPLOYMENT_OVA.md`](docs/DEPLOYMENT_OVA.md) para descargarla y verificarla, importarla en VMware y abrir tu primera sesión.
 
-Host Linux con:
-
-- Git
-- Python 3
-- Docker Engine
-- Docker Compose
-- acceso a Docker para el usuario de despliegue
-
-Clonar el repositorio:
-
-```bash
-git clone https://github.com/M4Rc0s-S3c/centaurus-osint-framework.git
-cd centaurus-osint-framework
-```
-
-Para utilizar la release pública actual:
-
-```bash
-git checkout v1.0.0
-```
-
-A continuación, seguir el procedimiento documentado en [`INSTALL.md`](docs/INSTALL.md).
-
-El bootstrap de release está disponible mediante:
-
-```bash
-./scripts/bootstrap_linux_release.sh
-```
-
-> Los prerrequisitos exactos, la preparación del entorno y los pasos de validación se definen en `docs/INSTALL.md`. Debe utilizarse ese documento como procedimiento de despliegue, no este README como runbook completo.
+Para USB, Git + Docker sobre Linux o Core local en Windows, consulta [`INSTALL.md`](docs/INSTALL.md).
 
 ## Credenciales de la appliance
 
@@ -146,13 +117,9 @@ Se recomienda cambiar las credenciales por defecto después del primer uso cuand
 
 CENTAURUS contempla varias modalidades de distribución.
 
-### Git + Docker
-
-Recomendada cuando el framework se despliega desde código fuente sobre un host Linux compatible.
-
-El repositorio incluye el Core, las definiciones Docker/Compose, locks de dependencias, scripts de inicialización y documentación de despliegue.
-
 ### Appliance VMware
+
+La OVA es la distribución principal. Procedimiento de importación y primer uso: [`DEPLOYMENT_OVA.md`](docs/DEPLOYMENT_OVA.md).
 
 La appliance VMware preconstruida está disponible mediante almacenamiento externo:
 
@@ -186,11 +153,19 @@ Se recomienda verificar siempre el SHA-256 después de la descarga.
 
 > Los binarios OVA/USB son artefactos externos y no se almacenan directamente en este repositorio Git.
 
+### Git + Docker
+
+Recomendada cuando el framework se despliega desde código fuente sobre un host Linux compatible.
+
+El repositorio incluye el Core, las definiciones Docker/Compose, locks de dependencias, scripts de inicialización y documentación de despliegue.
+
+Procedimiento: [`DEPLOYMENT_GIT_DOCKER.md`](docs/DEPLOYMENT_GIT_DOCKER.md).
+
 ## Windows
 
 Windows nativo puede utilizarse para desarrollo, ejecución del Core y flujos locales con Ollama.
 
-No se presenta Windows como equivalente a la distribución completa Linux + Docker para todas las herramientas OSINT integradas ni para el runtime endurecido de contenedores. Consulta [`INSTALL.md`](docs/INSTALL.md) y [`PROJECT.md`](docs/PROJECT.md) para conocer el alcance documentado.
+No se presenta Windows como equivalente a la distribución completa Linux + Docker para todas las herramientas OSINT integradas ni para el runtime endurecido de contenedores. Consulta [`DEPLOYMENT_WINDOWS.md`](docs/DEPLOYMENT_WINDOWS.md) y [`PROJECT.md`](docs/PROJECT.md) para conocer el alcance documentado.
 
 ## LLM local
 
@@ -259,6 +234,9 @@ Orden de lectura recomendado:
 11. [`DEPLOYMENT_OVA.md`](docs/DEPLOYMENT_OVA.md) · [English](docs/DEPLOYMENT_OVA.en.md) - importación, uso y mantenimiento de la OVA.
 12. [`DEPLOYMENT_USB.md`](docs/DEPLOYMENT_USB.md) · [English](docs/DEPLOYMENT_USB.en.md) - escritura de la imagen raw, arranque y persistencia.
 13. [`SECURITY_ARCHITECTURE.md`](docs/SECURITY_ARCHITECTURE.md) · [English](docs/SECURITY_ARCHITECTURE.en.md) - límites de confianza, endurecimiento y tratamiento de fallos.
+14. [`DEPLOYMENT_GIT_DOCKER.md`](docs/DEPLOYMENT_GIT_DOCKER.md) · [English](docs/DEPLOYMENT_GIT_DOCKER.en.md) - despliegue desde código sobre Linux.
+15. [`DEPLOYMENT_WINDOWS.md`](docs/DEPLOYMENT_WINDOWS.md) · [English](docs/DEPLOYMENT_WINDOWS.en.md) - preparación del Core local en Windows.
+16. [`TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) · [English](docs/TROUBLESHOOTING.en.md) - diagnóstico de incidencias en las distintas modalidades.
 
 ## Release
 

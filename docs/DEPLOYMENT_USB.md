@@ -14,7 +14,7 @@ El dispositivo debe disponer de **al menos `31457280000` bytes reales**. Comprue
 
 ## 2. Descarga y verificación
 
-Utiliza el enlace de descarga publicado en [`INSTALL.md`](INSTALL.md).
+[CENTAURUS-USB.img — descarga](https://tinyurl.com/42wumj8b)
 
 | Propiedad | Valor |
 | --- | --- |
@@ -72,7 +72,14 @@ Un dispositivo reutilizado y mayor que la imagen puede conservar metadatos de un
 
 Conecta el USB al equipo de destino y elige su entrada UEFI en el menú de arranque. Conserva los discos internos fuera del procedimiento de escritura; arrancar la appliance no requiere instalarla sobre ellos.
 
-Inicia sesión como `centaurus` usando las credenciales publicadas en [`INSTALL.md`](INSTALL.md). Cámbialas si el medio va a seguir utilizándose. Desde una TTY interactiva:
+Credenciales iniciales de la appliance:
+
+| Cuenta | Usuario | Contraseña |
+| --- | --- | --- |
+| Analista | `centaurus` | `centaurus` |
+| Administración | `root` | `root` |
+
+Cambia estas credenciales si la appliance va a seguir utilizándose. Accede a la consola como `centaurus`. Desde una TTY interactiva:
 
 ```bash
 centaurus
@@ -80,7 +87,7 @@ centaurus
 
 El wrapper acepta cero argumentos y pide autenticación nueva. El shell y la interpretación de resultados se describen en [`USER_GUIDE.md`](USER_GUIDE.md).
 
-La interfaz lógica de referencia es `centaurus0` por DHCP. El administrador puede revisar `ip -br addr`, `ip route` y `findmnt /workspace`. Si no aparece una interfaz utilizable, revisa la compatibilidad del hardware antes de atribuir el problema a una fuente OSINT. La recopilación necesita red aunque el modelo LLM sea local.
+La interfaz lógica de referencia es `centaurus0` por DHCP. El administrador puede revisar `ip -br addr`, `ip route` y `findmnt /workspace`. Para incidencias de arranque o red, consulta [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md). La recopilación necesita red aunque el modelo LLM sea local.
 
 ## 6. Persistencia y apagado
 
@@ -99,3 +106,4 @@ Espera al apagado completo antes de retirar el USB. El sistema modifica el medio
 - [`DEPLOYMENT_OVA.md`](DEPLOYMENT_OVA.md)
 - [`CONFIGURATION.md`](CONFIGURATION.md)
 - [`SECURITY_ARCHITECTURE.md`](SECURITY_ARCHITECTURE.md)
+- [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md)

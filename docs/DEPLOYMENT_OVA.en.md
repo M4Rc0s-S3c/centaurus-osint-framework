@@ -14,7 +14,9 @@ The reference configuration uses three logical disks: SYSTEM, PLATFORM and WORKS
 
 ## 2. Download and identity
 
-Download the artifact through the link published in [`INSTALL.en.md`](INSTALL.en.md). Keep an original copy for future imports.
+[CENTAURUS-C4-FINAL.ova — Google Drive](https://drive.google.com/drive/folders/1Anvan2lh-KQzQMDvvv_nTqSjfdSnTpdT?usp=sharing)
+
+Keep an original copy for future imports.
 
 | Property | Value |
 | --- | --- |
@@ -49,7 +51,14 @@ First boot prepares the instance's local identity, including `machine-id` and SS
 
 ## 4. First session
 
-Log in at the console as `centaurus`. Initial credentials and the administration account are documented in [`INSTALL.en.md`](INSTALL.en.md); change them if the appliance will remain deployed.
+Initial appliance credentials:
+
+| Account | Username | Password |
+| --- | --- | --- |
+| Analyst | `centaurus` | `centaurus` |
+| Administration | `root` | `root` |
+
+Change these credentials if the appliance will remain in use. Log in at the console as `centaurus`.
 
 From an interactive TTY:
 
@@ -72,9 +81,7 @@ findmnt /workspace
 systemctl --failed --no-pager
 ```
 
-The expected logical interface is `centaurus0`, configured through DHCP. If it receives no address, first check the virtual adapter, NAT network and virtualization environment's DHCP service.
-
-If `centaurus` rejects startup, check that a TTY is in use and another session is not active. Integrity failures or an unavailable Docker daemon require administrative diagnosis; editing manifests to bypass verification is outside the usage procedure.
+The expected logical interface is `centaurus0`, configured through DHCP. For network or startup failures, see [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md).
 
 ## 6. Persistence and maintenance
 
@@ -99,3 +106,4 @@ The command accepts zero arguments and requires fresh authentication. Wait for s
 - [`CONFIGURATION.en.md`](CONFIGURATION.en.md)
 - [`SECURITY_ARCHITECTURE.en.md`](SECURITY_ARCHITECTURE.en.md)
 - [`DEPLOYMENT_USB.en.md`](DEPLOYMENT_USB.en.md)
+- [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md)

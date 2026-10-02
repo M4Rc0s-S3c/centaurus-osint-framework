@@ -78,4 +78,4 @@ Protege el workspace y sus copias: pueden incluir información pública recopila
 
 La telemetría de asistencia no está concebida para volcar prompts o informes completos. Esto no significa que todos los logs carezcan de información sensible; mensajes de error y contexto de ejecución requieren revisión.
 
-Cambia las credenciales iniciales de la appliance en despliegues persistentes, conserva los secretos fuera de Git y mantén respaldos consistentes antes de modificar el runtime. Los procedimientos específicos están en [`INSTALL.md`](INSTALL.md), [`DEPLOYMENT_OVA.md`](DEPLOYMENT_OVA.md) y [`DEPLOYMENT_USB.md`](DEPLOYMENT_USB.md).
+Cambia las credenciales iniciales de la appliance en despliegues persistentes, conserva los secretos fuera de Git y mantén respaldos consistentes antes de modificar el runtime. Los procedimientos específicos están en [`DEPLOYMENT_GIT_DOCKER.md`](DEPLOYMENT_GIT_DOCKER.md), [`DEPLOYMENT_OVA.md`](DEPLOYMENT_OVA.md) y [`DEPLOYMENT_USB.md`](DEPLOYMENT_USB.md).

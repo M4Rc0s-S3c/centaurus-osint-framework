@@ -14,7 +14,9 @@ La configuración de referencia utiliza tres discos lógicos: SYSTEM, PLATFORM y
 
 ## 2. Descarga e identidad
 
-Descarga el artefacto desde el enlace publicado en [`INSTALL.md`](INSTALL.md). Conserva una copia original para futuras importaciones.
+[CENTAURUS-C4-FINAL.ova — Google Drive](https://drive.google.com/drive/folders/1Anvan2lh-KQzQMDvvv_nTqSjfdSnTpdT?usp=sharing)
+
+Conserva una copia original para futuras importaciones.
 
 | Propiedad | Valor |
 | --- | --- |
@@ -49,7 +51,14 @@ El primer arranque prepara la identidad local de la instancia, incluidos `machin
 
 ## 4. Primera sesión
 
-Accede a la consola con el usuario `centaurus`. Las credenciales iniciales y la cuenta de administración están documentadas en [`INSTALL.md`](INSTALL.md); cámbialas si la appliance va a permanecer desplegada.
+Credenciales iniciales de la appliance:
+
+| Cuenta | Usuario | Contraseña |
+| --- | --- | --- |
+| Analista | `centaurus` | `centaurus` |
+| Administración | `root` | `root` |
+
+Cambia estas credenciales si la appliance va a seguir utilizándose. Accede a la consola como `centaurus`.
 
 En una TTY interactiva:
 
@@ -72,9 +81,7 @@ findmnt /workspace
 systemctl --failed --no-pager
 ```
 
-La interfaz lógica esperada es `centaurus0`, con configuración por DHCP. Si no obtiene dirección, revisa primero el adaptador virtual, la red NAT y el servicio DHCP del entorno de virtualización.
-
-Si `centaurus` rechaza el arranque, comprueba que se utiliza una TTY y que no existe otra sesión activa. Un fallo de integridad o de disponibilidad de Docker requiere diagnóstico administrativo; editar los manifiestos para omitir la comprobación no forma parte del procedimiento de uso.
+La interfaz lógica esperada es `centaurus0`, con configuración por DHCP. Para fallos de red o de arranque, consulta [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).
 
 ## 6. Persistencia y mantenimiento
 
@@ -99,3 +106,4 @@ El comando acepta cero argumentos y solicita autenticación nueva. Espera a que 
 - [`CONFIGURATION.md`](CONFIGURATION.md)
 - [`SECURITY_ARCHITECTURE.md`](SECURITY_ARCHITECTURE.md)
 - [`DEPLOYMENT_USB.md`](DEPLOYMENT_USB.md)
+- [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md)

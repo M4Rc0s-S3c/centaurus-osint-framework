@@ -37,7 +37,7 @@ The distribution distinguishes the system terminal from the application shell. T
 
 On the appliance, the first route is the normal entry point. Do not append `capabilities`, `shell` or `investigate` to the host command: that wrapper accepts zero arguments.
 
-For Git + Docker on Linux, use the execution context specified by the deployment; do not assume that the host has the appliance wrapper. See [Installation and Deployment](INSTALL.en.md).
+For Git + Docker on Linux, use the execution context specified by the deployment; do not assume that the host has the appliance wrapper. See [`DEPLOYMENT_GIT_DOCKER.en.md`](DEPLOYMENT_GIT_DOCKER.en.md).
 
 ## 3. Your first appliance session
 
@@ -182,6 +182,8 @@ The model's recommendations are advisory. To support a decision, return to the f
 | You cannot find a previous investigation from the shell | The CLI has no historical query feature; use the workspace access defined by the deployment |
 
 When reporting an issue, include the deployment mode, the stage where it occurred, the exact message and the case identifier if one was generated. Include only the data needed for diagnosis.
+
+For deployment checks and operational diagnosis, see [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md).
 
 ## 8. End the session and shut down the appliance
 

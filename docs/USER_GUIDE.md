@@ -37,7 +37,7 @@ La distribución distingue el terminal del sistema y el shell de la aplicación.
 
 En la appliance, el acceso normal es el primer recorrido. No añadas `capabilities`, `shell` ni `investigate` al comando host: ese wrapper acepta cero argumentos.
 
-Para Git + Docker sobre Linux, utiliza el contexto de ejecución indicado por el despliegue; no presupongas que el host dispone del wrapper de la appliance. Consulta [Instalación y despliegue](INSTALL.md).
+Para Git + Docker sobre Linux, utiliza el contexto de ejecución indicado por el despliegue; no presupongas que el host dispone del wrapper de la appliance. Consulta [`DEPLOYMENT_GIT_DOCKER.md`](DEPLOYMENT_GIT_DOCKER.md).
 
 ## 3. Primera sesión en la appliance
 
@@ -182,6 +182,8 @@ Las recomendaciones del modelo son orientativas. Para fundamentar una decisión,
 | No encuentras una investigación anterior desde el shell | No hay consulta histórica en la CLI; utiliza el acceso al workspace definido por el despliegue |
 
 Para comunicar una incidencia, indica la modalidad de uso, el punto donde ocurrió, el mensaje exacto y el identificador del caso si llegó a generarse. Incluye solo los datos necesarios para el diagnóstico.
+
+Para comprobaciones del despliegue y diagnóstico operativo, consulta [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).
 
 ## 8. Terminar la sesión y apagar la appliance
 

@@ -54,7 +54,7 @@ Que no se produzcan hallazgos no certifica la seguridad del objetivo. Puede refl
 
 ## 5. Inspección y mantenimiento
 
-En la CLI del Core, `centaurus capabilities --rules` permite consultar las reglas disponibles sin iniciar una investigación. Para acceder al Core mediante Compose, utiliza los comandos de [`INSTALL.md`](INSTALL.md). En el shell de la appliance, consulta la ayuda de capacidades descrita en [`USER_GUIDE.md`](USER_GUIDE.md); el wrapper del host acepta cero argumentos.
+En la CLI del Core, `centaurus capabilities --rules` permite consultar las reglas disponibles sin iniciar una investigación. Para acceder al Core mediante Compose, utiliza los comandos de [`DEPLOYMENT_GIT_DOCKER.md`](DEPLOYMENT_GIT_DOCKER.md). En el shell de la appliance, consulta la ayuda de capacidades descrita en [`USER_GUIDE.md`](USER_GUIDE.md); el wrapper del host acepta cero argumentos.
 
 El catálogo y sus condiciones se mantienen en código. Un cambio de semántica debe preservar identificadores y versiones de forma explícita, incluir pruebas con evidencia normalizada y revisar el efecto en los informes. Consulta [`DEVELOPMENT.md`](DEVELOPMENT.md) y [`STANDARDS.md`](STANDARDS.md).
 

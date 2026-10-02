@@ -14,7 +14,7 @@ The device must provide **at least `31457280000` actual bytes**. Check its capac
 
 ## 2. Download and verification
 
-Use the download link published in [`INSTALL.en.md`](INSTALL.en.md).
+[CENTAURUS-USB.img — download](https://tinyurl.com/42wumj8b)
 
 | Property | Value |
 | --- | --- |
@@ -72,7 +72,14 @@ A reused device larger than the image can retain previous partition metadata out
 
 Connect the USB to the target computer and select its UEFI entry in the boot menu. Keep internal disks outside the writing procedure; booting the appliance does not require installing it on them.
 
-Log in as `centaurus` using the credentials published in [`INSTALL.en.md`](INSTALL.en.md). Change them if the media will remain in use. From an interactive TTY:
+Initial appliance credentials:
+
+| Account | Username | Password |
+| --- | --- | --- |
+| Analyst | `centaurus` | `centaurus` |
+| Administration | `root` | `root` |
+
+Change these credentials if the appliance will remain in use. Log in at the console as `centaurus`. From an interactive TTY:
 
 ```bash
 centaurus
@@ -80,7 +87,7 @@ centaurus
 
 The wrapper accepts zero arguments and requires fresh authentication. [`USER_GUIDE.en.md`](USER_GUIDE.en.md) describes the shell and result interpretation.
 
-The reference logical interface is `centaurus0` with DHCP. An administrator can inspect `ip -br addr`, `ip route` and `findmnt /workspace`. If no usable interface appears, check hardware compatibility before attributing the problem to an OSINT source. Collection requires networking even though the LLM model is local.
+The reference logical interface is `centaurus0` with DHCP. An administrator can inspect `ip -br addr`, `ip route` and `findmnt /workspace`. For boot or network issues, see [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md). Collection requires networking even though the LLM model is local.
 
 ## 6. Persistence and shutdown
 
@@ -99,3 +106,4 @@ Wait for complete shutdown before removing the USB. Operation changes the media;
 - [`DEPLOYMENT_OVA.en.md`](DEPLOYMENT_OVA.en.md)
 - [`CONFIGURATION.en.md`](CONFIGURATION.en.md)
 - [`SECURITY_ARCHITECTURE.en.md`](SECURITY_ARCHITECTURE.en.md)
+- [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md)

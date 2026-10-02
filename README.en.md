@@ -14,9 +14,9 @@ It provides a reproducible workflow for collecting public information, normalizi
 - Local LLM integration through Ollama.
 - Separation between authoritative deterministic reporting and non-authoritative LLM assistance.
 - Persistent workspace for investigations, evidence, findings, reports and logs.
-- Git + Docker deployment on Linux.
 - VMware appliance distribution.
 - Bootable USB image distribution.
+- Git + Docker deployment on Linux.
 - Local-first execution model.
 - Apache License 2.0.
 
@@ -87,40 +87,11 @@ LLM #2 - Analyst assistance
 
 The language model does not execute OSINT tools autonomously and does not generate authoritative findings. Operational execution and technical conclusions remain traceable through deterministic components.
 
-## Quick start - Git + Docker
+## Quick start — VMware OVA
 
-### Requirements
+The prebuilt OVA is the main CENTAURUS distribution. Follow [`DEPLOYMENT_OVA.en.md`](docs/DEPLOYMENT_OVA.en.md) to download and verify it, import it into VMware and open your first session.
 
-A Linux host with:
-
-- Git
-- Python 3
-- Docker Engine
-- Docker Compose
-- Docker access for the deployment user
-
-Clone the repository:
-
-```bash
-git clone https://github.com/M4Rc0s-S3c/centaurus-osint-framework.git
-cd centaurus-osint-framework
-```
-
-For the current public release:
-
-```bash
-git checkout v1.0.0
-```
-
-Then follow the deployment procedure documented in [`INSTALL.en.md`](docs/INSTALL.en.md).
-
-The release bootstrap is provided through:
-
-```bash
-./scripts/bootstrap_linux_release.sh
-```
-
-> The exact prerequisites, environment preparation and validation steps are defined in `docs/INSTALL.en.md`. Follow that document rather than treating this README as the complete deployment runbook.
+For USB, Git + Docker on Linux or local Core on Windows, see [`INSTALL.en.md`](docs/INSTALL.en.md).
 
 ## Appliance credentials
 
@@ -146,13 +117,9 @@ Change the default credentials after first use when the environment will remain 
 
 CENTAURUS is designed around several distribution modes.
 
-### Git + Docker
-
-Recommended when the framework is deployed from source on a compatible Linux host.
-
-The repository contains the Core, Docker/Compose definitions, dependency locks, initialization scripts and deployment documentation.
-
 ### VMware appliance
+
+The OVA is the main distribution. Import and first-use procedure: [`DEPLOYMENT_OVA.en.md`](docs/DEPLOYMENT_OVA.en.md).
 
 The prebuilt VMware appliance is available through external storage:
 
@@ -186,11 +153,19 @@ Always verify the SHA-256 after downloading the artifact.
 
 > OVA and raw USB binaries are external artifacts and are not stored directly in this Git repository.
 
+### Git + Docker
+
+Recommended when the framework is deployed from source on a compatible Linux host.
+
+The repository contains the Core, Docker/Compose definitions, dependency locks, initialization scripts and deployment documentation.
+
+Procedure: [`DEPLOYMENT_GIT_DOCKER.en.md`](docs/DEPLOYMENT_GIT_DOCKER.en.md).
+
 ## Windows
 
 Native Windows can be used for development, Core execution and local Ollama workflows.
 
-Windows is not presented as equivalent to the complete Linux + Docker distribution for all integrated OSINT tools or for the hardened container runtime. See [`INSTALL.en.md`](docs/INSTALL.en.md) and [`PROJECT.en.md`](docs/PROJECT.en.md) for the documented scope.
+Windows is not presented as equivalent to the complete Linux + Docker distribution for all integrated OSINT tools or for the hardened container runtime. See [`DEPLOYMENT_WINDOWS.en.md`](docs/DEPLOYMENT_WINDOWS.en.md) and [`PROJECT.en.md`](docs/PROJECT.en.md) for the documented scope.
 
 ## Local LLM
 
@@ -259,6 +234,9 @@ Recommended reading order:
 11. [`DEPLOYMENT_OVA.en.md`](docs/DEPLOYMENT_OVA.en.md) · [Español](docs/DEPLOYMENT_OVA.md) - OVA import, operation and maintenance.
 12. [`DEPLOYMENT_USB.en.md`](docs/DEPLOYMENT_USB.en.md) · [Español](docs/DEPLOYMENT_USB.md) - raw image writing, boot and persistence.
 13. [`SECURITY_ARCHITECTURE.en.md`](docs/SECURITY_ARCHITECTURE.en.md) · [Español](docs/SECURITY_ARCHITECTURE.md) - trust boundaries, hardening and failure handling.
+14. [`DEPLOYMENT_GIT_DOCKER.en.md`](docs/DEPLOYMENT_GIT_DOCKER.en.md) · [Español](docs/DEPLOYMENT_GIT_DOCKER.md) - deployment from source on Linux.
+15. [`DEPLOYMENT_WINDOWS.en.md`](docs/DEPLOYMENT_WINDOWS.en.md) · [Español](docs/DEPLOYMENT_WINDOWS.md) - local Core setup on Windows.
+16. [`TROUBLESHOOTING.en.md`](docs/TROUBLESHOOTING.en.md) · [Español](docs/TROUBLESHOOTING.md) - issue diagnosis across deployment modes.
 
 ## Release
 

@@ -180,7 +180,7 @@ correlatable original RAW
 
 Git + Docker mode uses a persistent host directory mounted at `/workspace`.
 
-The exact location is documented in [`INSTALL.en.md`](INSTALL.en.md).
+The exact location is documented in [`DEPLOYMENT_GIT_DOCKER.en.md`](DEPLOYMENT_GIT_DOCKER.en.md).
 
 Investigation data is not part of the Docker image or Git repository.
 

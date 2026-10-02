@@ -51,7 +51,7 @@ Compose utiliza `http://centaurus-ollama:11434` como URL por defecto y fija el t
 
 Después del bootstrap, el administrador de Git + Docker puede añadir las variables interpoladas por Compose al `compose.env` generado. Hay que conservar sus dos rutas y usar siempre `--env-file` con ese fichero. Las variables exportadas en el shell pueden prevalecer sobre los valores del fichero; revisa el entorno antes de diagnosticar diferencias.
 
-El bootstrap vuelve a generar `compose.env`. Conserva una copia de los ajustes antes de repetirlo y revisa qué opciones admite la versión seleccionada. Para iniciar, detener y consultar logs, sigue [`INSTALL.md`](INSTALL.md).
+El bootstrap vuelve a generar `compose.env`. Conserva una copia de los ajustes antes de repetirlo y revisa qué opciones admite la versión seleccionada. Para iniciar, detener y consultar logs, sigue [`DEPLOYMENT_GIT_DOCKER.md`](DEPLOYMENT_GIT_DOCKER.md).
 
 Cambiar `OLLAMA_MODEL` no descarga ni valida un modelo nuevo: el aprovisionamiento y su identidad pertenecen a la cadena de suministro. Ollama monta el almacén de modelos en modo solo lectura durante el uso normal.
 
