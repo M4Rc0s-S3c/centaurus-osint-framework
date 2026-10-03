@@ -36,6 +36,10 @@ Los campos de texto obligatorios no admiten valores vacíos. Los tiempos deben s
 
 Una configuración rechazada impide iniciar la investigación y la CLI termina con código `1`.
 
+El perfil actual de LLM #2 fija además `think=false` y el proveedor envía `keep_alive=0`. Son ajustes de implementación versionados, no variables de entorno expuestas al analista. El timeout de `300` segundos, `num_ctx=8192` y el límite opcional de generación son los valores configurables de la tabla anterior.
+
+En ejecución nativa, define `CENTAURUS_WORKSPACE` con una ruta absoluta donde pueda escribir el usuario del runtime. En Windows, sigue la preparación de ruta explícita de [`DEPLOYMENT_WINDOWS.md`](DEPLOYMENT_WINDOWS.md); `/workspace` no es una ubicación portable de Windows.
+
 ## 3. Git + Docker
 
 El bootstrap utiliza `CENTAURUS_DATA_ROOT`; si no está definida, toma `${XDG_DATA_HOME:-$HOME/.local/share}/centaurus`. Crea `compose.env` con permisos `0600` y las rutas persistentes:

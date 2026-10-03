@@ -48,7 +48,7 @@ Registration rules use normalized WHOIS/RDAP evidence; DNS rules use DNSRecon; p
 
 `RL-010` describes the direct query to the target's `_dmarc` name. It does not establish that every potentially inherited policy is absent or represent a complete DMARC assessment.
 
-An unobserved SPF policy, a recent registration or multiple public addresses also do not prove exploitation or malicious activity. Check each conclusion against its supporting evidence and the execution failures recorded in the report.
+An unobserved SPF policy, a recent registration or multiple public addresses also do not prove exploitation or malicious activity. Check each conclusion against its supporting evidence and the execution failures shown separately in the CLI and stored in `execution/failures/`. These failures are not part of `Report`; see [`STORAGE.en.md`](STORAGE.en.md).
 
 No findings does not certify that a target is secure. It can reflect unmet conditions, unobserved data or limited source coverage.
 

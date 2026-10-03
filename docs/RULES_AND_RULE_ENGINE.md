@@ -48,7 +48,7 @@ Las reglas de registro trabajan con evidencia normalizada de WHOIS/RDAP; las de 
 
 `RL-010` describe la consulta directa a `_dmarc` del objetivo. No prueba que falte cualquier política aplicable por herencia ni representa una evaluación completa de DMARC.
 
-La ausencia de SPF observado, un registro reciente o varias direcciones públicas tampoco demuestran una explotación o actividad maliciosa. Contrasta cada conclusión con sus evidencias y con los fallos de ejecución recogidos en el informe.
+La ausencia de SPF observado, un registro reciente o varias direcciones públicas tampoco demuestran una explotación o actividad maliciosa. Contrasta cada conclusión con sus evidencias y con los fallos de ejecución mostrados por separado en la CLI y conservados en `execution/failures/`. Estos fallos no forman parte de `Report`; consulta [`STORAGE.md`](STORAGE.md).
 
 Que no se produzcan hallazgos no certifica la seguridad del objetivo. Puede reflejar condiciones no cumplidas, datos no observados o cobertura limitada de fuentes.
 

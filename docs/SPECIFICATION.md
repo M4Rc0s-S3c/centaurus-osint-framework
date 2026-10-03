@@ -50,7 +50,7 @@ La salida RAW se transforma mediante normalización específica en `Evidence`, s
 
 ### FR-09 — Reporting
 
-`ReportManager` construye y persiste el informe.
+`ReportManager` construye el informe; el Core coordina su persistencia mediante `ReportStore`.
 
 ```text
 report.json → autoritativo
@@ -69,15 +69,7 @@ Su salida:
 - no modifica `Evidence`, `Findings` o `Report`;
 - falla en modo fail-soft.
 
-Perfil actual:
-
-```text
-timeout=300
-num_ctx=8192
-num_predict=UNSET
-think=false
-keep_alive=0
-```
+Los parámetros operacionales, sus valores por defecto y las diferencias entre ejecución nativa y Docker se documentan en [`CONFIGURATION.md`](CONFIGURATION.md).
 
 ### FR-11 — Fallo parcial de herramientas
 
@@ -104,7 +96,7 @@ En ejecución no interactiva esa superficie puede silenciarse sin alterar el con
 
 ### FR-14 — Persistencia trazable
 
-Los artefactos se correlacionan mediante `investigation_id` y se conservan bajo `/workspace`.
+Los artefactos se correlacionan mediante `investigation_id` y se conservan bajo el `<workspace>` configurado. `/workspace` es la ruta de referencia de appliance/contenedor; las rutas del host y las modalidades nativas se describen en [`CONFIGURATION.md`](CONFIGURATION.md).
 
 ### FR-15 — Punto de entrada de la appliance
 
@@ -138,7 +130,7 @@ La appliance utiliza `centaurus0` como nombre lógico del uplink y evita depende
 
 | Target | Cobertura |
 |---|---|
-| DOMAIN | principal/completa en la versión actual |
+| DOMAIN | cobertura principal mediante las herramientas integradas; no equivale a una evaluación exhaustiva de seguridad |
 | IP | limitada mediante RDAP |
 | EMAIL | no operacional como Target directo |
 | CERTIFICATE | diferido |

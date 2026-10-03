@@ -63,7 +63,7 @@ See [`DEPLOYMENT_GIT_DOCKER.en.md`](DEPLOYMENT_GIT_DOCKER.en.md) for startup and
 | `Docker Engine is not available to the current user` | Check the service with `systemctl status docker`, then `docker info` and host access policy. |
 | `Docker Compose plugin is required` | Check that the Compose plugin is installed and `docker compose version` works. |
 | `release checkout must be clean before bootstrap` | Preserve or reconcile changes and untracked files; do not delete work merely to pass the check. |
-| The checkout does not match `CENTAURUS_RELEASE_COMMIT` | Compare `git rev-parse HEAD` with the intended release and select the correct commit. |
+| The checkout does not match `CENTAURUS_RELEASE_COMMIT` | Compare `git rev-parse HEAD` with the intended release. The variable may retain the previous release commit in the same terminal: update it to the independently verified full commit, or return to the intended checkout. Follow the update procedure in [`DEPLOYMENT_GIT_DOCKER.en.md`](DEPLOYMENT_GIT_DOCKER.en.md); do not remove the check to hide a mismatch. |
 | Downloading dependencies fails during build | Keep the error and review connectivity and pinned artifact availability. Do not treat an incomplete build as validated. |
 | `pip check` fails | The candidate environment is inconsistent; do not promote or use that candidate as the new validated image. Bootstrap stops before updating the local tag. |
 | Workspace write error | Check ownership, permissions and the generated host bind path. Normal Core uses `1000:1000`; bootstrap changes the workspace directory owner, not all existing files recursively. |
@@ -80,7 +80,7 @@ See [`DEPLOYMENT_GIT_DOCKER.en.md`](DEPLOYMENT_GIT_DOCKER.en.md) for startup and
 | Model unavailable | Check the Ollama service, configured URL and persistent store. In Git + Docker use the versioned verification/provisioning scripts; on the appliance request administrative diagnosis. |
 | LLM error during interpretation | LLM #1 can prevent investigation startup. Keep the message and check the service/model before retrying. |
 | `Invalid request` | Check the target and write a simple request using a supported type; see `/capabilities` inside the shell. |
-| A source fails or returns HTTP errors | Review `ExecutionFailure` and report coverage. A valid partial result may exist; retrying does not guarantee source availability. |
+| A source fails or returns HTTP errors | Assess coverage by reviewing the report and the separate `ExecutionFailure` artifacts in `execution/failures/` together. A valid partial result may exist; retrying does not guarantee source availability. |
 | All tasks fail | The investigation fails. Isolated files do not establish that a valid report exists. |
 | No findings | Review evidence and applicable rules; zero findings does not certify absence of risk. |
 | LLM #2 is slow, fails or times out | Keep the already-persisted deterministic `Report`. Review logs and resources; additional assistance is non-authoritative and fail-soft. |

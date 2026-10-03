@@ -35,55 +35,27 @@ The architecture is designed so additional tools can be incorporated through the
 
 ## Architecture at a glance
 
-```text
-Analyst
-   |
-   v
-CLI / natural-language request
-   |
-   v
-LLM #1 - Intent interpretation
-   |
-   v
-TargetFactory
-   |
-   v
-Planner
-   |
-   v
-Core execution
-   |
-   +--> Plugins / OSINT sources
-   |        |
-   |        v
-   |   Raw observations
-   |        |
-   |        v
-   |   Normalization
-   |        |
-   v        v
-EvidenceManager
-   |
-   v
-Evidence
-   |
-   v
-RuleEngine
-   |
-   v
-Findings
-   |
-   v
-Deterministic Report
-   |
-   +--> report.json   (authoritative)
-   +--> report.md     (deterministic projection)
-   |
-   v
-LLM #2 - Analyst assistance
-          grounded, ephemeral,
-          non-authoritative, fail-soft
+```mermaid
+flowchart TD
+    U["CLI / natural-language request"] --> I["RequestInterpreter"]
+    I --> T["TargetFactory: Target"]
+    I --> L["LLM #1: Intent"]
+    T --> S["StructuredRequest"]
+    L --> S
+    S --> C["Core"]
+    C --> P["Planner"]
+    P --> X["Executor / PluginManager"]
+    X --> O["OSINT / RAW"]
+    O --> E["EvidenceManager / normalization"]
+    E --> R["RuleEngine / Findings"]
+    R --> M["ReportManager / Report"]
+    M --> F["Core / ReportStore: report.json + report.md"]
+    F --> A["LLM #2: non-authoritative assistance"]
 ```
+
+`RequestInterpreter` first constructs the Target deterministically and then asks LLM #1 to classify the Intent from the same input. Both are combined in `StructuredRequest`; the LLM does not construct the Target. The Core orchestrates the subsequent pipeline. LLM #2 runs after persistence and its output is grounded, ephemeral and fail-soft.
+
+See [`ARCHITECTURE.en.md`](docs/ARCHITECTURE.en.md) for component responsibilities.
 
 The language model does not execute OSINT tools autonomously and does not generate authoritative findings. Operational execution and technical conclusions remain traceable through deterministic components.
 
@@ -93,67 +65,19 @@ The prebuilt OVA is the main CENTAURUS distribution. Follow [`DEPLOYMENT_OVA.en.
 
 For USB, Git + Docker on Linux or local Core on Windows, see [`INSTALL.en.md`](docs/INSTALL.en.md).
 
-## Appliance credentials
-
-The distributed OVA/USB appliance uses the following default credentials:
-
-### Standard user
-
-```text
-Username: centaurus
-Password: centaurus
-```
-
-### Root
-
-```text
-Username: root
-Password: root
-```
-
-Change the default credentials after first use when the environment will remain deployed.
-
 ## Distribution modes
 
 CENTAURUS is designed around several distribution modes.
 
 ### VMware appliance
 
-The OVA is the main distribution. Import and first-use procedure: [`DEPLOYMENT_OVA.en.md`](docs/DEPLOYMENT_OVA.en.md).
-
-The prebuilt VMware appliance is available through external storage:
-
-**[Access the CENTAURUS-C4-FINAL.ova download (Google Drive)](https://drive.google.com/drive/folders/1Anvan2lh-KQzQMDvvv_nTqSjfdSnTpdT?usp=sharing)**
-
-Published artifact identity:
-
-```text
-File: CENTAURUS-C4-FINAL.ova
-SIZE_BYTES: 11828618752
-SHA256: d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868
-```
-
-Always verify the SHA-256 after downloading the artifact.
+The OVA is the main distribution. Download, published size and SHA-256, resource requirements, import and initial credentials: [`DEPLOYMENT_OVA.en.md`](docs/DEPLOYMENT_OVA.en.md).
 
 ### Bootable USB image
 
-Writing and first-boot procedure: [`DEPLOYMENT_USB.en.md`](docs/DEPLOYMENT_USB.en.md).
+The raw image boots the appliance on compatible hardware and requires wired Ethernet. Download, published size and SHA-256, writing and first boot: [`DEPLOYMENT_USB.en.md`](docs/DEPLOYMENT_USB.en.md).
 
-The raw USB image is available through external storage:
-
-**[Access the CENTAURUS-USB.img download](https://tinyurl.com/42wumj8b)**
-
-Published artifact identity:
-
-```text
-File: CENTAURUS-USB.img
-SIZE_BYTES: 31457280000
-SHA256: 7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165
-```
-
-Always verify the SHA-256 after downloading the artifact.
-
-> OVA and raw USB binaries are external artifacts and are not stored directly in this Git repository.
+OVA/USB binaries are hosted externally. Verify their identity against the corresponding deployment guide before use.
 
 ### Git + Docker
 
@@ -221,27 +145,42 @@ See [`DEVELOPMENT.en.md`](docs/DEVELOPMENT.en.md) for development and validation
 
 ## Documentation
 
-Recommended reading order:
+Choose the documents for your task; you do not need to read the full index in order.
 
-1. [`PROJECT.en.md`](docs/PROJECT.en.md) · [Español](docs/PROJECT.md) - project identity, scope and distribution modes.
-2. [`INSTALL.en.md`](docs/INSTALL.en.md) · [Español](docs/INSTALL.md) - deployment and installation.
-3. [`USER_GUIDE.en.md`](docs/USER_GUIDE.en.md) · [Español](docs/USER_GUIDE.md) - first session, result interpretation and troubleshooting.
-4. [`ARCHITECTURE.en.md`](docs/ARCHITECTURE.en.md) · [Español](docs/ARCHITECTURE.md) - framework architecture.
-5. [`SPECIFICATION.en.md`](docs/SPECIFICATION.en.md) · [Español](docs/SPECIFICATION.md) - functional and non-functional specification.
-6. [`STORAGE.en.md`](docs/STORAGE.en.md) · [Español](docs/STORAGE.md) - persistence and traceability.
-7. [`STANDARDS.en.md`](docs/STANDARDS.en.md) · [Español](docs/STANDARDS.md) - conventions and project standards.
-8. [`DEVELOPMENT.en.md`](docs/DEVELOPMENT.en.md) · [Español](docs/DEVELOPMENT.md) - development workflow.
-9. [`CONFIGURATION.en.md`](docs/CONFIGURATION.en.md) · [Español](docs/CONFIGURATION.md) - runtime variables, defaults and deployment differences.
-10. [`RULES_AND_RULE_ENGINE.en.md`](docs/RULES_AND_RULE_ENGINE.en.md) · [Español](docs/RULES_AND_RULE_ENGINE.md) - rule catalog and finding interpretation.
-11. [`DEPLOYMENT_OVA.en.md`](docs/DEPLOYMENT_OVA.en.md) · [Español](docs/DEPLOYMENT_OVA.md) - OVA import, operation and maintenance.
-12. [`DEPLOYMENT_USB.en.md`](docs/DEPLOYMENT_USB.en.md) · [Español](docs/DEPLOYMENT_USB.md) - raw image writing, boot and persistence.
-13. [`SECURITY_ARCHITECTURE.en.md`](docs/SECURITY_ARCHITECTURE.en.md) · [Español](docs/SECURITY_ARCHITECTURE.md) - trust boundaries, hardening and failure handling.
-14. [`DEPLOYMENT_GIT_DOCKER.en.md`](docs/DEPLOYMENT_GIT_DOCKER.en.md) · [Español](docs/DEPLOYMENT_GIT_DOCKER.md) - deployment from source on Linux.
-15. [`DEPLOYMENT_WINDOWS.en.md`](docs/DEPLOYMENT_WINDOWS.en.md) · [Español](docs/DEPLOYMENT_WINDOWS.md) - local Core setup on Windows.
-16. [`TROUBLESHOOTING.en.md`](docs/TROUBLESHOOTING.en.md) · [Español](docs/TROUBLESHOOTING.md) - issue diagnosis across deployment modes.
-17. [`GPU_OLLAMA_DOCKER.en.md`](docs/GPU_OLLAMA_DOCKER.en.md) · [Español](docs/GPU_OLLAMA_DOCKER.md) - optional experimental acceleration, without project GPU certification.
+### Start and use
+
+- [`PROJECT.en.md`](docs/PROJECT.en.md) · [Español](docs/PROJECT.md) - project identity, scope and distribution modes.
+- [`INSTALL.en.md`](docs/INSTALL.en.md) · [Español](docs/INSTALL.md) - deployment and installation.
+- [`USER_GUIDE.en.md`](docs/USER_GUIDE.en.md) · [Español](docs/USER_GUIDE.md) - first session, result interpretation and troubleshooting.
+- [`TROUBLESHOOTING.en.md`](docs/TROUBLESHOOTING.en.md) · [Español](docs/TROUBLESHOOTING.md) - issue diagnosis across deployment modes.
+
+### Deploy and administer
+
+- [`DEPLOYMENT_OVA.en.md`](docs/DEPLOYMENT_OVA.en.md) · [Español](docs/DEPLOYMENT_OVA.md) - OVA import, operation and maintenance.
+- [`DEPLOYMENT_USB.en.md`](docs/DEPLOYMENT_USB.en.md) · [Español](docs/DEPLOYMENT_USB.md) - raw image writing, boot and persistence.
+- [`DEPLOYMENT_GIT_DOCKER.en.md`](docs/DEPLOYMENT_GIT_DOCKER.en.md) · [Español](docs/DEPLOYMENT_GIT_DOCKER.md) - deployment from source on Linux.
+- [`DEPLOYMENT_WINDOWS.en.md`](docs/DEPLOYMENT_WINDOWS.en.md) · [Español](docs/DEPLOYMENT_WINDOWS.md) - local Core setup on Windows.
+- [`GPU_OLLAMA_DOCKER.en.md`](docs/GPU_OLLAMA_DOCKER.en.md) · [Español](docs/GPU_OLLAMA_DOCKER.md) - optional experimental acceleration, without project GPU certification.
+- [`CONFIGURATION.en.md`](docs/CONFIGURATION.en.md) · [Español](docs/CONFIGURATION.md) - runtime variables, defaults and deployment differences.
+
+### Understand the architecture
+
+- [`ARCHITECTURE.en.md`](docs/ARCHITECTURE.en.md) · [Español](docs/ARCHITECTURE.md) - framework architecture.
+- [`SPECIFICATION.en.md`](docs/SPECIFICATION.en.md) · [Español](docs/SPECIFICATION.md) - functional and non-functional specification.
+- [`STORAGE.en.md`](docs/STORAGE.en.md) · [Español](docs/STORAGE.md) - persistence and traceability.
+- [`RULES_AND_RULE_ENGINE.en.md`](docs/RULES_AND_RULE_ENGINE.en.md) · [Español](docs/RULES_AND_RULE_ENGINE.md) - rule catalog and finding interpretation.
+- [`SECURITY_ARCHITECTURE.en.md`](docs/SECURITY_ARCHITECTURE.en.md) · [Español](docs/SECURITY_ARCHITECTURE.md) - trust boundaries, hardening and failure handling.
+
+### Develop
+
+- [`STANDARDS.en.md`](docs/STANDARDS.en.md) · [Español](docs/STANDARDS.md) - conventions and project standards.
+- [`DEVELOPMENT.en.md`](docs/DEVELOPMENT.en.md) · [Español](docs/DEVELOPMENT.md) - development workflow.
 
 ## Release
+
+The deployment guides on `main` document the `v1.0.0` release and the OVA/USB artifacts identified in their respective guides. The `v1.0.0` tag retains an earlier documentation tree: switching to that tag does not bring the later guides into a local checkout. Use the [documentation on main](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/tree/main/docs) alongside the selected release, and record the documentation commit for an audit. GPU examples remain experimental.
+
+The release label `v1.0.0` is distinct from the Python package version: `pyproject.toml` declares `0.4.0-dev`, which packaging normalizes to `0.4.0.dev0`. Therefore, `centaurus --version` may display the package version rather than the release label. Identify a source deployment by its tag and full commit, and an appliance by its artifact hash; `--version` alone does not establish distribution identity.
 
 Current public release:
 

@@ -4,6 +4,8 @@
 
 [Home](../README.en.md) · [`INSTALL.en.md`](INSTALL.en.md) · [`USER_GUIDE.en.md`](USER_GUIDE.en.md)
 
+These instructions apply to `v1.0.0`. The tag retains older local documentation and the Python package uses a different version label; see the [release and documentation scope](../README.en.md#release). Keep the [current online guide](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/blob/main/docs/DEPLOYMENT_WINDOWS.en.md) available when switching tags.
+
 ## 1. Scope and limits
 
 Native Windows runs Core, CLI, persistence and both LLM roles through Python, without Docker. It is an option for development and local use when the required dependencies are available. OVA remains the main distribution; to use it from Windows, follow [`DEPLOYMENT_OVA.en.md`](DEPLOYMENT_OVA.en.md).
@@ -23,6 +25,18 @@ ollama --version
 ollama list
 ```
 
+With Git for Windows installed, obtain the public release and record its commit:
+
+```powershell
+git clone https://github.com/M4Rc0s-S3c/centaurus-osint-framework.git
+Set-Location centaurus-osint-framework
+git checkout --detach v1.0.0
+git rev-parse HEAD
+git status --porcelain --untracked-files=all
+```
+
+The final command should produce no output. Alternatively, download **Source code (zip)** from the [v1.0.0 release](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.0), extract it and open PowerShell in the extracted root. A source ZIP supports native package installation; it does not replace the Git checkout required by the Linux bootstrap.
+
 Run the following steps from the repository root containing `pyproject.toml`. Retain the identity of the tag/commit or ZIP used. Neither virtual-environment activation nor a PowerShell execution-policy change is required.
 
 ## 3. Core installation
@@ -38,7 +52,7 @@ python -m venv .venv
 
 `-e` installs in editable mode: code runs from the checkout. The lock reduces dependency variation; it does not certify complete Windows/Linux equivalence. Do not install the DNSRecon, Sublist3r and TheHarvester locks into this same environment.
 
-For development without locking dependencies to the distribution lock, `pip install -e .` is an alternative after creating the environment. To install a non-editable copy while retaining the prepared dependencies, replace the editable installation with:
+For development without locking dependencies to the distribution lock, `.\.venv\Scripts\python.exe -m pip install -e .` is an alternative after creating the environment. To install a non-editable copy while retaining the prepared dependencies, replace the editable installation with:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install --no-deps .

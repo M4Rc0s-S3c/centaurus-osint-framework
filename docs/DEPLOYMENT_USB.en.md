@@ -61,6 +61,8 @@ Select the **whole USB disk**, never a partition or the system disk. Disconnect 
 
 ## 4. Raw writing
 
+The project validation used **HDDRawCopy 2.6 on Windows** to write the physical medium. This identifies the historical validation procedure; it does not certify other versions or all hardware. In that tool, select **FILE** as the source, choose the verified image and then the previously identified physical USB device as the destination. The following sequence also applies to an equivalent raw writer, whose behavior must be checked for the selected environment.
+
 1. Open a raw-image writing tool that supports selecting a physical disk, with the required administrative privileges.
 2. Select `CENTAURUS-USB.img` as the source and recheck the destination's identity and capacity.
 3. Use direct whole-image writing, preserving its partition layout. Do not select file extraction or conversion into an ISO installer.
@@ -102,6 +104,8 @@ centaurus-poweroff
 ```
 
 Wait for complete shutdown before removing the USB. Operation changes the media; after first boot, the written region is no longer expected to retain the distribution image's hash.
+
+For case export, consistent backups and recovery checks, follow section 13 of [`STORAGE.en.md`](STORAGE.en.md). These operations belong to the administrator; retain the original data until the recovered copy is verified.
 
 ## 7. Related documentation
 

@@ -63,7 +63,7 @@ Consulta [`DEPLOYMENT_GIT_DOCKER.md`](DEPLOYMENT_GIT_DOCKER.md) para arranque y 
 | `Docker Engine is not available to the current user` | Revisa el servicio con `systemctl status docker`, después `docker info` y la política de acceso del host. |
 | `Docker Compose plugin is required` | Comprueba que el plugin está instalado y funciona `docker compose version`. |
 | `release checkout must be clean before bootstrap` | Conserva o reconcilia cambios y ficheros sin seguimiento; no borres trabajo solo para superar la comprobación. |
-| El checkout no coincide con `CENTAURUS_RELEASE_COMMIT` | Contrasta `git rev-parse HEAD` con la release prevista y selecciona el commit correcto. |
+| El checkout no coincide con `CENTAURUS_RELEASE_COMMIT` | Contrasta `git rev-parse HEAD` con la release prevista. La variable puede conservar el commit anterior en la misma terminal: actualízala al commit completo verificado de forma independiente o vuelve al checkout previsto. Sigue la actualización de [`DEPLOYMENT_GIT_DOCKER.md`](DEPLOYMENT_GIT_DOCKER.md); no retires la comprobación para ocultar una discrepancia. |
 | Falla la descarga de dependencias durante la construcción | Conserva el error y revisa conectividad y disponibilidad de los artefactos fijados. No consideres validada una construcción incompleta. |
 | Falla `pip check` | El entorno candidato es inconsistente; no lo promociones ni lo uses como nueva imagen validada. El bootstrap se detiene antes de actualizar la etiqueta local. |
 | Error de escritura en workspace | Comprueba propietario, permisos y ruta del montaje del host generado. El Core normal usa `1000:1000`; el bootstrap cambia el propietario del directorio workspace, no todos los ficheros existentes de forma recursiva. |
@@ -80,7 +80,7 @@ Consulta [`DEPLOYMENT_GIT_DOCKER.md`](DEPLOYMENT_GIT_DOCKER.md) para arranque y 
 | El modelo no está disponible | Revisa el servicio Ollama, la URL configurada y el almacén persistente. En Git + Docker utiliza los verificadores/aprovisionadores versionados; en la appliance solicita diagnóstico administrativo. |
 | Error LLM durante la interpretación | LLM #1 puede impedir iniciar la investigación. Conserva el mensaje y comprueba servicio/modelo antes de repetir. |
 | `Invalid request` | Revisa el objetivo y formula una petición simple con un tipo admitido; consulta `/capabilities` dentro del shell. |
-| Una fuente falla o devuelve errores HTTP | Revisa `ExecutionFailure` y la cobertura del informe. Puede existir un resultado parcial válido; repetir no garantiza disponibilidad de la fuente. |
+| Una fuente falla o devuelve errores HTTP | Evalúa la cobertura consultando conjuntamente el informe y los artefactos `ExecutionFailure`, conservados por separado en `execution/failures/`. Puede existir un resultado parcial válido; repetir no garantiza disponibilidad de la fuente. |
 | Todas las tareas fallan | La investigación queda fallida. La presencia de ficheros aislados no equivale a disponer de un informe válido. |
 | No hay hallazgos | Revisa evidencias y reglas aplicables; cero hallazgos no certifica ausencia de riesgo. |
 | LLM #2 tarda, falla o agota el timeout | Conserva el `Report` determinista ya persistido. Revisa logs y recursos; la asistencia adicional es no autoritativa y fail-soft. |

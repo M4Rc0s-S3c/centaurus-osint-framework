@@ -121,51 +121,29 @@ An LLM #2 failure does not invalidate `Evidence`, `Findings` or `Report`.
 | Logging | stdlib `logging` + `RotatingFileHandler` |
 | Testing | pytest |
 
-Current LLM #2 operational profile:
-
-```text
-timeout=300
-num_ctx=8192
-num_predict=UNSET
-think=false
-keep_alive=0
-```
+Operational parameters, defaults and differences between native and Docker execution are documented in [`CONFIGURATION.en.md`](CONFIGURATION.en.md).
 
 ## 8. Distribution modes
 
 ### VMware appliance
 
-The OVA is the main distribution. Import and first-use procedure: [`DEPLOYMENT_OVA.en.md`](DEPLOYMENT_OVA.en.md).
-
-The prebuilt OVA is distributed through external storage:
-
-**[CENTAURUS-C4-FINAL.ova — Google Drive](https://drive.google.com/drive/folders/1Anvan2lh-KQzQMDvvv_nTqSjfdSnTpdT?usp=sharing)**
-
-```text
-SIZE_BYTES=11828618752
-SHA256=d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868
-```
+The OVA is the main distribution. Download, published size and SHA-256, resource requirements, import and initial credentials: [`DEPLOYMENT_OVA.en.md`](DEPLOYMENT_OVA.en.md).
 
 ### Bootable USB image
 
-Writing and first-boot procedure: [`DEPLOYMENT_USB.en.md`](DEPLOYMENT_USB.en.md).
+The raw image boots the appliance on compatible hardware and requires wired Ethernet. Download, published size and SHA-256, writing and first boot: [`DEPLOYMENT_USB.en.md`](DEPLOYMENT_USB.en.md).
 
-The raw USB image is distributed through external storage:
-
-**[CENTAURUS-USB.img — download](https://tinyurl.com/42wumj8b)**
-
-```text
-SIZE_BYTES=31457280000
-SHA256=7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165
-```
-
-OVA/USB binaries are not stored directly in this Git repository. Verify artifact integrity using the published SHA-256.
+OVA/USB binaries are hosted externally. Verify their identity against the corresponding deployment guide before use.
 
 ### Git + Docker
 
 Reproducible deployment from the public repository on a compatible Linux host.
 
 See [`DEPLOYMENT_GIT_DOCKER.en.md`](DEPLOYMENT_GIT_DOCKER.en.md).
+
+### Native Windows Core
+
+A limited option for local use and development; it does not reproduce the complete Docker appliance runtime. See [`DEPLOYMENT_WINDOWS.en.md`](DEPLOYMENT_WINDOWS.en.md).
 
 ## 9. Responsible use
 

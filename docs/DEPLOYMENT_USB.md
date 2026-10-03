@@ -61,6 +61,8 @@ Selecciona el **disco USB completo**, nunca una partición ni el disco del siste
 
 ## 4. Escritura raw
 
+La validación del proyecto utilizó **HDDRawCopy 2.6 en Windows** para escribir el medio físico. Esta referencia identifica el procedimiento validado históricamente; no certifica otras versiones ni cualquier hardware. En esa herramienta, selecciona **FILE** como origen, elige la imagen verificada y después el dispositivo USB físico previamente identificado como destino. La secuencia siguiente también se aplica a una herramienta raw equivalente, cuyo comportamiento debe comprobarse para el entorno elegido.
+
 1. Abre una herramienta de escritura de imágenes raw que permita seleccionar un disco físico, con los permisos administrativos necesarios.
 2. Selecciona `CENTAURUS-USB.img` como origen y vuelve a contrastar la identidad y capacidad del destino.
 3. Utiliza escritura directa de la imagen completa, conservando su particionado. No elijas extracción de ficheros ni conversión a instalador ISO.
@@ -102,6 +104,8 @@ centaurus-poweroff
 ```
 
 Espera al apagado completo antes de retirar el USB. El sistema modifica el medio durante su uso; después del primer arranque ya no se espera que la región escrita conserve el hash de la imagen de distribución.
+
+Para extraer casos, realizar copias consistentes y comprobar una recuperación, sigue el apartado 13 de [`STORAGE.md`](STORAGE.md). Estas operaciones corresponden al administrador; conserva los datos originales hasta verificar la copia recuperada.
 
 ## 7. Documentación relacionada
 

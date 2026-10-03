@@ -8,6 +8,8 @@ Esta guía describe el despliegue desde código fuente sobre un host Linux. La O
 
 Utiliza una release/tag concreta para un despliegue reproducible. Release pública: [v1.0.0](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.0).
 
+Estas instrucciones se aplican a `v1.0.0`. El tag conserva documentación local anterior y el paquete Python utiliza una versión distinta; consulta el [alcance de release y documentación](../README.md#release). Mantén disponible la [guía actual en línea](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/blob/main/docs/DEPLOYMENT_GIT_DOCKER.md) al cambiar de tag.
+
 ## 1. Requisitos
 
 Utiliza un host Linux amd64/x86-64 para reproducir la plataforma de referencia, con:
@@ -301,13 +303,11 @@ docker compose version
 
 y ejecutar las comprobaciones/smoke tests proporcionados por el bootstrap.
 
-Para desarrollo:
-
-```bash
-python -m pytest
-```
+Para desarrollo, prepara primero las dependencias de pruebas y el intérprete descritos en [`DEVELOPMENT.md`](DEVELOPMENT.md) y ejecuta después su procedimiento de validación.
 
 ## 13. Actualización
+
+Antes de cambiar de versión, detén las investigaciones y respalda los datos persistentes según el apartado 10.
 
 Para cambiar de versión:
 
@@ -316,7 +316,13 @@ git fetch --tags --prune
 git checkout --detach <TAG_O_COMMIT>
 ```
 
-Verifica el árbol limpio y vuelve a ejecutar el procedimiento de inicialización correspondiente a esa versión.
+Verifica que el árbol esté limpio y contrasta `git rev-parse HEAD` con el commit completo esperado de la nueva release según su publicación. Si `CENTAURUS_RELEASE_COMMIT` sigue definido en esta terminal, puede conservar el commit anterior. Solo después de confirmar la nueva identidad, sustituye esa aserción:
+
+```bash
+export CENTAURUS_RELEASE_COMMIT="<COMMIT_COMPLETO_VERIFICADO>"
+```
+
+Sustituye el marcador; no lo pegues literalmente. Repite el procedimiento de inicialización de esa versión con el directorio de datos previsto. No elimines la aserción simplemente para eludir una discrepancia.
 
 No reutilices identidades o hashes de una versión anterior para declarar válida una versión posterior.
 

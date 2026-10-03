@@ -113,6 +113,7 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements-core.lock
 python -m pip install --no-deps -e .
+python -m pip install pytest
 python -m pip check
 ```
 
@@ -122,8 +123,11 @@ On Windows:
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements-core.lock
 .\.venv\Scripts\python.exe -m pip install --no-deps -e .
+.\.venv\Scripts\python.exe -m pip install pytest
 .\.venv\Scripts\python.exe -m pip check
 ```
+
+`pytest` is a development dependency and is not included in `requirements-core.lock` or the installed package dependencies. Install it only in the development environment. No test-dependency lock is provided; record `python -m pip freeze` with validation results when reproducibility is required.
 
 ## 9. Tests
 
@@ -133,7 +137,14 @@ Run the suite:
 python -m pytest
 ```
 
-For Python changes, also check syntax:
+On Windows, keep using the virtual-environment interpreter without requiring activation:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest
+.\.venv\Scripts\python.exe -m compileall -q src tests
+```
+
+For Python changes on Linux, also check syntax:
 
 ```bash
 python -m compileall -q src tests
@@ -149,7 +160,7 @@ Do not stage/commit while tests are failing.
 
 ## 10. Git review
 
-Recommended flow:
+Recommended flow (on Windows, replace `python` with `.\.venv\Scripts\python.exe`):
 
 ```bash
 git status

@@ -185,15 +185,7 @@ LLM #2 runs after report persistence.
 - ephemeral;
 - fail-soft.
 
-Current LLM #2 profile:
-
-```text
-timeout=300
-num_ctx=8192
-num_predict=UNSET
-think=false
-keep_alive=0
-```
+Operational parameters, defaults and differences between native and Docker execution are documented in [`CONFIGURATION.en.md`](CONFIGURATION.en.md).
 
 ## 10. Deployment boundary
 

@@ -8,6 +8,8 @@ This guide covers deployment from source on a Linux host. The prebuilt OVA is th
 
 Use a specific release/tag for a reproducible deployment. Public release: [v1.0.0](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.0).
 
+These instructions apply to `v1.0.0`. The tag retains older local documentation and the Python package uses a different version label; see the [release and documentation scope](../README.en.md#release). Keep the [current online guide](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/blob/main/docs/DEPLOYMENT_GIT_DOCKER.en.md) available when switching tags.
+
 ## 1. Requirements
 
 Use a Linux amd64/x86-64 host to reproduce the reference platform, with:
@@ -301,13 +303,11 @@ docker compose version
 
 and run the bootstrap-provided checks/smoke tests.
 
-For development:
-
-```bash
-python -m pytest
-```
+For development, first prepare the test dependencies and interpreter described in [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md) and then run its validation procedure.
 
 ## 13. Updating
+
+Before switching versions, stop investigations and back up persistent data as described in section 10.
 
 To move to another version:
 
@@ -316,7 +316,13 @@ git fetch --tags --prune
 git checkout --detach <TAG_OR_COMMIT>
 ```
 
-Verify a clean tree and rerun the initialization procedure for that version.
+Verify that the tree is clean and compare `git rev-parse HEAD` with the full commit expected for the new release from its publication record. If `CENTAURUS_RELEASE_COMMIT` remains set in this terminal, it may still contain the previous commit. Only after confirming the new identity, replace that assertion:
+
+```bash
+export CENTAURUS_RELEASE_COMMIT="<VERIFIED_FULL_COMMIT>"
+```
+
+Replace the placeholder; do not paste it literally. Rerun the initialization procedure for that version using the intended data root. Do not unset the assertion merely to bypass a mismatch.
 
 Do not reuse identities or hashes from an older version to declare a newer one valid.
 

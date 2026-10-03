@@ -168,22 +168,11 @@ If you see `LLM analyst assistance unavailable; the deterministic Report remains
 
 The model's recommendations are advisory. To support a decision, return to the finding, rule and evidence. If the generative explanation disagrees with the report, the deterministic report takes precedence.
 
-## 7. Common issues
+## 7. When something goes wrong
 
-| Situation | Check or next step |
-|---|---|
-| The host entry point rejects `centaurus capabilities` | On the appliance, run only `centaurus`; inside, use `/capabilities` |
-| Appliance access fails before `centaurus>` appears | Review the message and report it to the environment administrator; services may require attention |
-| `Invalid request` appears | Check the target and write a simple request using a supported target type |
-| An LLM error appears during interpretation | Keep the message; ask for Ollama availability and configuration to be checked before retrying |
-| A tool fails and the result is partial | Read the failure table and document the reduced coverage |
-| No findings are produced | Review evidence and coverage; zero findings does not mean no risk |
-| LLM assistance is unavailable after the report | Use the persisted report; the additional explanation may have failed |
-| You cannot find a previous investigation from the shell | The CLI has no historical query feature; use the workspace access defined by the deployment |
+If access fails, retain the exact message and check whether you are at the host terminal or inside `centaurus>`. If an investigation produces a partial result or LLM assistance fails, retain the report and investigation ID; use section 4 to interpret the result.
 
-When reporting an issue, include the deployment mode, the stage where it occurred, the exact message and the case identifier if one was generated. Include only the data needed for diagnosis.
-
-For deployment checks and operational diagnosis, see [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md).
+For deployment checks, source failures, Ollama issues and the information to include in an incident report, see [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md).
 
 ## 8. End the session and shut down the appliance
 

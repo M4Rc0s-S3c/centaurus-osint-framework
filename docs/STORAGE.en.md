@@ -42,8 +42,10 @@ Stores persist already-produced artifacts. They do not normalize, apply `Rules` 
 
 ## 4. Physical layout
 
+A configured `<workspace>` is used below. `/workspace` is the reference path in the appliance/container; see [`CONFIGURATION.en.md`](CONFIGURATION.en.md) for deployment-specific paths.
+
 ```text
-/workspace/
+<workspace>/
 └── investigations/
     └── <investigation-id>/
         ├── evidences/
@@ -203,7 +205,33 @@ The implementation uses **Filesystem + JSON**.
 
 Direct access to persisted artifacts is part of the operating model; a separate historical API is not mandatory.
 
-## 13. Related documentation
+## 13. Export, backup and recovery
+
+These are administrative procedures. The appliance analyst does not need general Docker access or broader filesystem permissions. There is no CLI export or restore command; the administrator works with persisted files and an approved transfer destination.
+
+### Export an investigation
+
+1. Record the investigation ID and wait for its execution to finish. Ask the administrator to locate `<workspace>/investigations/<investigation-id>/` in the deployment workspace.
+2. Copy the whole case directory to a separate destination to preserve evidence, findings, reports and operational failures together. For a report-only delivery, copy both `reports/report.json` and `reports/report.md`, explaining that the evidence and failures are separate artifacts.
+3. Compare the copied files with the source using SHA-256, retain the case ID and deployment identity, and review the contents before sharing. LLM assistance is not included in persisted reports.
+
+### Back up the workspace
+
+1. Finish active investigations, exit Core sessions and prevent new sessions during the copy. Verify the actual workspace mount; on OVA/USB the administrator can use `findmnt /workspace`.
+2. Copy the complete workspace, including `investigations/` and any logs needed, to independent storage. Preserve directory layout, numeric ownership and permissions with a suitable backup tool. Keep the backup outside the live workspace and outside the same USB medium.
+3. Record the appliance hash or source commit, the source path, backup time and file hashes. Check readability and available destination space. A workspace backup preserves results; it does not back up the operating system, Docker images or Ollama model.
+4. For a full OVA recovery point, shut down the VM cleanly and copy its complete directory with all three virtual disks using the host's backup procedure. A snapshot on the same storage is not an independent backup. For USB, retain the original verified distribution image separately from the workspace backup.
+
+### Recover and verify
+
+1. Preserve the current workspace before making changes. Prepare a separate compatible instance using the identified distribution; keep it inactive during recovery.
+2. Restore the workspace backup to that instance's data volume, preserving numeric ownership and permissions. Do not overlay cases with identical IDs or replace SYSTEM/PLATFORM content with workspace data.
+3. Before normal use, verify the mount, compare restored file hashes against the backup and open selected `report.json` and `report.md` files. The administrator must also confirm that the normal runtime user can access the restored data.
+4. Retain the original and backup until recovery is accepted. Existing files do not prove every investigation completed; check each case's reports and operational failures. No migration between incompatible storage formats is provided by this procedure.
+
+This procedure is operational guidance; it does not claim a new OVA/USB recovery test. Validate the chosen backup tool and transfer method in your environment before relying on them.
+
+## 14. Related documentation
 
 - [`ARCHITECTURE.en.md`](ARCHITECTURE.en.md)
 - [`SPECIFICATION.en.md`](SPECIFICATION.en.md)

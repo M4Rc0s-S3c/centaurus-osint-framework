@@ -184,15 +184,7 @@ LLM #2 se ejecuta después de la persistencia del informe.
 - efímero;
 - fail-soft.
 
-Perfil actual de LLM #2:
-
-```text
-timeout=300
-num_ctx=8192
-num_predict=UNSET
-think=false
-keep_alive=0
-```
+Los parámetros operacionales, sus valores por defecto y las diferencias entre ejecución nativa y Docker se documentan en [`CONFIGURATION.md`](CONFIGURATION.md).
 
 ## 10. Frontera de despliegue
 

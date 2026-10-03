@@ -120,53 +120,31 @@ Un fallo de LLM #2 no invalida `Evidence`, `Findings` ni `Report`.
 | Logging | `logging` stdlib + `RotatingFileHandler` |
 | Testing | pytest |
 
-Perfil operacional de LLM #2:
-
-```text
-timeout=300
-num_ctx=8192
-num_predict=UNSET
-think=false
-keep_alive=0
-```
+Los parámetros operacionales, sus valores por defecto y las diferencias entre ejecución nativa y Docker se documentan en [`CONFIGURATION.md`](CONFIGURATION.md).
 
 ## 8. Modalidades de distribución
 
-CENTAURUS puede utilizarse mediante tres modalidades.
+CENTAURUS ofrece las distribuciones siguientes y una modalidad nativa Windows de alcance limitado.
 
 ### Appliance VMware
 
-La OVA es la distribución principal. Procedimiento de importación y primer uso: [`DEPLOYMENT_OVA.md`](DEPLOYMENT_OVA.md).
-
-La OVA preconstruida se distribuye mediante almacenamiento externo:
-
-**[CENTAURUS-C4-FINAL.ova — Google Drive](https://drive.google.com/drive/folders/1Anvan2lh-KQzQMDvvv_nTqSjfdSnTpdT?usp=sharing)**
-
-```text
-SIZE_BYTES=11828618752
-SHA256=d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868
-```
+La OVA es la distribución principal. Descarga, tamaño y SHA-256 publicados, requisitos de recursos, importación y credenciales iniciales: [`DEPLOYMENT_OVA.md`](DEPLOYMENT_OVA.md).
 
 ### Imagen USB arrancable
 
-Procedimiento de escritura y primer arranque: [`DEPLOYMENT_USB.md`](DEPLOYMENT_USB.md).
+La imagen raw arranca la appliance sobre hardware compatible y requiere Ethernet cableada. Descarga, tamaño y SHA-256 publicados, escritura y primer arranque: [`DEPLOYMENT_USB.md`](DEPLOYMENT_USB.md).
 
-La imagen raw USB se distribuye mediante almacenamiento externo:
-
-**[CENTAURUS-USB.img — descarga](https://tinyurl.com/42wumj8b)**
-
-```text
-SIZE_BYTES=31457280000
-SHA256=7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165
-```
-
-Los binarios OVA/USB no se almacenan directamente en este repositorio Git. La integridad de cada artefacto debe verificarse mediante su SHA-256.
+Los binarios OVA/USB se alojan externamente. Verifica su identidad en la guía de despliegue correspondiente antes de utilizarlos.
 
 ### Git + Docker
 
 Despliegue reproducible desde el repositorio público sobre un host Linux compatible.
 
 Consulta [`DEPLOYMENT_GIT_DOCKER.md`](DEPLOYMENT_GIT_DOCKER.md).
+
+### Core nativo en Windows
+
+Opción limitada para uso local y desarrollo; no reproduce el runtime completo de la appliance Docker. Consulta [`DEPLOYMENT_WINDOWS.md`](DEPLOYMENT_WINDOWS.md).
 
 ## 9. Uso responsable
 

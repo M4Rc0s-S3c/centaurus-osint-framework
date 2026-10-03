@@ -16,7 +16,7 @@ El Core controla el ciclo de vida de la investigación. La validación del Inten
 
 LLM #1 interpreta una petición como un Intent sujeto a esquema y valores admitidos. No recibe autoridad para ejecutar herramientas arbitrarias, cambiar el catálogo o escribir hallazgos. Una interpretación inválida debe detener ese flujo antes de la investigación.
 
-LLM #2 actúa después de persistir el informe determinista. Recibe una proyección controlada que excluye `Evidence.data`, conserva referencias y metadatos pertinentes y limita la información suministrada. Su salida pasa validaciones estructurales y comprobaciones factuales contra el contexto permitido; los elementos que no superan esas comprobaciones se descartan.
+LLM #2 actúa después de persistir el informe determinista. Recibe una proyección controlada que excluye `Evidence.data`, conserva referencias y metadatos pertinentes y limita la información suministrada. Su salida pasa validaciones estructurales y comprobaciones factuales contra el contexto permitido; los elementos que no superan esas comprobaciones se descartan. Estas comprobaciones evalúan coherencia con el contexto suministrado; no verifican de forma independiente la exactitud de las fuentes ni garantizan la veracidad de cada afirmación generada.
 
 La validación de JSON no demuestra veracidad. Estos controles reducen la superficie de entrada y restringen el uso de la respuesta, sin declarar inmunidad universal frente a prompt injection o errores del modelo. La asistencia es efímera, no autoritativa y no modifica `report.json`.
 

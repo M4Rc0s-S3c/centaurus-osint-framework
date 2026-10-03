@@ -51,7 +51,7 @@ RAW output is transformed through tool-specific normalization into `Evidence` wi
 
 ### FR-09 — Reporting
 
-`ReportManager` builds and persists the report.
+`ReportManager` builds the report; the Core coordinates its persistence through `ReportStore`.
 
 ```text
 report.json → authoritative
@@ -70,15 +70,7 @@ Its output:
 - does not modify `Evidence`, `Findings` or `Report`;
 - fails in fail-soft mode.
 
-Current profile:
-
-```text
-timeout=300
-num_ctx=8192
-num_predict=UNSET
-think=false
-keep_alive=0
-```
+Operational parameters, defaults and differences between native and Docker execution are documented in [`CONFIGURATION.en.md`](CONFIGURATION.en.md).
 
 ### FR-11 — Partial tool failure
 
@@ -105,7 +97,7 @@ In non-interactive execution this surface may be suppressed without changing fun
 
 ### FR-14 — Traceable persistence
 
-Artifacts are correlated through `investigation_id` and stored under `/workspace`.
+Artifacts are correlated through `investigation_id` and stored under the configured `<workspace>`. `/workspace` is the appliance/container reference path; host paths and native deployments are described in [`CONFIGURATION.en.md`](CONFIGURATION.en.md).
 
 ### FR-15 — Appliance entry point
 
@@ -139,7 +131,7 @@ The appliance uses `centaurus0` as the logical uplink name and avoids dependence
 
 | Target | Coverage |
 |---|---|
-| DOMAIN | main/complete in the current version |
+| DOMAIN | main coverage through the integrated tools; not an exhaustive security assessment |
 | IP | limited via RDAP |
 | EMAIL | not operational as a direct Target |
 | CERTIFICATE | deferred |

@@ -103,7 +103,7 @@ docker port centaurus-ollama
 
 El último comando debe quedar sin salida. En NVIDIA, observa también `nvidia-smi` durante la inferencia; revisa métricas del backend correspondiente para AMD. Una prueba local satisfactoria documenta ese host, no todas las GPU.
 
-La VRAM depende del modelo, contexto, caché y concurrencia. La GPU no corrige truncamiento, grounding ni validación de salida. Mantén inicialmente el perfil actual de LLM #2: timeout 300 s, `num_ctx=8192`, `num_predict` opcional, `think=false` y `keep_alive=0`. Cualquier ajuste necesita medición y validación propias; consulta [`CONFIGURATION.md`](CONFIGURATION.md).
+La VRAM depende del modelo, contexto, caché y concurrencia. La GPU no corrige truncamiento, grounding ni validación de salida. Mantén inicialmente el perfil de LLM #2 documentado en [`CONFIGURATION.md`](CONFIGURATION.md). Cualquier ajuste necesita medición y validación propias.
 
 ## 7. Reversión a CPU
 

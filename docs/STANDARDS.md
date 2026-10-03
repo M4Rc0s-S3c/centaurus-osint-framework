@@ -64,15 +64,7 @@ Solo se amplía `RuleEngine` cuando una necesidad real no puede representarse me
 6. Structured output controla forma, no verdad semántica.
 7. Un timeout/error de LLM #2 no invalida el informe determinista.
 
-Perfil actual de LLM #2:
-
-```text
-timeout=300
-num_ctx=8192
-num_predict=UNSET
-think=false
-keep_alive=0
-```
+Los parámetros operacionales, sus valores por defecto y las diferencias entre ejecución nativa y Docker se documentan en [`CONFIGURATION.md`](CONFIGURATION.md).
 
 ## 7. Persistencia
 
@@ -90,7 +82,7 @@ keep_alive=0
 1. Probar comportamiento observable y contratos.
 2. Preferir APIs públicas.
 3. Mantener pruebas focales por responsabilidad.
-4. Los refactors internos no deben romper pruebas basadas únicamente en detalles de implementación.
+4. Las pruebas deben verificar contratos y comportamiento observable, evitando depender innecesariamente de detalles internos para permitir refactorizaciones que preserven esos contratos.
 5. No hacer commit con pruebas fallando.
 6. Lo que depende del runtime real requiere validación del runtime real.
 

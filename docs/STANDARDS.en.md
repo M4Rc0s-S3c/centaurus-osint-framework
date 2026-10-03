@@ -65,15 +65,7 @@ A new `Rule` must express an objective domain question.
 6. Structured output controls shape, not semantic truth.
 7. An LLM #2 timeout/error does not invalidate the deterministic report.
 
-Current LLM #2 profile:
-
-```text
-timeout=300
-num_ctx=8192
-num_predict=UNSET
-think=false
-keep_alive=0
-```
+Operational parameters, defaults and differences between native and Docker execution are documented in [`CONFIGURATION.en.md`](CONFIGURATION.en.md).
 
 ## 7. Persistence
 
@@ -91,7 +83,7 @@ keep_alive=0
 1. Test observable behavior and contracts.
 2. Prefer public APIs.
 3. Keep tests focused by responsibility.
-4. Internal refactors should not break tests that depend only on implementation details.
+4. Tests must verify contracts and observable behavior, avoiding unnecessary dependence on internal details so that refactoring can preserve those contracts.
 5. Do not commit with failing tests.
 6. Anything depending on real runtime behavior requires real runtime validation.
 

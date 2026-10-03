@@ -36,6 +36,10 @@ Required text settings cannot be empty. Timeouts must be positive numbers; conte
 
 Rejected configuration prevents an investigation from starting and the CLI exits with code `1`.
 
+The current LLM #2 profile also fixes `think=false` and the provider sends `keep_alive=0`. These are versioned implementation settings, not environment variables exposed to the analyst. The `300`-second timeout, `num_ctx=8192` and optional generation limit are the configurable defaults listed above.
+
+For native execution, set `CENTAURUS_WORKSPACE` to an absolute path writable by the runtime user. On Windows, follow the explicit path setup in [`DEPLOYMENT_WINDOWS.en.md`](DEPLOYMENT_WINDOWS.en.md); `/workspace` is not a portable Windows location.
+
 ## 3. Git + Docker
 
 Bootstrap uses `CENTAURUS_DATA_ROOT`; when unset, it uses `${XDG_DATA_HOME:-$HOME/.local/share}/centaurus`. It creates `compose.env` with mode `0600` and the persistent paths:

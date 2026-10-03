@@ -16,7 +16,7 @@ Core owns the investigation lifecycle. Intent validation, Target construction, t
 
 LLM #1 interprets a request as an Intent constrained by a schema and permitted values. It has no authority to execute arbitrary tools, change the catalog or write findings. An invalid interpretation must stop that flow before investigation.
 
-LLM #2 operates after the deterministic report is persisted. It receives a controlled projection that excludes `Evidence.data`, retains relevant references and metadata and limits the supplied information. Its output undergoes structural validation and factual checks against the permitted context; items that fail those checks are discarded.
+LLM #2 operates after the deterministic report is persisted. It receives a controlled projection that excludes `Evidence.data`, retains relevant references and metadata and limits the supplied information. Its output undergoes structural validation and factual checks against the permitted context; items that fail those checks are discarded. These checks assess consistency with the supplied context; they do not independently verify source accuracy or guarantee the truth of every generated statement.
 
 JSON validation does not establish truth. These controls reduce the input surface and constrain response usage without claiming universal immunity to prompt injection or model errors. Assistance is ephemeral, non-authoritative and does not modify `report.json`.
 

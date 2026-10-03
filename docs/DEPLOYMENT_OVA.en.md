@@ -104,6 +104,8 @@ Before maintenance, finish investigations and close the Core session. Keep a con
 
 The appliance does not retain a Git checkout for routine updates. Do not apply the Git + Docker tag-switching and bootstrap procedure inside it. Runtime changes require administrative maintenance that keeps the image, configuration and verified identities consistent.
 
+For case export, consistent backups and recovery checks, follow section 13 of [`STORAGE.en.md`](STORAGE.en.md). These operations belong to the administrator; retain the original data until the recovered copy is verified.
+
 ## 7. Shutdown
 
 Exit the Core shell, then run the following as `centaurus` from the host TTY:

@@ -112,6 +112,7 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements-core.lock
 python -m pip install --no-deps -e .
+python -m pip install pytest
 python -m pip check
 ```
 
@@ -121,8 +122,11 @@ En Windows:
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements-core.lock
 .\.venv\Scripts\python.exe -m pip install --no-deps -e .
+.\.venv\Scripts\python.exe -m pip install pytest
 .\.venv\Scripts\python.exe -m pip check
 ```
+
+`pytest` es una dependencia de desarrollo y no está incluido en `requirements-core.lock` ni en las dependencias del paquete instalado. Instálalo solo en el entorno de desarrollo. No se distribuye un lock de dependencias de pruebas; registra `python -m pip freeze` junto a los resultados cuando se necesite reproducibilidad.
 
 ## 9. Pruebas
 
@@ -132,7 +136,14 @@ Ejecutar la suite:
 python -m pytest
 ```
 
-Para cambios Python, comprobar además sintaxis:
+En Windows, mantén el intérprete del entorno virtual sin necesidad de activarlo:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest
+.\.venv\Scripts\python.exe -m compileall -q src tests
+```
+
+Para cambios Python en Linux, comprobar además sintaxis:
 
 ```bash
 python -m compileall -q src tests
@@ -148,7 +159,7 @@ No realizar staging/commit mientras existan pruebas fallando.
 
 ## 10. Revisión Git
 
-Flujo recomendado:
+Flujo recomendado (en Windows, sustituye `python` por `.\.venv\Scripts\python.exe`):
 
 ```bash
 git status

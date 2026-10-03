@@ -4,6 +4,8 @@
 
 [Inicio](../README.md) · [`INSTALL.md`](INSTALL.md) · [`USER_GUIDE.md`](USER_GUIDE.md)
 
+Estas instrucciones se aplican a `v1.0.0`. El tag conserva documentación local anterior y el paquete Python utiliza una versión distinta; consulta el [alcance de release y documentación](../README.md#release). Mantén disponible la [guía actual en línea](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/blob/main/docs/DEPLOYMENT_WINDOWS.md) al cambiar de tag.
+
 ## 1. Alcance y límites
 
 Windows nativo permite ejecutar Core, CLI, persistencia y las dos funciones LLM desde Python, sin Docker. Es una opción para desarrollo y uso local con las dependencias necesarias disponibles. La OVA sigue siendo la distribución principal; para utilizarla desde Windows, sigue [`DEPLOYMENT_OVA.md`](DEPLOYMENT_OVA.md).
@@ -23,6 +25,18 @@ ollama --version
 ollama list
 ```
 
+Con Git para Windows instalado, obtén la release pública y registra su commit:
+
+```powershell
+git clone https://github.com/M4Rc0s-S3c/centaurus-osint-framework.git
+Set-Location centaurus-osint-framework
+git checkout --detach v1.0.0
+git rev-parse HEAD
+git status --porcelain --untracked-files=all
+```
+
+El último comando debe quedar sin salida. Como alternativa, descarga **Source code (zip)** desde la [release v1.0.0](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.0), extráelo y abre PowerShell en la raíz extraída. El ZIP de fuentes permite instalar el paquete nativo; no sustituye al checkout Git exigido por el bootstrap Linux.
+
 Ejecuta los pasos siguientes desde la raíz del repositorio, donde está `pyproject.toml`. Conserva la identidad del tag/commit o ZIP utilizado. No es necesario activar el entorno virtual ni cambiar la política de ejecución de PowerShell.
 
 ## 3. Instalación del Core
@@ -38,7 +52,7 @@ python -m venv .venv
 
 `-e` instala en modo editable: el código se ejecuta desde el checkout. El lock reduce variación de dependencias; no certifica equivalencia completa entre Windows y Linux. No instales los locks de DNSRecon, Sublist3r y TheHarvester en este mismo entorno.
 
-Como alternativa para desarrollo sin fijar las dependencias al lock, tras crear el entorno se puede usar `pip install -e .`. Para instalar una copia no editable conservando las dependencias ya preparadas, sustituye la instalación editable por:
+Como alternativa para desarrollo sin fijar las dependencias al lock, tras crear el entorno se puede usar `.\.venv\Scripts\python.exe -m pip install -e .`. Para instalar una copia no editable conservando las dependencias ya preparadas, sustituye la instalación editable por:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install --no-deps .

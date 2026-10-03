@@ -104,6 +104,8 @@ Antes de mantenimiento, termina las investigaciones y cierra la sesión del Core
 
 La appliance no mantiene un checkout Git para actualizaciones ordinarias. No apliques dentro de ella los pasos de cambio de tag y bootstrap de la modalidad Git + Docker. Los cambios de runtime requieren un procedimiento administrativo que mantenga coherentes la imagen, la configuración y sus identidades verificadas.
 
+Para extraer casos, realizar copias consistentes y comprobar una recuperación, sigue el apartado 13 de [`STORAGE.md`](STORAGE.md). Estas operaciones corresponden al administrador; conserva los datos originales hasta verificar la copia recuperada.
+
 ## 7. Apagado
 
 Sal del shell del Core y, desde la TTY del host como `centaurus`, ejecuta:

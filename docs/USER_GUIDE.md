@@ -168,22 +168,11 @@ Si aparece `LLM analyst assistance unavailable; the deterministic Report remains
 
 Las recomendaciones del modelo son orientativas. Para fundamentar una decisión, vuelve al hallazgo, la regla y las evidencias. Si la explicación generativa discrepa del informe, prevalece el informe determinista.
 
-## 7. Incidencias habituales
+## 7. Qué hacer ante una incidencia
 
-| Situación | Comprobación o siguiente paso |
-|---|---|
-| El acceso host rechaza `centaurus capabilities` | En la appliance ejecuta solo `centaurus`; dentro usa `/capabilities` |
-| El acceso a la appliance falla antes de mostrar `centaurus>` | Revisa el mensaje y comunícalo al responsable del entorno; puede requerir intervención sobre los servicios |
-| Aparece `Invalid request` | Revisa el objetivo y formula una petición simple dentro de los tipos admitidos |
-| Aparece un error LLM durante la interpretación | Conserva el mensaje; solicita revisar la disponibilidad y configuración de Ollama antes de repetir |
-| Una herramienta falla y el resultado es parcial | Lee la tabla de fallos y documenta la cobertura reducida |
-| No se producen hallazgos | Revisa evidencias y cobertura; cero hallazgos no equivale a ausencia de riesgo |
-| Falta la asistencia LLM después del informe | Utiliza el informe persistido; la explicación adicional puede haber fallado |
-| No encuentras una investigación anterior desde el shell | No hay consulta histórica en la CLI; utiliza el acceso al workspace definido por el despliegue |
+Si falla el acceso, conserva el mensaje exacto y comprueba si estás en el terminal del host o dentro de `centaurus>`. Si una investigación produce un resultado parcial o falla la asistencia LLM, conserva el informe y el identificador; utiliza el apartado 4 para interpretar el resultado.
 
-Para comunicar una incidencia, indica la modalidad de uso, el punto donde ocurrió, el mensaje exacto y el identificador del caso si llegó a generarse. Incluye solo los datos necesarios para el diagnóstico.
-
-Para comprobaciones del despliegue y diagnóstico operativo, consulta [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).
+Para comprobar el despliegue, diagnosticar fallos de fuentes u Ollama y preparar la información de una incidencia, consulta [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).
 
 ## 8. Terminar la sesión y apagar la appliance
 
