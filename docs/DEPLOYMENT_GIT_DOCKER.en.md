@@ -168,25 +168,29 @@ With a clean checkout, a pinned version and the data directory selected:
 ./scripts/bootstrap_linux_release.sh
 ```
 
-Bootstrap executes the following control sequence:
+Bootstrap executes these 14 steps in order, grouped into four phases. Read each phase from top to bottom and proceed from left to right:
 
 ```mermaid
-flowchart TD
-    N0["Check host and clean Git identity"]
-    N1["Create data root + compose.env"]
-    N2["Generate deterministic Core build bundle"]
-    N3["Extract into a checked temporary directory"]
-    N4["Build centaurus-core:g2-candidate --no-cache"]
-    N5["pip check: Core + DNSRecon + Sublist3r + TheHarvester"]
-    N6["Tag centaurus-core:local"]
-    N7["Set workspace directory owner to 1000:1000"]
-    N8["Verify / provision qwen3:4b"]
-    N9["Render Compose"]
-    N10["Start centaurus-ollama"]
-    N11["Verify effective Ollama image identity"]
-    N12["Smoke: centaurus capabilities"]
-    N13["LINUX_BOOTSTRAP=PASS"]
-    N0 --> N1 --> N2 --> N3 --> N4 --> N5 --> N6 --> N7 --> N8 --> N9 --> N10 --> N11 --> N12 --> N13
+flowchart LR
+    P0["`**Preparation**
+01 · Check host and clean Git identity
+02 · Create data root + compose.env
+03 · Generate deterministic Core build bundle
+04 · Extract into a checked temporary directory`"]
+    P1["`**Build and promotion**
+05 · Build centaurus-core:g2-candidate --no-cache
+06 · pip check: Core + DNSRecon + Sublist3r + TheHarvester
+07 · Tag centaurus-core:local`"]
+    P2["`**Persistent runtime**
+08 · Set workspace directory owner to 1000:1000
+09 · Verify / provision qwen3:4b
+10 · Render Compose`"]
+    P3["`**Verification and closure**
+11 · Start centaurus-ollama
+12 · Verify effective Ollama image identity
+13 · Smoke: centaurus capabilities
+14 · LINUX_BOOTSTRAP=PASS`"]
+    P0 --> P1 --> P2 --> P3
 ```
 
 The final marker means bootstrap completed, including its static capability smoke check. It does not establish successful inference or a real investigation on this host. The local Core tag is updated before model and Compose checks; a later failure does not automatically roll it back. Preserve the previous image identity and persistent data before updating.

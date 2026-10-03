@@ -168,25 +168,29 @@ Con el checkout limpio, la versión fijada y el directorio de datos decidido:
 ./scripts/bootstrap_linux_release.sh
 ```
 
-El bootstrap ejecuta la siguiente cadena de control:
+El bootstrap ejecuta estos 14 pasos en orden, agrupados en cuatro fases. Lee cada fase de arriba abajo y avanza de izquierda a derecha:
 
 ```mermaid
-flowchart TD
-    N0["Comprobar host e identidad Git limpia"]
-    N1["Crear data root + compose.env"]
-    N2["Generar paquete determinista del Core"]
-    N3["Extraer en directorio temporal con rutas verificadas"]
-    N4["Build centaurus-core:g2-candidate --no-cache"]
-    N5["pip check: Core + DNSRecon + Sublist3r + TheHarvester"]
-    N6["Tag centaurus-core:local"]
-    N7["Ajustar propietario del directorio workspace a 1000:1000"]
-    N8["Verificar / aprovisionar qwen3:4b"]
-    N9["Renderizar Compose"]
-    N10["Levantar centaurus-ollama"]
-    N11["Verificar identidad efectiva de imagen Ollama"]
-    N12["Smoke: centaurus capabilities"]
-    N13["LINUX_BOOTSTRAP=PASS"]
-    N0 --> N1 --> N2 --> N3 --> N4 --> N5 --> N6 --> N7 --> N8 --> N9 --> N10 --> N11 --> N12 --> N13
+flowchart LR
+    P0["`**Preparación**
+01 · Comprobar host e identidad Git limpia
+02 · Crear data root + compose.env
+03 · Generar paquete determinista del Core
+04 · Extraer en directorio temporal con rutas verificadas`"]
+    P1["`**Construcción y promoción**
+05 · Build centaurus-core:g2-candidate --no-cache
+06 · pip check: Core + DNSRecon + Sublist3r + TheHarvester
+07 · Tag centaurus-core:local`"]
+    P2["`**Runtime persistente**
+08 · Ajustar propietario del directorio workspace a 1000:1000
+09 · Verificar / aprovisionar qwen3:4b
+10 · Renderizar Compose`"]
+    P3["`**Verificación y cierre**
+11 · Levantar centaurus-ollama
+12 · Verificar identidad efectiva de imagen Ollama
+13 · Smoke: centaurus capabilities
+14 · LINUX_BOOTSTRAP=PASS`"]
+    P0 --> P1 --> P2 --> P3
 ```
 
 El marcador final indica que el bootstrap ha terminado, incluida la comprobación de capacidades estáticas. No demuestra una inferencia correcta ni una investigación real en ese host. La etiqueta local del Core se actualiza antes de comprobar modelo y Compose; un fallo posterior no la revierte automáticamente. Conserva la identidad de la imagen anterior y los datos persistentes antes de actualizar.

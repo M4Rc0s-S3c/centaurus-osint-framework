@@ -35,25 +35,32 @@ The architecture is designed so additional tools can be incorporated through the
 
 ## Architecture at a glance
 
+The CLI sends the input to `RequestInterpreter`, which passes a `StructuredRequest` to the **Core**. The Core governs the investigation and coordinates the following components:
+
 ```mermaid
-flowchart TD
-    U["CLI / natural-language request"] --> I["RequestInterpreter"]
-    I --> T["TargetFactory: Target"]
-    I --> L["LLM #1: Intent"]
-    T --> S["StructuredRequest"]
-    L --> S
-    S --> C["Core"]
-    C --> P["Planner"]
-    P --> X["Executor / PluginManager"]
-    X --> O["OSINT / RAW"]
-    O --> E["EvidenceManager / normalization"]
-    E --> R["RuleEngine / Findings"]
-    R --> M["ReportManager / Report"]
-    M --> F["Core / ReportStore: report.json + report.md"]
-    F --> A["LLM #2: non-authoritative assistance"]
+flowchart TB
+    C["`**Core**
+Investigation lifecycle`"]
+    C --> G
+    subgraph G["Components coordinated by the Core"]
+        direction LR
+        A["`**Planning and acquisition**
+Planner / Executor
+PluginManager / OSINT plugins`"]
+        K["`**Normalization and analysis**
+EvidenceManager
+RuleEngine`"]
+        R["`**Reporting and assistance**
+ReportManager / ReportStore
+LLMManager / LLM #2`"]
+        A -->|RAW| K
+        K -->|Findings| R
+    end
+    classDef governor fill:#dbeafe,stroke:#1d4ed8,stroke-width:3px,color:#172554
+    class C governor
 ```
 
-`RequestInterpreter` first constructs the Target deterministically and then asks LLM #1 to classify the Intent from the same input. Both are combined in `StructuredRequest`; the LLM does not construct the Target. The Core orchestrates the subsequent pipeline. LLM #2 runs after persistence and its output is grounded, ephemeral and fail-soft.
+`RequestInterpreter` first constructs the Target deterministically and then asks LLM #1 to classify the Intent from the same input. Both are combined in `StructuredRequest`; the LLM does not construct the Target. The upper block identifies the Core as the governing component. Inside the coordinated-components area, arrows show the main data flow. The Core governs planning, execution, knowledge processing and persistence. In the final group, `ReportManager` builds the report, the Core persists it through `ReportStore`, and `LLMManager` coordinates subsequent assistance. LLM #2 runs after persistence and its output is grounded, ephemeral and fail-soft.
 
 See [`ARCHITECTURE.en.md`](docs/ARCHITECTURE.en.md) for component responsibilities.
 
