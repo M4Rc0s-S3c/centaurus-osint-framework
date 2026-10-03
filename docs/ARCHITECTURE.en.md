@@ -22,6 +22,8 @@ The architecture is designed so that new tools can be added without redesigning 
 - Heavy resources can be acquired/released on demand.
 - Security boundaries preserve authority and least privilege.
 
+Deterministic results, forward and reverse traceability, and modularity through contracts are design constraints across these layers. Every finding must retain its rule and supporting evidence; presentation must preserve that authority. A component change must preserve these relationships and the public contracts of its consumers. The Core coordinates the workflow that maintains them.
+
 ## 3. Layers and concepts
 
 ```text
@@ -244,6 +246,19 @@ The architecture should be revisited when any of the following changes:
 
 Adding a tool, a rule or a packaging mode does not by itself imply an architectural change.
 
+### Modularity in practice
+
+| Change | Main components involved | Contract to preserve |
+| --- | --- | --- |
+| Replace or add a tool | Plugin, dependencies, capability catalog and normalizer where needed | `RawObservation`, source and collection time; compatible normalized `Evidence`. |
+| Add an analytical criterion | Rule catalog and tests; engine if a new operator is needed | Explicit rule identity/version, evaluation semantics and supporting evidence in each `Finding`. |
+| Add a report format | Rendering and report persistence | Meaning of `Report`, with no additional analytical conclusions from presentation. |
+| Replace a persistence backend | Store implementations and runtime wiring | Store interfaces, case correlation, artifact preservation and failure behavior. |
+
+Modularity localizes the impact of a change; it does not mean every change fits in one file or can be applied without integration work. See [`PLUGIN_SYSTEM.en.md`](PLUGIN_SYSTEM.en.md) for tool integration and [`RULES_AND_RULE_ENGINE.en.md`](RULES_AND_RULE_ENGINE.en.md) for analytical criteria.
+
+The current rule catalog lives in code. Loading it from YAML, JSON, a registry or a database is a possible future extension, not an implemented configuration option. Such a change would require a loader and validation while preserving `Rule`/`Condition`, versions and the rule snapshot retained in findings.
+
 ## 14. Related documentation
 
 - [`PROJECT.en.md`](PROJECT.en.md)
@@ -251,7 +266,6 @@ Adding a tool, a rule or a packaging mode does not by itself imply an architectu
 - [`STORAGE.en.md`](STORAGE.en.md)
 - [`STANDARDS.en.md`](STANDARDS.en.md)
 - [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)
-
 - [`CORE_RUNTIME.en.md`](CORE_RUNTIME.en.md)
 - [`PLUGIN_SYSTEM.en.md`](PLUGIN_SYSTEM.en.md)
 - [`LLM_ARCHITECTURE.en.md`](LLM_ARCHITECTURE.en.md)

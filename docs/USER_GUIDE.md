@@ -157,6 +157,10 @@ La CLI de esta versión no ofrece un navegador histórico ni un comando para abr
 
 Al entregar un resultado, acompaña el informe con su identificador, el objetivo y las limitaciones de cobertura relevantes. No presentes una captura de la explicación LLM como sustituto del informe.
 
+### Cómo justificar un resultado
+
+Parte de un hallazgo de `report.json`, revisa la regla y las evidencias de apoyo que contiene y correlaciona esas evidencias con las observaciones originales conservadas. Esa trazabilidad inversa permite explicar por qué el sistema formuló la conclusión. [`STORAGE.md`](STORAGE.md#9-trazabilidad) describe los pasos de inspección y los límites de correlación; [`RULES_AND_RULE_ENGINE.md`](RULES_AND_RULE_ENGINE.md) explica la evaluación determinista con un ejemplo controlado.
+
 ## 6. Qué papel tiene la asistencia LLM
 
 El modelo interviene en dos momentos distintos:

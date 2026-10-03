@@ -6,6 +6,16 @@ CENTAURUS es un framework OSINT modular y orientado a ejecución local, diseñad
 
 Proporciona un flujo reproducible para recopilar información pública, normalizar evidencias, aplicar reglas de análisis deterministas y generar informes de investigación trazables, manteniendo las decisiones operativas fuera del modelo de lenguaje.
 
+## Bases del diseño
+
+CENTAURUS está diseñado para que el analista pueda responder **«¿Por qué afirma esto el sistema y qué observaciones lo sustentan?»** Tres bases orientan la aplicación:
+
+- **Resultados deterministas:** reglas explícitas producen hallazgos a partir de evidencias normalizadas. El informe persistido es autoritativo; la asistencia LLM no crea ni altera sus conclusiones. [Evaluación y límites](docs/RULES_AND_RULE_ENGINE.md).
+- **Trazabilidad directa e inversa:** permite seguir cómo las observaciones se convierten en hallazgos, o partir del informe para revisar las reglas y evidencias que lo sustentan y correlacionarlas con el RAW conservado. [Recorrido de auditoría](docs/STORAGE.md#9-trazabilidad).
+- **Modularidad por contratos:** adquisición, normalización, reglas, reporting y persistencia tienen responsabilidades separadas. Los componentes pueden evolucionar conservando esos contratos y la coordinación del Core. [Fronteras de extensión](docs/ARCHITECTURE.md#13-evolución-arquitectónica).
+
+Estas bases permiten explicar y revisar el análisis. Repetir consultas en vivo puede producir observaciones diferentes; el determinismo se refiere a evaluar las mismas entradas con las mismas reglas e implementación.
+
 ## Características principales
 
 - Arquitectura modular basada en plugins.
@@ -177,7 +187,6 @@ Elige los documentos según tu tarea; no es necesario leer todo el índice en or
 - [`STORAGE.md`](docs/STORAGE.md) · [English](docs/STORAGE.en.md) - persistencia y trazabilidad.
 - [`RULES_AND_RULE_ENGINE.md`](docs/RULES_AND_RULE_ENGINE.md) · [English](docs/RULES_AND_RULE_ENGINE.en.md) - catálogo de reglas e interpretación de hallazgos.
 - [`SECURITY_ARCHITECTURE.md`](docs/SECURITY_ARCHITECTURE.md) · [English](docs/SECURITY_ARCHITECTURE.en.md) - límites de confianza, endurecimiento y tratamiento de fallos.
-
 - [`CORE_RUNTIME.md`](docs/CORE_RUNTIME.md) · [English](docs/CORE_RUNTIME.en.md) - ciclo de investigación, coordinación y resultados parciales.
 - [`LLM_ARCHITECTURE.md`](docs/LLM_ARCHITECTURE.md) · [English](docs/LLM_ARCHITECTURE.en.md) - roles, proyección de datos, validación y límites de la asistencia.
 
@@ -185,7 +194,6 @@ Elige los documentos según tu tarea; no es necesario leer todo el índice en or
 
 - [`STANDARDS.md`](docs/STANDARDS.md) · [English](docs/STANDARDS.en.md) - convenciones y estándares del proyecto.
 - [`DEVELOPMENT.md`](docs/DEVELOPMENT.md) · [English](docs/DEVELOPMENT.en.md) - flujo de desarrollo.
-
 - [`PLUGIN_SYSTEM.md`](docs/PLUGIN_SYSTEM.md) · [English](docs/PLUGIN_SYSTEM.en.md) - contrato, integración de capacidades y normalización de fuentes.
 - [`TESTING.md`](docs/TESTING.md) · [English](docs/TESTING.en.md) - niveles de prueba, evidencias y límites de validación.
 

@@ -10,6 +10,18 @@
 
 Findings describe observations from the queried sources. They do not, by themselves, establish a vulnerability, attribution, risk score or operational recommendation.
 
+### What a deterministic result means
+
+For the same normalized evidence, including collection times, the same rules and evaluation order, and the same implementation, the engine produces the same findings. The criteria can be inspected and evaluated again without asking an LLM to decide the conclusion.
+
+This does not guarantee that a source is accurate or that two live investigations produce identical results: sources, coverage and observations can change. It also does not imply byte-identical reports across investigations, which have their own identifiers and generation times. `report.md` is a deterministic projection of a given `Report`.
+
+### Controlled example: corroboration with RL-014
+
+Suppose normalized Sublist3r evidence contains `api.example.com` and `www.example.com`, while crt.sh evidence contains `api.example.com` and `mail.example.com`. Evaluating `RL-014` alone produces one finding for `api.example.com`, observed in two distinct sources. It retains the rule and both supporting evidences.
+
+The other names do not meet this corroboration criterion. That does not prove that they do not exist or are safe. The example uses controlled data, not live observations of `example.com`. It illustrates how explicit criteria turn observations into a conclusion whose support can be reviewed through [`STORAGE.en.md`](STORAGE.en.md#9-traceability).
+
 ## 2. Production catalog
 
 The catalog contains eleven rules, ordered by numeric identifier.

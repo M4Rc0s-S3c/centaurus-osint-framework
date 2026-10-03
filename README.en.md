@@ -6,6 +6,16 @@ CENTAURUS is a modular, local-first OSINT framework designed for Blue Team, secu
 
 It provides a reproducible workflow for collecting public information, normalizing evidence, applying deterministic analysis rules and generating traceable investigation reports, while keeping operational decisions outside the language model.
 
+## Design foundations
+
+CENTAURUS is designed so an analyst can answer **“Why does the system make this claim, and which observations support it?”** Three foundations guide the application:
+
+- **Deterministic results:** explicit rules produce findings from normalized evidence. The persisted report is authoritative; LLM assistance does not create or alter its conclusions. [Evaluation and limits](docs/RULES_AND_RULE_ENGINE.en.md).
+- **Forward and reverse traceability:** follow how observations become findings, or start with a report and inspect the rules and evidence supporting it, then correlate them with the preserved RAW. [Audit trail](docs/STORAGE.en.md#9-traceability).
+- **Modularity through contracts:** acquisition, normalization, rules, reporting and persistence have separate responsibilities. Components can evolve while preserving those contracts and the Core’s coordination. [Extension boundaries](docs/ARCHITECTURE.en.md#13-architectural-evolution).
+
+These foundations make the analysis explainable and reviewable. Repeating live queries can yield different observations; determinism applies to evaluating the same inputs with the same rules and implementation.
+
 ## Key features
 
 - Modular plugin architecture.
@@ -177,7 +187,6 @@ Choose the documents for your task; you do not need to read the full index in or
 - [`STORAGE.en.md`](docs/STORAGE.en.md) · [Español](docs/STORAGE.md) - persistence and traceability.
 - [`RULES_AND_RULE_ENGINE.en.md`](docs/RULES_AND_RULE_ENGINE.en.md) · [Español](docs/RULES_AND_RULE_ENGINE.md) - rule catalog and finding interpretation.
 - [`SECURITY_ARCHITECTURE.en.md`](docs/SECURITY_ARCHITECTURE.en.md) · [Español](docs/SECURITY_ARCHITECTURE.md) - trust boundaries, hardening and failure handling.
-
 - [`CORE_RUNTIME.en.md`](docs/CORE_RUNTIME.en.md) · [Español](docs/CORE_RUNTIME.md) - investigation lifecycle, coordination and partial results.
 - [`LLM_ARCHITECTURE.en.md`](docs/LLM_ARCHITECTURE.en.md) · [Español](docs/LLM_ARCHITECTURE.md) - roles, data projection, validation and assistance limits.
 
@@ -185,7 +194,6 @@ Choose the documents for your task; you do not need to read the full index in or
 
 - [`STANDARDS.en.md`](docs/STANDARDS.en.md) · [Español](docs/STANDARDS.md) - conventions and project standards.
 - [`DEVELOPMENT.en.md`](docs/DEVELOPMENT.en.md) · [Español](docs/DEVELOPMENT.md) - development workflow.
-
 - [`PLUGIN_SYSTEM.en.md`](docs/PLUGIN_SYSTEM.en.md) · [Español](docs/PLUGIN_SYSTEM.md) - contract, capability integration and source normalization.
 - [`TESTING.en.md`](docs/TESTING.en.md) · [Español](docs/TESTING.md) - test levels, evidence and validation limits.
 

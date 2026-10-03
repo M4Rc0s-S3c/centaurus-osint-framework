@@ -10,6 +10,18 @@
 
 Los hallazgos describen lo observado en las fuentes consultadas. No constituyen por sí mismos una vulnerabilidad, una atribución, una puntuación de riesgo ni una recomendación operativa.
 
+### Qué significa un resultado determinista
+
+Con las mismas evidencias normalizadas, incluidos sus tiempos de recogida, las mismas reglas y orden de evaluación y la misma implementación, el motor produce los mismos hallazgos. Los criterios pueden inspeccionarse y volver a evaluarse sin pedir a un LLM que decida la conclusión.
+
+Esto no garantiza la exactitud de una fuente ni que dos investigaciones en vivo obtengan resultados idénticos: las fuentes, la cobertura y las observaciones pueden cambiar. Tampoco implica informes idénticos byte a byte entre investigaciones, que tienen identificadores y tiempos de generación propios. `report.md` es una proyección determinista de un `Report` concreto.
+
+### Ejemplo controlado: corroboración con RL-014
+
+Supongamos que la evidencia normalizada de Sublist3r contiene `api.example.com` y `www.example.com`, mientras que la de crt.sh contiene `api.example.com` y `mail.example.com`. Evaluar únicamente `RL-014` produce un hallazgo para `api.example.com`, observado en dos fuentes distintas. Conserva la regla y ambas evidencias de apoyo.
+
+Los otros nombres no satisfacen este criterio de corroboración. Eso no demuestra que no existan ni que sean seguros. El ejemplo utiliza datos controlados, no observaciones en vivo de `example.com`. Ilustra cómo unos criterios explícitos convierten observaciones en una conclusión cuyo fundamento puede revisarse mediante [`STORAGE.md`](STORAGE.md#9-trazabilidad).
+
 ## 2. Catálogo productivo
 
 El catálogo contiene once reglas, ordenadas por su identificador numérico.

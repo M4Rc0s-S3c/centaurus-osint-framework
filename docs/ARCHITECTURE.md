@@ -21,6 +21,8 @@ La arquitectura está diseñada para que la incorporación de nuevas herramienta
 - Los recursos pesados pueden adquirirse/liberarse bajo demanda.
 - Las fronteras de seguridad mantienen autoridad y mínimo privilegio.
 
+Los resultados deterministas, la trazabilidad directa e inversa y la modularidad por contratos son criterios de diseño que atraviesan estas capas. Cada hallazgo debe conservar su regla y sus evidencias de apoyo; la presentación debe respetar esa autoridad. Un cambio de componente debe preservar esas relaciones y los contratos públicos de sus consumidores. El Core coordina el flujo que las mantiene.
+
 ## 3. Capas y conceptos
 
 ```text
@@ -243,6 +245,19 @@ La arquitectura debe revisarse cuando cambie:
 
 Añadir una herramienta, una regla o una nueva modalidad de empaquetado no implica por sí mismo un cambio arquitectónico.
 
+### Modularidad en la práctica
+
+| Cambio | Componentes principales implicados | Contrato que debe preservarse |
+| --- | --- | --- |
+| Sustituir o añadir una herramienta | Plugin, dependencias, catálogo de capacidades y normalizador cuando corresponda | `RawObservation`, fuente y tiempo de recogida; `Evidence` normalizada compatible. |
+| Añadir un criterio analítico | Catálogo de reglas y pruebas; motor si se necesita un operador nuevo | Identidad/versión explícitas de la regla, semántica de evaluación y evidencias de apoyo en cada `Finding`. |
+| Añadir un formato de informe | Renderizado y persistencia del informe | Significado de `Report`, sin conclusiones analíticas adicionales desde la presentación. |
+| Sustituir un backend de persistencia | Implementaciones de stores y conexión en el runtime | Interfaces de los stores, correlación del caso, conservación de artefactos y comportamiento ante fallos. |
+
+La modularidad localiza el impacto del cambio; no significa que todo cambio quepa en un fichero o pueda aplicarse sin trabajo de integración. Consulta [`PLUGIN_SYSTEM.md`](PLUGIN_SYSTEM.md) para integrar herramientas y [`RULES_AND_RULE_ENGINE.md`](RULES_AND_RULE_ENGINE.md) para los criterios analíticos.
+
+El catálogo de reglas actual reside en código. Cargarlo desde YAML, JSON, un registry o una base de datos es una posible evolución, no una opción de configuración implementada. Ese cambio requeriría un cargador y validación, preservando `Rule`/`Condition`, las versiones y el snapshot de la regla conservado en los hallazgos.
+
 ## 14. Documentación relacionada
 
 - [`PROJECT.md`](PROJECT.md)
@@ -250,7 +265,6 @@ Añadir una herramienta, una regla o una nueva modalidad de empaquetado no impli
 - [`STORAGE.md`](STORAGE.md)
 - [`STANDARDS.md`](STANDARDS.md)
 - [`DEVELOPMENT.md`](DEVELOPMENT.md)
-
 - [`CORE_RUNTIME.md`](CORE_RUNTIME.md)
 - [`PLUGIN_SYSTEM.md`](PLUGIN_SYSTEM.md)
 - [`LLM_ARCHITECTURE.md`](LLM_ARCHITECTURE.md)

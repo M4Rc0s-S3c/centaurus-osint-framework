@@ -191,6 +191,22 @@ source / collected_at
 correlatable original RAW
 ```
 
+### Forward traceability: from observation to report
+
+The plugin produces `RawObservation`; its structured output is persisted before normalization. `EvidenceManager` creates normalized `Evidence`, retaining `source` and `collected_at`. Rules evaluate that evidence, and each matching `Finding` retains its rule and supporting evidences. `Report` consolidates the findings within the investigation. Not every observation leads to a finding.
+
+### Reverse traceability: reviewing a conclusion
+
+1. Locate the case by `investigation_id` and open `reports/report.json`.
+2. Select the finding by its report-local `finding_ref`. Review its conclusion, rule snapshot, version and conditions, and embedded supporting evidences.
+3. Compare those evidences with `evidences/normalized/`, using `source`, `collected_at` and `data` within the same case.
+4. Correlate them with observations in `evidences/raw/` using source, collection time and the content transformed by the corresponding normalizer. RAW and normalized content need not be identical.
+5. Review `execution/failures/` separately to assess missing coverage. The report does not include those operational failures.
+
+`Evidence` has no direct RAW identifier or file path. RAW and normalized stores allocate sequences independently; matching filename numbers is not a reliable relationship. Source and time alone are not guaranteed unique either: if the retained artifacts do not establish an unambiguous correspondence, record that limit rather than assuming a link.
+
+This is an inspection path through persisted artifacts, not a built-in reverse-navigation command or a cryptographic chain of custody. Preserve the complete case directory and the code/rule version used when an audit must explain both the conclusions and their derivation.
+
 ## 10. Workspace in Git + Docker
 
 Git + Docker mode uses a persistent host directory mounted at `/workspace`.

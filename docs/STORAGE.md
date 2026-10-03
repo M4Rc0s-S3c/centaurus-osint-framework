@@ -190,6 +190,22 @@ source / collected_at
 RAW original correlacionable
 ```
 
+### Trazabilidad directa: de la observación al informe
+
+El plugin produce `RawObservation`; su salida estructurada se persiste antes de normalizar. `EvidenceManager` crea `Evidence` normalizada conservando `source` y `collected_at`. Las reglas evalúan esa evidencia y cada `Finding` generado conserva su regla y las evidencias de apoyo. `Report` consolida los hallazgos dentro de la investigación. No toda observación desemboca en un hallazgo.
+
+### Trazabilidad inversa: revisar una conclusión
+
+1. Localiza el caso por `investigation_id` y abre `reports/report.json`.
+2. Selecciona el hallazgo por su `finding_ref`, local al informe. Revisa su conclusión, el snapshot de la regla, su versión y condiciones, y las evidencias de apoyo incorporadas.
+3. Contrasta esas evidencias con `evidences/normalized/`, utilizando `source`, `collected_at` y `data` dentro del mismo caso.
+4. Correlaciónalas con las observaciones de `evidences/raw/` mediante fuente, tiempo de recogida y contenido transformado por el normalizador correspondiente. El contenido RAW y el normalizado no tienen por qué ser idénticos.
+5. Revisa por separado `execution/failures/` para valorar la cobertura que faltó. El informe no incorpora esos fallos operacionales.
+
+`Evidence` no contiene un identificador directo de RAW ni su ruta de fichero. Los stores RAW y normalizado asignan secuencias independientes; la coincidencia de números en sus nombres no establece una relación fiable. Tampoco se garantiza que fuente y tiempo sean únicos: si los artefactos conservados no permiten una correspondencia inequívoca, registra ese límite en lugar de dar por supuesto el enlace.
+
+Este es un recorrido de inspección de artefactos persistidos, no un comando integrado de navegación inversa ni una cadena de custodia criptográfica. Conserva el directorio completo del caso y la versión de código/reglas utilizada cuando una auditoría deba explicar tanto las conclusiones como su obtención.
+
 ## 10. Workspace en Git + Docker
 
 La modalidad Git + Docker utiliza un directorio persistente del host que se monta en `/workspace`.

@@ -157,6 +157,10 @@ This version's CLI does not provide a history browser or a command to open or ex
 
 When handing over a result, include the report's identifier, target and relevant coverage limitations. Do not present a screenshot of the LLM explanation as a substitute for the report.
 
+### How to justify a result
+
+Start with a finding in `report.json`, review the rule and supporting evidence it contains, then correlate that evidence with the preserved original observations. This reverse traceability answers why the system made the claim. [`STORAGE.en.md`](STORAGE.en.md#9-traceability) explains the inspection steps and correlation limits; [`RULES_AND_RULE_ENGINE.en.md`](RULES_AND_RULE_ENGINE.en.md) explains deterministic evaluation with a controlled example.
+
 ## 6. The role of LLM assistance
 
 The model is involved at two different stages:
