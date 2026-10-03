@@ -72,6 +72,8 @@ A new tool must:
 7. include focused tests;
 8. include integration/runtime validation when depending on an external tool.
 
+Package structure, capability registration, normalization and the integration sequence are detailed in [`PLUGIN_SYSTEM.en.md`](PLUGIN_SYSTEM.en.md).
+
 ## 5. Adding a Rule
 
 A new `Rule` should start from an objective domain question.
@@ -130,6 +132,8 @@ python -m venv .venv
 `pytest` is a development dependency and is not included in `requirements-core.lock` or the installed package dependencies. Install it only in the development environment. No test-dependency lock is provided; record `python -m pip freeze` with validation results when reproducibility is required.
 
 ## 9. Tests
+
+Test levels, selection criteria and limits of simulated dependencies are explained in [`TESTING.en.md`](TESTING.en.md).
 
 Run the suite:
 

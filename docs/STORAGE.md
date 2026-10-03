@@ -122,6 +122,19 @@ report.md
 
 `Report` no incorpora `ExecutionFailure` como conocimiento.
 
+El JSON autoritativo incluye el contenido siguiente:
+
+| Contenido | Campos persistidos |
+| --- | --- |
+| Contexto del caso | `investigation_id`, `generated_at`, `target`, `target_type`, `intent` |
+| Petición original | `analyst_question` opcional; registrada por el recorrido normal de la CLI |
+| Hallazgos | `finding_ref`, conclusión, snapshot completo de la regla y evidencias de apoyo |
+| Evidencias de apoyo dentro de cada hallazgo | `source`, `collected_at` y `data` |
+
+La petición original también aparece en el informe Markdown cuando está presente. El snapshot JSON de la regla incluye identidad, versión, campos descriptivos, condiciones y conclusión. Las evidencias que sustentan un hallazgo se incorporan al informe además de persistirse por separado; las evidencias sin hallazgo y el RAW original no quedan por ello incluidos en el informe. Los fallos operacionales permanecen separados.
+
+El directorio completo del caso es, por tanto, la referencia para conservar todos los artefactos persistidos. Compartir solo los informes también comparte contexto, la petición original cuando está registrada y evidencias de apoyo. Revisa esos contenidos antes de entregarlos. La proyección más limitada que recibe LLM #2, descrita en [`LLM_ARCHITECTURE.md`](LLM_ARCHITECTURE.md), no elimina datos de los ficheros persistidos.
+
 ## 7. ExecutionFailure
 
 `ExecutionFailure`:
@@ -211,7 +224,7 @@ Son procedimientos administrativos. El analista de la appliance no necesita acce
 ### Extraer una investigación
 
 1. Anota el identificador de investigación y espera a que termine su ejecución. Solicita al administrador que localice `<workspace>/investigations/<investigation-id>/` en el workspace del despliegue.
-2. Copia el directorio completo del caso a un destino separado para conservar conjuntamente evidencias, hallazgos, informes y fallos operacionales. Para entregar solo el informe, copia `reports/report.json` y `reports/report.md`, explicando que las evidencias y los fallos son artefactos separados.
+2. Copia el directorio completo del caso a un destino separado para conservar conjuntamente evidencias, hallazgos, informes y fallos operacionales. Para entregar solo el informe, copia `reports/report.json` y `reports/report.md`, explicando que el informe incluye evidencias de apoyo, pero no sustituye al directorio completo del caso ni incluye los fallos operacionales.
 3. Compara los ficheros copiados con el origen mediante SHA-256, conserva el identificador del caso y la identidad del despliegue y revisa el contenido antes de compartirlo. La asistencia LLM no está incluida en los informes persistidos.
 
 ### Respaldar el workspace

@@ -178,10 +178,16 @@ Elige los documentos según tu tarea; no es necesario leer todo el índice en or
 - [`RULES_AND_RULE_ENGINE.md`](docs/RULES_AND_RULE_ENGINE.md) · [English](docs/RULES_AND_RULE_ENGINE.en.md) - catálogo de reglas e interpretación de hallazgos.
 - [`SECURITY_ARCHITECTURE.md`](docs/SECURITY_ARCHITECTURE.md) · [English](docs/SECURITY_ARCHITECTURE.en.md) - límites de confianza, endurecimiento y tratamiento de fallos.
 
+- [`CORE_RUNTIME.md`](docs/CORE_RUNTIME.md) · [English](docs/CORE_RUNTIME.en.md) - ciclo de investigación, coordinación y resultados parciales.
+- [`LLM_ARCHITECTURE.md`](docs/LLM_ARCHITECTURE.md) · [English](docs/LLM_ARCHITECTURE.en.md) - roles, proyección de datos, validación y límites de la asistencia.
+
 ### Desarrollar
 
 - [`STANDARDS.md`](docs/STANDARDS.md) · [English](docs/STANDARDS.en.md) - convenciones y estándares del proyecto.
 - [`DEVELOPMENT.md`](docs/DEVELOPMENT.md) · [English](docs/DEVELOPMENT.en.md) - flujo de desarrollo.
+
+- [`PLUGIN_SYSTEM.md`](docs/PLUGIN_SYSTEM.md) · [English](docs/PLUGIN_SYSTEM.en.md) - contrato, integración de capacidades y normalización de fuentes.
+- [`TESTING.md`](docs/TESTING.md) · [English](docs/TESTING.en.md) - niveles de prueba, evidencias y límites de validación.
 
 ## Release
 

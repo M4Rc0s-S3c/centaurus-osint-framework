@@ -142,6 +142,8 @@ Si se presenta `FAILED` y se indica que no se produjo un informe final, no trate
 | Fallos de ejecución | Explicar la cobertura que faltó |
 | Texto de asistencia LLM | Ayuda de lectura efímera; no forma parte del informe persistido |
 
+El recorrido normal de la CLI registra la petición original como `analyst_question`, que aparece en JSON y Markdown. `report.json` incluye también la regla y las evidencias de apoyo de cada hallazgo; no equivale al expediente completo. Revisa la petición, el objetivo y las evidencias antes de compartir informes. Consulta [`STORAGE.md`](STORAGE.md) para el contenido persistido y el procedimiento de extracción.
+
 Las rutas de los informes, relativas al workspace configurado, son:
 
 ```text

@@ -142,6 +142,8 @@ If `FAILED` is displayed and the application indicates that no final report was 
 | Execution failures | Explain missing coverage |
 | LLM assistance text | Ephemeral reading aid; not part of the persisted report |
 
+The normal CLI flow records the original request as `analyst_question`, which appears in JSON and Markdown. `report.json` also includes each finding’s rule and supporting evidence; it is not the complete case archive. Review the request, target and evidence before sharing reports. See [`STORAGE.en.md`](STORAGE.en.md) for the exact persisted content and export procedure.
+
 Report paths, relative to the configured workspace, are:
 
 ```text

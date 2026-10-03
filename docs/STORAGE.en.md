@@ -123,6 +123,19 @@ report.md
 
 `Report` does not incorporate `ExecutionFailure` as knowledge.
 
+The authoritative JSON includes the following content:
+
+| Content | Persisted fields |
+| --- | --- |
+| Case context | `investigation_id`, `generated_at`, `target`, `target_type`, `intent` |
+| Original request | Optional `analyst_question`; recorded by the normal CLI flow |
+| Findings | `finding_ref`, conclusion, complete rule snapshot and supporting evidence |
+| Supporting evidence within each finding | `source`, `collected_at` and `data` |
+
+The original request also appears in the Markdown report when present. The JSON rule snapshot includes its identity, version, descriptive fields, conditions and conclusion. Evidence supporting a finding is embedded in the report in addition to its separate persistence; evidence without a finding and original RAW are not thereby included in the report. Operational failures remain separate.
+
+The full case directory is therefore the reference for retaining all persisted artifacts. Sharing only the reports still shares context, the original request when recorded and supporting evidence. Review those contents before delivery. The narrower projection sent to LLM #2, described in [`LLM_ARCHITECTURE.en.md`](LLM_ARCHITECTURE.en.md), does not remove data from the persisted files.
+
 ## 7. ExecutionFailure
 
 `ExecutionFailure`:
@@ -212,7 +225,7 @@ These are administrative procedures. The appliance analyst does not need general
 ### Export an investigation
 
 1. Record the investigation ID and wait for its execution to finish. Ask the administrator to locate `<workspace>/investigations/<investigation-id>/` in the deployment workspace.
-2. Copy the whole case directory to a separate destination to preserve evidence, findings, reports and operational failures together. For a report-only delivery, copy both `reports/report.json` and `reports/report.md`, explaining that the evidence and failures are separate artifacts.
+2. Copy the whole case directory to a separate destination to preserve evidence, findings, reports and operational failures together. For a report-only delivery, copy both `reports/report.json` and `reports/report.md`, explaining that the report includes supporting evidence but does not replace the complete case directory or include operational failures.
 3. Compare the copied files with the source using SHA-256, retain the case ID and deployment identity, and review the contents before sharing. LLM assistance is not included in persisted reports.
 
 ### Back up the workspace

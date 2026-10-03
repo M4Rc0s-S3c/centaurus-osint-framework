@@ -71,6 +71,8 @@ Una nueva herramienta debe:
 7. incluir pruebas focales;
 8. incluir prueba de integración/runtime cuando dependa de una herramienta externa.
 
+La estructura del paquete, el registro de capacidades, la normalización y la secuencia de integración se detallan en [`PLUGIN_SYSTEM.md`](PLUGIN_SYSTEM.md).
+
 ## 5. Añadir una Rule
 
 Una nueva `Rule` debe empezar por una pregunta objetiva del dominio.
@@ -129,6 +131,8 @@ python -m venv .venv
 `pytest` es una dependencia de desarrollo y no está incluido en `requirements-core.lock` ni en las dependencias del paquete instalado. Instálalo solo en el entorno de desarrollo. No se distribuye un lock de dependencias de pruebas; registra `python -m pip freeze` junto a los resultados cuando se necesite reproducibilidad.
 
 ## 9. Pruebas
+
+Los niveles de prueba, criterios de selección y límites de las dependencias simuladas se explican en [`TESTING.md`](TESTING.md).
 
 Ejecutar la suite:
 

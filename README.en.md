@@ -178,10 +178,16 @@ Choose the documents for your task; you do not need to read the full index in or
 - [`RULES_AND_RULE_ENGINE.en.md`](docs/RULES_AND_RULE_ENGINE.en.md) · [Español](docs/RULES_AND_RULE_ENGINE.md) - rule catalog and finding interpretation.
 - [`SECURITY_ARCHITECTURE.en.md`](docs/SECURITY_ARCHITECTURE.en.md) · [Español](docs/SECURITY_ARCHITECTURE.md) - trust boundaries, hardening and failure handling.
 
+- [`CORE_RUNTIME.en.md`](docs/CORE_RUNTIME.en.md) · [Español](docs/CORE_RUNTIME.md) - investigation lifecycle, coordination and partial results.
+- [`LLM_ARCHITECTURE.en.md`](docs/LLM_ARCHITECTURE.en.md) · [Español](docs/LLM_ARCHITECTURE.md) - roles, data projection, validation and assistance limits.
+
 ### Develop
 
 - [`STANDARDS.en.md`](docs/STANDARDS.en.md) · [Español](docs/STANDARDS.md) - conventions and project standards.
 - [`DEVELOPMENT.en.md`](docs/DEVELOPMENT.en.md) · [Español](docs/DEVELOPMENT.md) - development workflow.
+
+- [`PLUGIN_SYSTEM.en.md`](docs/PLUGIN_SYSTEM.en.md) · [Español](docs/PLUGIN_SYSTEM.md) - contract, capability integration and source normalization.
+- [`TESTING.en.md`](docs/TESTING.en.md) · [Español](docs/TESTING.md) - test levels, evidence and validation limits.
 
 ## Release
 

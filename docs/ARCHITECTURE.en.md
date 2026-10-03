@@ -54,6 +54,19 @@ Investigation · Target · Intent · Rule · Evidence · Finding · Report
 - `Finding`
 - `Report`
 
+| Concept | Responsibility and invariant |
+| --- | --- |
+| `Investigation` | Aggregate with its own identity; Core coordinates its lifecycle and knowledge integration. A new execution creates a new case. |
+| Target / Intent | Identify the investigated object and permitted purpose. They do not select arbitrary tools or represent findings. |
+| `Rule` | Versioned deterministic criterion, separate from a tool's output format. |
+| `Evidence` | Normalized observation retaining source and collection time; it is not an analytical conclusion. |
+| `Finding` | Conclusion produced by RuleEngine, retaining its rule and supporting evidence. |
+| `Report` | Snapshot consolidating findings and case context; it is built before LLM #2 and persisted through stores. |
+
+In the current implementation, `Investigation` stores `target`, `target_type` and `intent` as values; the conceptual distinction does not imply three nested domain objects. Its methods validate knowledge integration, while the architectural contract assigns lifecycle coordination to Core.
+
+`RawObservation`, `StructuredRequest`, `ExecutionPlan`, `ExecutionTask` and `ExecutionFailure` are application or operational objects. LLM assistance and progress are presentation surfaces; neither creates domain knowledge. Domain states and partial execution are detailed in [`CORE_RUNTIME.en.md`](CORE_RUNTIME.en.md).
+
 ### Application/runtime
 
 - `StructuredRequest`
@@ -238,3 +251,7 @@ Adding a tool, a rule or a packaging mode does not by itself imply an architectu
 - [`STORAGE.en.md`](STORAGE.en.md)
 - [`STANDARDS.en.md`](STANDARDS.en.md)
 - [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)
+
+- [`CORE_RUNTIME.en.md`](CORE_RUNTIME.en.md)
+- [`PLUGIN_SYSTEM.en.md`](PLUGIN_SYSTEM.en.md)
+- [`LLM_ARCHITECTURE.en.md`](LLM_ARCHITECTURE.en.md)

@@ -53,6 +53,19 @@ Investigation · Target · Intent · Rule · Evidence · Finding · Report
 - `Finding`
 - `Report`
 
+| Concepto | Responsabilidad e invariante |
+| --- | --- |
+| `Investigation` | Agregado con identidad propia; Core coordina su ciclo e integración de conocimiento. Una ejecución nueva crea un caso nuevo. |
+| Target / Intent | Identifican el objeto investigado y el propósito permitido. No seleccionan herramientas arbitrarias ni representan hallazgos. |
+| `Rule` | Criterio determinista versionado, separado del formato de salida de una herramienta. |
+| `Evidence` | Observación normalizada que conserva fuente y tiempo de recogida; no es una conclusión analítica. |
+| `Finding` | Conclusión producida por RuleEngine, conservando su regla y evidencias de apoyo. |
+| `Report` | Snapshot que consolida hallazgos y contexto del caso; se construye antes de LLM #2 y se persiste mediante stores. |
+
+En la implementación actual, `Investigation` guarda `target`, `target_type` e `intent` como valores; la distinción conceptual no implica tres objetos de dominio anidados. Sus métodos validan la integración de conocimiento, mientras el contrato arquitectónico asigna al Core la coordinación del ciclo.
+
+`RawObservation`, `StructuredRequest`, `ExecutionPlan`, `ExecutionTask` y `ExecutionFailure` son objetos de aplicación u operación. La asistencia LLM y el progreso son superficies de presentación; no crean conocimiento de dominio. Los estados y la ejecución parcial se detallan en [`CORE_RUNTIME.md`](CORE_RUNTIME.md).
+
 ### Aplicación/runtime
 
 - `StructuredRequest`
@@ -237,3 +250,7 @@ Añadir una herramienta, una regla o una nueva modalidad de empaquetado no impli
 - [`STORAGE.md`](STORAGE.md)
 - [`STANDARDS.md`](STANDARDS.md)
 - [`DEVELOPMENT.md`](DEVELOPMENT.md)
+
+- [`CORE_RUNTIME.md`](CORE_RUNTIME.md)
+- [`PLUGIN_SYSTEM.md`](PLUGIN_SYSTEM.md)
+- [`LLM_ARCHITECTURE.md`](LLM_ARCHITECTURE.md)
