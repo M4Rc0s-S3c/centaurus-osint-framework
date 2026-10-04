@@ -99,7 +99,7 @@ findmnt /workspace
 systemctl --failed --no-pager
 ```
 
-The expected logical interface is `centaurus0`, configured through DHCP. For network or startup failures, see [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md).
+The expected logical interface is `centaurus0`. DHCP is the default configuration, not a requirement: the administrator can configure a static IP address, gateway and DNS from the appliance host. For network or startup failures, see [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md).
 
 ## 6. Persistence and maintenance
 
@@ -127,3 +127,5 @@ The command accepts zero arguments and requires fresh authentication. Wait for s
 - [Security](SECURITY_ARCHITECTURE.en.md)
 - [USB deployment](DEPLOYMENT_USB.en.md)
 - [Troubleshooting](TROUBLESHOOTING.en.md)
+
+For manual IP configuration, see [static IPv4 from the appliance host](TROUBLESHOOTING.en.md#31-static-ipv4-from-the-appliance-host).

@@ -48,9 +48,70 @@ findmnt /workspace
 systemctl --failed --no-pager
 ```
 
-La interfaz lógica de referencia es `centaurus0` por DHCP. En VMware, revisa el adaptador E1000, su conexión a NAT y el servicio DHCP del entorno. **La distribución USB requiere conexión cableada Ethernet:** conecta el cable y comprueba enlace, tarjeta/controlador compatibles y DHCP. La imagen no tiene desplegados controlador ni gestor de conexiones Wi-Fi; no esperes obtener red por Wi-Fi. La validación en un equipo no garantiza compatibilidad con cualquier adaptador Ethernet. Evita renombrar interfaces sin diagnosticar la causa.
+La interfaz lógica de referencia es `centaurus0`, configurada **por defecto** mediante DHCP. También puede utilizarse una IP, puerta de enlace y DNS configurados manualmente; DHCP no es obligatorio. En VMware, revisa el adaptador E1000 y su conexión a la red virtual prevista (NAT en la configuración de referencia). Comprueba el servicio DHCP solo si utilizas direccionamiento automático; con IP estática, revisa subred, puerta de enlace y DNS de esa red.
+
+**La distribución USB requiere conexión cableada Ethernet:** comprueba cable, enlace y tarjeta/controlador compatibles. La imagen no incorpora controlador ni gestor de conexiones Wi-Fi desplegados. La validación en un equipo no garantiza compatibilidad con cualquier adaptador Ethernet. Conserva el nombre lógico de la interfaz al cambiar su configuración IP.
 
 Si `centaurus` falla antes de mostrar el shell, comprueba que se ejecuta como usuario `centaurus`, sin argumentos, desde una TTY y sin otra sesión activa. Si el mensaje indica un fallo de integridad o de Docker, conserva el diagnóstico y solicita intervención administrativa. No cambies manifiestos ni concedas acceso genérico a Docker para eludir la comprobación.
+
+### 3.1. IPv4 estática desde el host de la appliance
+
+Utiliza la consola local de VMware o la consola física del USB como `root`, en el host Debian de la appliance, fuera de `centaurus>` y de los contenedores. Detén antes las investigaciones: aplicar cambios de red interrumpe la conectividad. La appliance distribuida utiliza `ifupdown` y `/etc/network/interfaces`; si el host se ha personalizado con otro gestor de red, utiliza la configuración de ese gestor.
+
+**Inspeccionar y respaldar.** Anota dirección, rutas y DNS actuales. Conserva el directorio de respaldo único que muestran estos comandos:
+
+```bash
+ip -br addr show centaurus0
+ip route
+ifquery centaurus0
+ls -l /etc/resolv.conf
+cat /etc/resolv.conf
+network_backup=$(mktemp -d /root/centaurus-network.XXXXXX)
+cp -a /etc/network/interfaces "$network_backup/"
+cp -a /etc/network/interfaces.d "$network_backup/"
+cp -a /etc/resolv.conf "$network_backup/resolv.conf.link-or-file"
+cp -L /etc/resolv.conf "$network_backup/resolv.conf.contents"
+printf '%s\n' "$network_backup"
+```
+
+**Editar el direccionamiento.** Localiza la declaración existente de `centaurus0` en `/etc/network/interfaces` o en un fichero incluido de `/etc/network/interfaces.d/`. Con el editor de texto del host, sustituye su declaración IPv4 por DHCP por este patrón. Conserva loopback, las directivas de inclusión y la configuración ajena al cambio; no añadas una segunda declaración IPv4 de la misma interfaz.
+
+```text
+allow-hotplug centaurus0
+iface centaurus0 inet static
+    address 192.0.2.10/24
+    gateway 192.0.2.1
+```
+
+Son direcciones de ejemplo reservadas para documentación. Sustitúyelas por una dirección libre y un prefijo asignados para tu red y por su puerta de enlace real. En VMware NAT, utiliza la subred y puerta de enlace de esa red virtual, que no tienen por qué coincidir con las de la LAN física. Conserva la regla `.link` que asigna el nombre `centaurus0`.
+
+**Configurar DNS.** Una IP estática no proporciona DNS automáticamente. Revisa quién gestiona `/etc/resolv.conf` antes de modificarlo:
+
+- Si es un fichero regular sin gestor, edítalo para incluir `nameserver <DNS_IP>`, sustituyendo `<DNS_IP>` por la dirección de un servidor DNS autorizado y accesible.
+- Si DNS está gestionado por `resolvconf` y dispone de su integración con ifupdown, añade `dns-nameservers <DNS_IP>` a la declaración estática con la dirección real. Esa opción por sí sola no configura DNS sin dicha integración.
+- Si `/etc/resolv.conf` lo genera otro servicio o es un enlace simbólico, configura ese servicio; no sustituyas el enlace por un fichero estático.
+
+**Aplicar y comprobar.** Revisa `ifquery centaurus0` (muestra la configuración, no prueba la conectividad). Una vez preparados los ficheros y DNS, reinicia la appliance desde la consola local:
+
+```bash
+systemctl reboot
+```
+
+Después del arranque, comprueba:
+
+```bash
+ip -br addr show centaurus0
+ip route
+cat /etc/resolv.conf
+getent ahostsv4 example.com
+systemctl --failed --no-pager
+```
+
+Confirma la dirección/prefijo configurados y la ruta predeterminada prevista. Utiliza `ping -c 3 <GATEWAY_IP>` con la puerta de enlace real para comprobar conectividad local; un ping fallido no es concluyente si ICMP está bloqueado. `getent` comprueba resolución de nombres, no HTTPS ni disponibilidad de fuentes. Finalmente, como usuario habitual `centaurus`, inicia la aplicación y realiza una investigación autorizada para comprobar también el recorrido de red de la aplicación y sus contenedores. Revisa por separado los fallos de fuentes.
+
+**Volver a DHCP.** Sustituye la declaración IPv4 estática por `allow-hotplug centaurus0` e `iface centaurus0 inet dhcp`, retira sus ajustes estáticos de dirección/puerta de enlace y DNS, y recupera la configuración anterior de gestión DNS. Utiliza los ficheros respaldados si es necesario, conservando los enlaces simbólicos. Reinicia desde la consola local y repite las comprobaciones; este modo sí requiere un servicio DHCP disponible. Una IP estática válida en una red puede necesitar cambios al trasladar el USB a otra.
+
+Este es un procedimiento de configuración administrativa, no una nueva validación física de OVA/USB. Consulta la [referencia interfaces de ifupdown de Debian](https://manpages.debian.org/trixie/ifupdown/interfaces.5.en.html) y su [guía de configuración de red](https://www.debian.org/doc/manuals/debian-reference/ch05).
 
 ## 4. Git + Docker
 

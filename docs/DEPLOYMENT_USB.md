@@ -10,7 +10,7 @@
 
 El equipo de destino debe admitir x86-64 y arranque UEFI. La validación de referencia se realizó en un Toshiba Z30-A con Ethernet Intel I218-V y controlador `e1000e`. Esa referencia no garantiza compatibilidad con cualquier adaptador Ethernet o GPU. La baseline utiliza CPU.
 
-> **Importante.** **Para disponer de red se necesita conexión por cable Ethernet y una tarjeta de red compatible.** La imagen USB distribuida no incorpora controlador ni gestor de conexiones Wi-Fi desplegados; Wi-Fi no es una vía de conexión soportada en esta distribución. Conecta el cable Ethernet a una red con DHCP y acceso a las fuentes OSINT necesarias.
+> **Importante.** **Para disponer de red se necesita conexión por cable Ethernet y una tarjeta de red compatible.** La imagen USB distribuida no incorpora controlador ni gestor de conexiones Wi-Fi desplegados; Wi-Fi no es una vía de conexión soportada en esta distribución. Conecta el cable Ethernet a una red con acceso a las fuentes OSINT necesarias. DHCP está habilitado por defecto; el administrador puede configurar en su lugar una IP estática, puerta de enlace y DNS.
 
 El dispositivo debe disponer de **al menos `31457280000` bytes reales**. Comprueba su capacidad en bytes: la etiqueta comercial «32 GB» no sustituye esa comprobación. Conserva espacio adicional para guardar la imagen original en el equipo que realizará la escritura.
 
@@ -100,7 +100,7 @@ centaurus
 
 El wrapper acepta cero argumentos y pide autenticación nueva. El shell y la interpretación de resultados se describen en [`USER_GUIDE.md`](USER_GUIDE.md).
 
-La interfaz lógica de referencia es `centaurus0` por DHCP. El administrador puede revisar `ip -br addr`, `ip route` y `findmnt /workspace`. Para incidencias de arranque o red, consulta [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md). La recopilación necesita red aunque el modelo LLM sea local.
+La interfaz lógica de referencia es `centaurus0`. Su configuración predeterminada utiliza DHCP; una red configurada manualmente no requiere servidor DHCP. El administrador puede revisar `ip -br addr`, `ip route` y `findmnt /workspace`. Para incidencias de arranque o red, consulta [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md). La recopilación necesita red aunque el modelo LLM sea local.
 
 ## 6. Persistencia y apagado
 
@@ -122,3 +122,5 @@ Para extraer casos, realizar copias consistentes y comprobar una recuperación, 
 - [Configuración](CONFIGURATION.md)
 - [Seguridad](SECURITY_ARCHITECTURE.md)
 - [Resolución de problemas](TROUBLESHOOTING.md)
+
+Para configurar la IP manualmente, consulta [IPv4 estática desde el host de la appliance](TROUBLESHOOTING.md#31-ipv4-estática-desde-el-host-de-la-appliance).

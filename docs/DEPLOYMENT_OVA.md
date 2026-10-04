@@ -99,7 +99,7 @@ findmnt /workspace
 systemctl --failed --no-pager
 ```
 
-La interfaz lógica esperada es `centaurus0`, con configuración por DHCP. Para fallos de red o de arranque, consulta [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).
+La interfaz lógica esperada es `centaurus0`. DHCP es la configuración predeterminada, no un requisito: el administrador puede configurar una IP estática, puerta de enlace y DNS desde el host de la appliance. Para fallos de red o de arranque, consulta [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).
 
 ## 6. Persistencia y mantenimiento
 
@@ -127,3 +127,5 @@ El comando acepta cero argumentos y solicita autenticación nueva. Espera a que 
 - [Seguridad](SECURITY_ARCHITECTURE.md)
 - [Despliegue USB](DEPLOYMENT_USB.md)
 - [Resolución de problemas](TROUBLESHOOTING.md)
+
+Para configurar la IP manualmente, consulta [IPv4 estática desde el host de la appliance](TROUBLESHOOTING.md#31-ipv4-estática-desde-el-host-de-la-appliance).

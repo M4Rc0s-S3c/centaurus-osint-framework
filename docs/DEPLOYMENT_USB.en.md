@@ -10,7 +10,7 @@
 
 The target computer must support x86-64 and UEFI boot. Reference validation used a Toshiba Z30-A with Intel I218-V Ethernet and the `e1000e` driver. That reference does not guarantee compatibility with every Ethernet adapter or GPU. The baseline uses CPU.
 
-> **Important.** **Networking requires a wired Ethernet connection and a compatible network adapter.** The distributed USB image has no Wi-Fi driver or Wi-Fi connection manager deployed; Wi-Fi is not a supported connection method in this distribution. Connect an Ethernet cable to a network with DHCP and access to the required OSINT sources.
+> **Important.** **Networking requires a wired Ethernet connection and a compatible network adapter.** The distributed USB image has no Wi-Fi driver or Wi-Fi connection manager deployed; Wi-Fi is not a supported connection method in this distribution. Connect an Ethernet cable to a network with access to the required OSINT sources. DHCP is enabled by default; the administrator can configure a static IP address, gateway and DNS instead.
 
 The device must provide **at least `31457280000` actual bytes**. Check its capacity in bytes: a commercial “32 GB” label is not a substitute. Allow additional storage for the original image on the computer performing the write.
 
@@ -98,7 +98,7 @@ centaurus
 
 The wrapper accepts zero arguments and requires fresh authentication. [`USER_GUIDE.en.md`](USER_GUIDE.en.md) describes the shell and result interpretation.
 
-The reference logical interface is `centaurus0` with DHCP. An administrator can inspect `ip -br addr`, `ip route` and `findmnt /workspace`. For boot or network issues, see [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md). Collection requires networking even though the LLM model is local.
+The reference logical interface is `centaurus0`. Its default configuration uses DHCP; a manually configured network does not require a DHCP server. An administrator can inspect `ip -br addr`, `ip route` and `findmnt /workspace`. For boot or network issues, see [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md). Collection requires networking even though the LLM model is local.
 
 ## 6. Persistence and shutdown
 
@@ -120,3 +120,5 @@ For case export, consistent backups and recovery checks, follow section 13 of [`
 - [Configuration](CONFIGURATION.en.md)
 - [Security](SECURITY_ARCHITECTURE.en.md)
 - [Troubleshooting](TROUBLESHOOTING.en.md)
+
+For manual IP configuration, see [static IPv4 from the appliance host](TROUBLESHOOTING.en.md#31-static-ipv4-from-the-appliance-host).
