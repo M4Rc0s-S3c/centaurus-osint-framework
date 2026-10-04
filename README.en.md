@@ -70,7 +70,13 @@ LLMManager / LLM #2`"]
     class C governor
 ```
 
-`RequestInterpreter` first constructs the Target deterministically and then asks LLM #1 to classify the Intent from the same input. Both are combined in `StructuredRequest`; the LLM does not construct the Target. The upper block identifies the Core as the governing component. Inside the coordinated-components area, arrows show the main data flow. The Core governs planning, execution, knowledge processing and persistence. In the final group, `ReportManager` builds the report, the Core persists it through `ReportStore`, and `LLMManager` coordinates subsequent assistance. LLM #2 runs after persistence and its output is grounded, ephemeral and fail-soft.
+`RequestInterpreter` first constructs the Target deterministically and then asks LLM #1 to classify the Intent from the same input. Both are combined in `StructuredRequest`; the LLM does not construct the Target.
+
+The upper block identifies the Core as the governing component. Inside the coordinated-components area, arrows show the main data flow.
+
+The Core governs planning, execution, knowledge processing and persistence.
+
+In the final group, `ReportManager` builds the report, the Core persists it through `ReportStore`, and `LLMManager` coordinates subsequent assistance. LLM #2 runs after persistence and its output is grounded, ephemeral and fail-soft.
 
 See [`ARCHITECTURE.en.md`](docs/ARCHITECTURE.en.md) for component responsibilities.
 
@@ -104,7 +110,7 @@ The repository contains the Core, Docker/Compose definitions, dependency locks, 
 
 Procedure: [`DEPLOYMENT_GIT_DOCKER.en.md`](docs/DEPLOYMENT_GIT_DOCKER.en.md).
 
-## Windows
+### Windows
 
 Native Windows can be used for development, Core execution and local Ollama workflows.
 
@@ -148,9 +154,7 @@ See [`STORAGE.en.md`](docs/STORAGE.en.md) for the authoritative storage model.
 
 The repository includes the automated test suite under:
 
-```text
-tests/
-```
+`tests/`
 
 In a prepared development/test environment:
 
@@ -166,36 +170,36 @@ Choose the documents for your task; you do not need to read the full index in or
 
 ### Start and use
 
-- [`PROJECT.en.md`](docs/PROJECT.en.md) · [Español](docs/PROJECT.md) - project identity, scope and distribution modes.
-- [`INSTALL.en.md`](docs/INSTALL.en.md) · [Español](docs/INSTALL.md) - deployment and installation.
-- [`USER_GUIDE.en.md`](docs/USER_GUIDE.en.md) · [Español](docs/USER_GUIDE.md) - first session, result interpretation and troubleshooting.
-- [`TROUBLESHOOTING.en.md`](docs/TROUBLESHOOTING.en.md) · [Español](docs/TROUBLESHOOTING.md) - issue diagnosis across deployment modes.
+- [Project](docs/PROJECT.en.md) · [Español](docs/PROJECT.md) - project identity, scope and distribution modes.
+- [Installation](docs/INSTALL.en.md) · [Español](docs/INSTALL.md) - deployment and installation.
+- [User guide](docs/USER_GUIDE.en.md) · [Español](docs/USER_GUIDE.md) - first session, result interpretation and troubleshooting.
+- [Troubleshooting](docs/TROUBLESHOOTING.en.md) · [Español](docs/TROUBLESHOOTING.md) - issue diagnosis across deployment modes.
 
 ### Deploy and administer
 
-- [`DEPLOYMENT_OVA.en.md`](docs/DEPLOYMENT_OVA.en.md) · [Español](docs/DEPLOYMENT_OVA.md) - OVA import, operation and maintenance.
-- [`DEPLOYMENT_USB.en.md`](docs/DEPLOYMENT_USB.en.md) · [Español](docs/DEPLOYMENT_USB.md) - raw image writing, boot and persistence.
-- [`DEPLOYMENT_GIT_DOCKER.en.md`](docs/DEPLOYMENT_GIT_DOCKER.en.md) · [Español](docs/DEPLOYMENT_GIT_DOCKER.md) - deployment from source on Linux.
-- [`DEPLOYMENT_WINDOWS.en.md`](docs/DEPLOYMENT_WINDOWS.en.md) · [Español](docs/DEPLOYMENT_WINDOWS.md) - local Core setup on Windows.
-- [`GPU_OLLAMA_DOCKER.en.md`](docs/GPU_OLLAMA_DOCKER.en.md) · [Español](docs/GPU_OLLAMA_DOCKER.md) - optional experimental acceleration, without project GPU certification.
-- [`CONFIGURATION.en.md`](docs/CONFIGURATION.en.md) · [Español](docs/CONFIGURATION.md) - runtime variables, defaults and deployment differences.
+- [OVA deployment](docs/DEPLOYMENT_OVA.en.md) · [Español](docs/DEPLOYMENT_OVA.md) - OVA import, operation and maintenance.
+- [USB deployment](docs/DEPLOYMENT_USB.en.md) · [Español](docs/DEPLOYMENT_USB.md) - raw image writing, boot and persistence.
+- [Git + Docker deployment](docs/DEPLOYMENT_GIT_DOCKER.en.md) · [Español](docs/DEPLOYMENT_GIT_DOCKER.md) - deployment from source on Linux.
+- [Windows deployment](docs/DEPLOYMENT_WINDOWS.en.md) · [Español](docs/DEPLOYMENT_WINDOWS.md) - local Core setup on Windows.
+- [Experimental GPU](docs/GPU_OLLAMA_DOCKER.en.md) · [Español](docs/GPU_OLLAMA_DOCKER.md) - optional experimental acceleration, without project GPU certification.
+- [Configuration](docs/CONFIGURATION.en.md) · [Español](docs/CONFIGURATION.md) - runtime variables, defaults and deployment differences.
 
 ### Understand the architecture
 
-- [`ARCHITECTURE.en.md`](docs/ARCHITECTURE.en.md) · [Español](docs/ARCHITECTURE.md) - framework architecture.
-- [`SPECIFICATION.en.md`](docs/SPECIFICATION.en.md) · [Español](docs/SPECIFICATION.md) - functional and non-functional specification.
-- [`STORAGE.en.md`](docs/STORAGE.en.md) · [Español](docs/STORAGE.md) - persistence and traceability.
-- [`RULES_AND_RULE_ENGINE.en.md`](docs/RULES_AND_RULE_ENGINE.en.md) · [Español](docs/RULES_AND_RULE_ENGINE.md) - rule catalog and finding interpretation.
-- [`SECURITY_ARCHITECTURE.en.md`](docs/SECURITY_ARCHITECTURE.en.md) · [Español](docs/SECURITY_ARCHITECTURE.md) - trust boundaries, hardening and failure handling.
-- [`CORE_RUNTIME.en.md`](docs/CORE_RUNTIME.en.md) · [Español](docs/CORE_RUNTIME.md) - investigation lifecycle, coordination and partial results.
-- [`LLM_ARCHITECTURE.en.md`](docs/LLM_ARCHITECTURE.en.md) · [Español](docs/LLM_ARCHITECTURE.md) - roles, data projection, validation and assistance limits.
+- [Architecture](docs/ARCHITECTURE.en.md) · [Español](docs/ARCHITECTURE.md) - framework architecture.
+- [Specification](docs/SPECIFICATION.en.md) · [Español](docs/SPECIFICATION.md) - functional and non-functional specification.
+- [Storage and traceability](docs/STORAGE.en.md) · [Español](docs/STORAGE.md) - persistence and traceability.
+- [Rules and rule engine](docs/RULES_AND_RULE_ENGINE.en.md) · [Español](docs/RULES_AND_RULE_ENGINE.md) - rule catalog and finding interpretation.
+- [Security](docs/SECURITY_ARCHITECTURE.en.md) · [Español](docs/SECURITY_ARCHITECTURE.md) - trust boundaries, hardening and failure handling.
+- [Core runtime](docs/CORE_RUNTIME.en.md) · [Español](docs/CORE_RUNTIME.md) - investigation lifecycle, coordination and partial results.
+- [LLM architecture](docs/LLM_ARCHITECTURE.en.md) · [Español](docs/LLM_ARCHITECTURE.md) - roles, data projection, validation and assistance limits.
 
 ### Develop
 
-- [`STANDARDS.en.md`](docs/STANDARDS.en.md) · [Español](docs/STANDARDS.md) - conventions and project standards.
-- [`DEVELOPMENT.en.md`](docs/DEVELOPMENT.en.md) · [Español](docs/DEVELOPMENT.md) - development workflow.
-- [`PLUGIN_SYSTEM.en.md`](docs/PLUGIN_SYSTEM.en.md) · [Español](docs/PLUGIN_SYSTEM.md) - contract, capability integration and source normalization.
-- [`TESTING.en.md`](docs/TESTING.en.md) · [Español](docs/TESTING.md) - test levels, evidence and validation limits.
+- [Standards](docs/STANDARDS.en.md) · [Español](docs/STANDARDS.md) - conventions and project standards.
+- [Development](docs/DEVELOPMENT.en.md) · [Español](docs/DEVELOPMENT.md) - development workflow.
+- [Plugin system](docs/PLUGIN_SYSTEM.en.md) · [Español](docs/PLUGIN_SYSTEM.md) - contract, capability integration and source normalization.
+- [Testing strategy](docs/TESTING.en.md) · [Español](docs/TESTING.md) - test levels, evidence and validation limits.
 
 ## Release
 

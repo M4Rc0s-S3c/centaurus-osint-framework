@@ -2,7 +2,7 @@
 
 [Español](CONFIGURATION.md) | [English](CONFIGURATION.en.md)
 
-[Home](../README.en.md) · [INSTALL.en.md](INSTALL.en.md) · [USER_GUIDE.en.md](USER_GUIDE.en.md)
+[Home](../README.en.md) · [Installation](INSTALL.en.md) · [User guide](USER_GUIDE.en.md)
 
 ## 1. Scope
 
@@ -75,7 +75,12 @@ An LLM #2 timeout does not invalidate the persisted deterministic report. Increa
 
 ## 6. References
 
+### Implementation
+
 - [`runtime.py`](../src/centaurus/config/runtime.py): variables and validation.
 - [`compose.yml`](../docker/compose.yml): deployment values and mounts.
 - [`bootstrap_linux_release.sh`](../scripts/bootstrap_linux_release.sh): persistent directory and provisioning.
-- [`SECURITY_ARCHITECTURE.en.md`](SECURITY_ARCHITECTURE.en.md): trust boundaries and controls.
+
+### Related documentation
+
+- [Security](SECURITY_ARCHITECTURE.en.md): trust boundaries and controls.

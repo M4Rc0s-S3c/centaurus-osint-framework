@@ -1,6 +1,7 @@
 # Visión general del proyecto
 
 [Español](PROJECT.md) | [English](PROJECT.en.md)
+
 [Inicio](../README.md) · [Arquitectura](ARCHITECTURE.md) · [Instalación](INSTALL.md) · [Especificación](SPECIFICATION.md)
 
 ## 1. Identidad
@@ -154,14 +155,14 @@ El usuario es responsable de cumplir la legislación aplicable, los términos de
 
 ## 10. Documentación relacionada
 
-- [`README.md`](../README.md)
-- [`INSTALL.md`](INSTALL.md)
-- [`USER_GUIDE.md`](USER_GUIDE.md)
-- [`ARCHITECTURE.md`](ARCHITECTURE.md)
-- [`SPECIFICATION.md`](SPECIFICATION.md)
-- [`STORAGE.md`](STORAGE.md)
-- [`STANDARDS.md`](STANDARDS.md)
-- [`DEVELOPMENT.md`](DEVELOPMENT.md)
+- [Inicio](../README.md)
+- [Instalación](INSTALL.md)
+- [Guía de uso](USER_GUIDE.md)
+- [Arquitectura](ARCHITECTURE.md)
+- [Especificación](SPECIFICATION.md)
+- [Persistencia y trazabilidad](STORAGE.md)
+- [Estándares](STANDARDS.md)
+- [Desarrollo](DEVELOPMENT.md)
 
 ## 11. Licencia
 

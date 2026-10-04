@@ -2,7 +2,7 @@
 
 [Español](RULES_AND_RULE_ENGINE.md) | [English](RULES_AND_RULE_ENGINE.en.md)
 
-[Inicio](../README.md) · [USER_GUIDE.md](USER_GUIDE.md) · [ARCHITECTURE.md](ARCHITECTURE.md)
+[Inicio](../README.md) · [Guía de uso](USER_GUIDE.md) · [Arquitectura](ARCHITECTURE.md)
 
 ## 1. Función del motor
 
@@ -18,9 +18,9 @@ Esto no garantiza la exactitud de una fuente ni que dos investigaciones en vivo 
 
 ### Ejemplo controlado: corroboración con RL-014
 
-Supongamos que la evidencia normalizada de Sublist3r contiene `api.example.com` y `www.example.com`, mientras que la de crt.sh contiene `api.example.com` y `mail.example.com`. Evaluar únicamente `RL-014` produce un hallazgo para `api.example.com`, observado en dos fuentes distintas. Conserva la regla y ambas evidencias de apoyo.
-
-Los otros nombres no satisfacen este criterio de corroboración. Eso no demuestra que no existan ni que sean seguros. El ejemplo utiliza datos controlados, no observaciones en vivo de `example.com`. Ilustra cómo unos criterios explícitos convierten observaciones en una conclusión cuyo fundamento puede revisarse mediante [`STORAGE.md`](STORAGE.md#9-trazabilidad).
+> Supongamos que la evidencia normalizada de Sublist3r contiene `api.example.com` y `www.example.com`, mientras que la de crt.sh contiene `api.example.com` y `mail.example.com`. Evaluar únicamente `RL-014` produce un hallazgo para `api.example.com`, observado en dos fuentes distintas. Conserva la regla y ambas evidencias de apoyo.
+>
+> Los otros nombres no satisfacen este criterio de corroboración. Eso no demuestra que no existan ni que sean seguros. El ejemplo utiliza datos controlados, no observaciones en vivo de `example.com`. Ilustra cómo unos criterios explícitos convierten observaciones en una conclusión cuyo fundamento puede revisarse mediante [`STORAGE.md`](STORAGE.md#9-trazabilidad).
 
 ## 2. Catálogo productivo
 
@@ -72,9 +72,14 @@ El catálogo y sus condiciones se mantienen en código. Un cambio de semántica 
 
 ## 6. Referencias
 
+### Implementación
+
 - [`rule_engine.py`](../src/centaurus/rules/rule_engine.py)
 - [`catalog.py`](../src/centaurus/rules/catalog.py)
 - [`registration_rules.py`](../src/centaurus/rules/registration_rules.py)
 - [`dns_rules.py`](../src/centaurus/rules/dns_rules.py)
 - [`exposure_rules.py`](../src/centaurus/rules/exposure_rules.py)
-- [`STORAGE.md`](STORAGE.md)
+
+### Documentación relacionada
+
+- [Persistencia y trazabilidad](STORAGE.md)

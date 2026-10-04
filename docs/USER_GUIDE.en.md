@@ -2,13 +2,26 @@
 
 [Español](USER_GUIDE.md) | [English](USER_GUIDE.en.md)
 
-[Home](../README.en.md) · [Installation](INSTALL.en.md) · [Storage](STORAGE.en.md)
-
-**Document version:** 1.0
+[Home](../README.en.md) · [Installation](INSTALL.en.md) · [Storage and traceability](STORAGE.en.md)
 
 **Audience:** users and analysts getting started with CENTAURUS.
 
 **Scope:** operating the application, interpreting results and accessing reports. Installation is covered in the deployment documentation.
+
+<details>
+<summary>On this page</summary>
+
+- [1. What you can do with CENTAURUS](#1-what-you-can-do-with-centaurus)
+- [2. Identify where you are typing](#2-identify-where-you-are-typing)
+- [3. Your first appliance session](#3-your-first-appliance-session)
+- [4. How to read the result](#4-how-to-read-the-result)
+- [5. Which results to keep and where to find them](#5-which-results-to-keep-and-where-to-find-them)
+- [6. The role of LLM assistance](#6-the-role-of-llm-assistance)
+- [7. When something goes wrong](#7-when-something-goes-wrong)
+- [8. End the session and shut down the appliance](#8-end-the-session-and-shut-down-the-appliance)
+- [9. Package CLI reference](#9-package-cli-reference)
+
+</details>
 
 ## 1. What you can do with CENTAURUS
 
@@ -41,7 +54,7 @@ For Git + Docker on Linux, use the execution context specified by the deployment
 
 ## 3. Your first appliance session
 
-### 3.1 Sign in
+### 3.1. Sign in
 
 Log in to Linux as the operational user `centaurus`. From that user's terminal, run:
 
@@ -53,7 +66,7 @@ Enter the user's password when prompted. Access requires an interactive terminal
 
 When `centaurus>` appears, you are inside the application. The following examples show only what you should type, without the prompt.
 
-### 3.2 View help and capabilities
+### 3.2. View help and capabilities
 
 ```text
 /help
@@ -77,7 +90,7 @@ You can also view each part separately:
 
 These queries display static information: they do not run tools or create an investigation. The verified catalog contains 11 rules. Being able to view capabilities does not prove that external sources or the LLM service are available.
 
-### 3.3 Write your request
+### 3.3. Write your request
 
 Write a clear request with a single target within the scope of your work. Example wording:
 
@@ -91,7 +104,7 @@ The application interprets the request, validates the target and purpose, and pa
 
 Each executed request opens a new investigation, even if you repeat the same domain. Repeating a request does not resume or update the previous case.
 
-### 3.4 Wait for the result
+### 3.4. Wait for the result
 
 An interactive terminal shows the current activity, elapsed time, task position in the plan, and tool or mode in use. Completion and degradation indicators help you follow progress.
 

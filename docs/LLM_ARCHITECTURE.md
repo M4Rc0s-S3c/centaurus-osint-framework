@@ -2,7 +2,7 @@
 
 [Español](LLM_ARCHITECTURE.md) | [English](LLM_ARCHITECTURE.en.md)
 
-[Inicio](../README.md) · [`ARCHITECTURE.md`](ARCHITECTURE.md) · [`DEVELOPMENT.md`](DEVELOPMENT.md)
+[Inicio](../README.md) · [Arquitectura](ARCHITECTURE.md) · [Desarrollo](DEVELOPMENT.md)
 
 ## 1. Dos roles, una autoridad determinista
 

@@ -2,7 +2,7 @@
 
 [Español](CONFIGURATION.md) | [English](CONFIGURATION.en.md)
 
-[Inicio](../README.md) · [INSTALL.md](INSTALL.md) · [USER_GUIDE.md](USER_GUIDE.md)
+[Inicio](../README.md) · [Instalación](INSTALL.md) · [Guía de uso](USER_GUIDE.md)
 
 ## 1. Alcance
 
@@ -75,7 +75,12 @@ Un timeout de LLM #2 no invalida el informe determinista ya persistido. Aumentar
 
 ## 6. Referencias
 
+### Implementación
+
 - [`runtime.py`](../src/centaurus/config/runtime.py): variables y validación.
 - [`compose.yml`](../docker/compose.yml): valores y montajes del despliegue.
 - [`bootstrap_linux_release.sh`](../scripts/bootstrap_linux_release.sh): directorio persistente y aprovisionamiento.
-- [`SECURITY_ARCHITECTURE.md`](SECURITY_ARCHITECTURE.md): límites de confianza y controles.
+
+### Documentación relacionada
+
+- [Seguridad](SECURITY_ARCHITECTURE.md): límites de confianza y controles.

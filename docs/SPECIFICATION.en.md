@@ -199,7 +199,7 @@ LLM #2 degradation does not invalidate an already built and persisted `Report`.
 
 ## 8. Related documentation
 
-- [`PROJECT.en.md`](PROJECT.en.md)
-- [`ARCHITECTURE.en.md`](ARCHITECTURE.en.md)
-- [`STORAGE.en.md`](STORAGE.en.md)
-- [`INSTALL.en.md`](INSTALL.en.md)
+- [Project](PROJECT.en.md)
+- [Architecture](ARCHITECTURE.en.md)
+- [Storage and traceability](STORAGE.en.md)
+- [Installation](INSTALL.en.md)

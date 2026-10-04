@@ -2,7 +2,21 @@
 
 [Español](TROUBLESHOOTING.md) | [English](TROUBLESHOOTING.en.md)
 
-[Home](../README.en.md) · [INSTALL.en.md](INSTALL.en.md) · [USER_GUIDE.en.md](USER_GUIDE.en.md)
+[Home](../README.en.md) · [Installation](INSTALL.en.md) · [User guide](USER_GUIDE.en.md)
+
+<details>
+<summary>On this page</summary>
+
+- [1. Identify the context](#1-identify-the-context)
+- [2. OVA import and USB boot](#2-ova-import-and-usb-boot)
+- [3. Networking and appliance access](#3-networking-and-appliance-access)
+- [4. Git + Docker](#4-git--docker)
+- [5. Ollama, requests and results](#5-ollama-requests-and-results)
+- [6. Native Windows](#6-native-windows)
+- [7. Experimental GPU on Linux + Docker](#7-experimental-gpu-on-linux--docker)
+- [8. Logs and diagnostic information](#8-logs-and-diagnostic-information)
+
+</details>
 
 ## 1. Identify the context
 

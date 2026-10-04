@@ -2,7 +2,7 @@
 
 [Español](DEPLOYMENT_OVA.md) | [English](DEPLOYMENT_OVA.en.md)
 
-[Inicio](../README.md) · [INSTALL.md](INSTALL.md) · [USER_GUIDE.md](USER_GUIDE.md)
+[Inicio](../README.md) · [Instalación](INSTALL.md) · [Guía de uso](USER_GUIDE.md)
 
 ## 1. Alcance y requisitos
 
@@ -35,7 +35,12 @@ Conserva una copia original para futuras importaciones.
 | --- | --- |
 | Fichero | `CENTAURUS-C4-FINAL.ova` |
 | Tamaño en bytes | `11828618752` |
-| SHA-256 | `d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868` |
+
+**SHA-256**
+
+```text
+d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868
+```
 
 En Linux:
 
@@ -118,7 +123,7 @@ El comando acepta cero argumentos y solicita autenticación nueva. Espera a que 
 
 ## 8. Documentación relacionada
 
-- [`CONFIGURATION.md`](CONFIGURATION.md)
-- [`SECURITY_ARCHITECTURE.md`](SECURITY_ARCHITECTURE.md)
-- [`DEPLOYMENT_USB.md`](DEPLOYMENT_USB.md)
-- [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md)
+- [Configuración](CONFIGURATION.md)
+- [Seguridad](SECURITY_ARCHITECTURE.md)
+- [Despliegue USB](DEPLOYMENT_USB.md)
+- [Resolución de problemas](TROUBLESHOOTING.md)

@@ -2,7 +2,21 @@
 
 [Español](TROUBLESHOOTING.md) | [English](TROUBLESHOOTING.en.md)
 
-[Inicio](../README.md) · [INSTALL.md](INSTALL.md) · [USER_GUIDE.md](USER_GUIDE.md)
+[Inicio](../README.md) · [Instalación](INSTALL.md) · [Guía de uso](USER_GUIDE.md)
+
+<details>
+<summary>En esta guía</summary>
+
+- [1. Identifica el contexto](#1-identifica-el-contexto)
+- [2. Importación OVA y arranque USB](#2-importación-ova-y-arranque-usb)
+- [3. Red y acceso a la appliance](#3-red-y-acceso-a-la-appliance)
+- [4. Git + Docker](#4-git--docker)
+- [5. Ollama, consultas y resultados](#5-ollama-consultas-y-resultados)
+- [6. Windows nativo](#6-windows-nativo)
+- [7. GPU experimental en Linux + Docker](#7-gpu-experimental-en-linux--docker)
+- [8. Logs y datos para el diagnóstico](#8-logs-y-datos-para-el-diagnóstico)
+
+</details>
 
 ## 1. Identifica el contexto
 

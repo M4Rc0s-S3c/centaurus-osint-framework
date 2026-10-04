@@ -2,13 +2,26 @@
 
 [Español](USER_GUIDE.md) | [English](USER_GUIDE.en.md)
 
-[Inicio](../README.md) · [Instalación](INSTALL.md) · [Persistencia](STORAGE.md)
-
-**Versión documental:** 1.0
+[Inicio](../README.md) · [Instalación](INSTALL.md) · [Persistencia y trazabilidad](STORAGE.md)
 
 **Público:** usuarios y analistas que comienzan a trabajar con CENTAURUS.
 
 **Alcance:** operación de la aplicación, lectura de resultados y consulta de informes. La instalación se trata en la documentación de despliegue.
+
+<details>
+<summary>En esta guía</summary>
+
+- [1. Qué puedes hacer con CENTAURUS](#1-qué-puedes-hacer-con-centaurus)
+- [2. Identifica dónde estás escribiendo](#2-identifica-dónde-estás-escribiendo)
+- [3. Primera sesión en la appliance](#3-primera-sesión-en-la-appliance)
+- [4. Cómo leer el resultado](#4-cómo-leer-el-resultado)
+- [5. Qué resultado conservar y dónde encontrarlo](#5-qué-resultado-conservar-y-dónde-encontrarlo)
+- [6. Qué papel tiene la asistencia LLM](#6-qué-papel-tiene-la-asistencia-llm)
+- [7. Qué hacer ante una incidencia](#7-qué-hacer-ante-una-incidencia)
+- [8. Terminar la sesión y apagar la appliance](#8-terminar-la-sesión-y-apagar-la-appliance)
+- [9. Referencia de la CLI del paquete](#9-referencia-de-la-cli-del-paquete)
+
+</details>
 
 ## 1. Qué puedes hacer con CENTAURUS
 
@@ -41,7 +54,7 @@ Para Git + Docker sobre Linux, utiliza el contexto de ejecución indicado por el
 
 ## 3. Primera sesión en la appliance
 
-### 3.1 Entrar
+### 3.1. Entrar
 
 Inicia sesión en Linux con el usuario operativo `centaurus`. Desde su terminal, ejecuta:
 
@@ -53,7 +66,7 @@ Introduce la contraseña del usuario cuando se solicite. El acceso requiere una 
 
 Cuando aparezca `centaurus>`, ya estás dentro de la aplicación. Los ejemplos siguientes muestran solamente lo que debes escribir, sin incluir el prompt.
 
-### 3.2 Consultar la ayuda y las capacidades
+### 3.2. Consultar la ayuda y las capacidades
 
 ```text
 /help
@@ -77,7 +90,7 @@ También puedes consultar cada parte por separado:
 
 Estas consultas muestran información estática: no ejecutan herramientas ni crean una investigación. El catálogo contrastado contiene 11 reglas. Poder ver las capacidades no demuestra que las fuentes externas o el servicio LLM estén disponibles.
 
-### 3.3 Formular la petición
+### 3.3. Formular la petición
 
 Escribe una petición clara, con un único objetivo dentro del alcance de tu trabajo. Ejemplo de redacción:
 
@@ -91,7 +104,7 @@ La aplicación interpreta la petición, valida el objetivo y el propósito, y en
 
 Cada petición ejecutada abre una investigación nueva, incluso si repites el mismo dominio. Repetirla no reanuda ni actualiza el caso anterior.
 
-### 3.4 Esperar al resultado
+### 3.4. Esperar al resultado
 
 En una terminal interactiva se muestra la actividad, el tiempo transcurrido, la posición de la tarea en el plan y la herramienta o modo en curso. Las marcas de finalización y degradación permiten seguir el proceso.
 

@@ -4,23 +4,35 @@
 
 [Home](../README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Standards](STANDARDS.en.md)
 
+<details>
+<summary>On this page</summary>
+
+- [1. Workflow](#1-workflow)
+- [2. Principles](#2-principles)
+- [3. Dependencies and collaborations](#3-dependencies-and-collaborations)
+- [4. Adding a plugin](#4-adding-a-plugin)
+- [5. Adding a Rule](#5-adding-a-rule)
+- [6. LLM](#6-llm)
+- [7. Persistence](#7-persistence)
+- [8. Development environment](#8-development-environment)
+- [9. Tests](#9-tests)
+- [10. Git review](#10-git-review)
+- [11. Commit convention](#11-commit-convention)
+- [12. What not to do](#12-what-not-to-do)
+- [13. Contributions](#13-contributions)
+- [14. Related documentation](#14-related-documentation)
+
+</details>
+
 ## 1. Workflow
 
-```text
-need
-  ↓
-analysis
-  ↓
-design
-  ↓
-implementation
-  ↓
-tests
-  ↓
-review
-  ↓
-commit
-```
+1. Need
+2. Analysis
+3. Design
+4. Implementation
+5. Tests
+6. Review
+7. Commit
 
 A new component should not be added without a defined responsibility and contract.
 
@@ -42,15 +54,11 @@ A direct dependency between components is valid when it belongs to the architect
 
 Examples:
 
-```text
-Core → Planner
-Core → Executor
-Executor → PluginManager
-PluginManager → BasePlugin
-Core → EvidenceManager
-Core → RuleEngine
-Core → ReportManager
-```
+| Component | Collaborates with |
+| --- | --- |
+| `Core` | `Planner`, `Executor`, `EvidenceManager`, `RuleEngine`, `ReportManager` |
+| `Executor` | `PluginManager` |
+| `PluginManager` | `BasePlugin` |
 
 Not allowed:
 
@@ -225,7 +233,7 @@ Before proposing a change:
 
 ## 14. Related documentation
 
-- [`ARCHITECTURE.en.md`](ARCHITECTURE.en.md)
-- [`STANDARDS.en.md`](STANDARDS.en.md)
-- [`SPECIFICATION.en.md`](SPECIFICATION.en.md)
-- [`INSTALL.en.md`](INSTALL.en.md)
+- [Architecture](ARCHITECTURE.en.md)
+- [Standards](STANDARDS.en.md)
+- [Specification](SPECIFICATION.en.md)
+- [Installation](INSTALL.en.md)

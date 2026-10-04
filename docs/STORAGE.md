@@ -1,7 +1,28 @@
 # Persistencia y trazabilidad
 
 [Español](STORAGE.md) | [English](STORAGE.en.md)
+
 [Inicio](../README.md) · [Arquitectura](ARCHITECTURE.md) · [Especificación](SPECIFICATION.md)
+
+<details>
+<summary>En esta guía</summary>
+
+- [1. Principio](#1-principio)
+- [2. Artefactos persistidos](#2-artefactos-persistidos)
+- [3. Stores](#3-stores)
+- [4. Layout físico](#4-layout-físico)
+- [5. Convención RAW](#5-convención-raw)
+- [6. Report](#6-report)
+- [7. ExecutionFailure](#7-executionfailure)
+- [8. Inmutabilidad y acumulación](#8-inmutabilidad-y-acumulación)
+- [9. Trazabilidad](#9-trazabilidad)
+- [10. Workspace en Git + Docker](#10-workspace-en-git--docker)
+- [11. Datos excluidos del repositorio](#11-datos-excluidos-del-repositorio)
+- [12. Tecnología](#12-tecnología)
+- [13. Extracción, respaldo y recuperación](#13-extracción-respaldo-y-recuperación)
+- [14. Documentación relacionada](#14-documentación-relacionada)
+
+</details>
 
 ## 1. Principio
 
@@ -56,45 +77,19 @@ El esquema usa el `<workspace>` configurado. `/workspace` es la ruta de referenc
             └── failures/
 ```
 
-### RAW
+<a id="raw"></a>
+<a id="evidence"></a>
+<a id="findings"></a>
+<a id="reports"></a>
+<a id="fallos-operacionales"></a>
 
-RAW se materializa en:
-
-```text
-evidences/raw/
-```
-
-### Evidence
-
-Evidence normalizada se materializa en:
-
-```text
-evidences/normalized/
-```
-
-### Findings
-
-Los hallazgos se conservan en:
-
-```text
-findings/
-```
-
-### Reports
-
-Los informes se conservan en:
-
-```text
-reports/
-```
-
-### Fallos operacionales
-
-Los fallos se conservan en:
-
-```text
-execution/failures/
-```
+| Directorio relativo al caso | Artefacto |
+| --- | --- |
+| `evidences/raw/` | `RawObservation` |
+| `evidences/normalized/` | `Evidence` |
+| `findings/` | `Finding` |
+| `reports/` | `Report` |
+| `execution/failures/` | `ExecutionFailure` |
 
 ## 5. Convención RAW
 
@@ -178,17 +173,13 @@ investigation_id
 
 Cadena conceptual de explicación:
 
-```text
-Report
-  ↓
-Finding
-  ↓
-Rule + Evidence
-  ↓
-source / collected_at
-  ↓
-RAW original correlacionable
-```
+| Orden de revisión | Elemento |
+| --- | --- |
+| 1 | `Report` |
+| 2 | `Finding` |
+| 3 | `Rule` + `Evidence` |
+| 4 | `source` / `collected_at` |
+| 5 | RAW original correlacionable |
 
 ### Trazabilidad directa: de la observación al informe
 
@@ -261,6 +252,6 @@ Este procedimiento es una pauta operativa; no declara una nueva prueba de recupe
 
 ## 14. Documentación relacionada
 
-- [`ARCHITECTURE.md`](ARCHITECTURE.md)
-- [`SPECIFICATION.md`](SPECIFICATION.md)
-- [`INSTALL.md`](INSTALL.md)
+- [Arquitectura](ARCHITECTURE.md)
+- [Especificación](SPECIFICATION.md)
+- [Instalación](INSTALL.md)

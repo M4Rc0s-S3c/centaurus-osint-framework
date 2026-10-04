@@ -1,25 +1,38 @@
 # Guía de desarrollo
 
 [Español](DEVELOPMENT.md) | [English](DEVELOPMENT.en.md)
+
 [Inicio](../README.md) · [Arquitectura](ARCHITECTURE.md) · [Estándares](STANDARDS.md)
+
+<details>
+<summary>En esta guía</summary>
+
+- [1. Flujo de trabajo](#1-flujo-de-trabajo)
+- [2. Principios](#2-principios)
+- [3. Dependencias y colaboraciones](#3-dependencias-y-colaboraciones)
+- [4. Añadir un plugin](#4-añadir-un-plugin)
+- [5. Añadir una Rule](#5-añadir-una-rule)
+- [6. LLM](#6-llm)
+- [7. Persistencia](#7-persistencia)
+- [8. Entorno de desarrollo](#8-entorno-de-desarrollo)
+- [9. Pruebas](#9-pruebas)
+- [10. Revisión Git](#10-revisión-git)
+- [11. Convención de commits](#11-convención-de-commits)
+- [12. Qué no hacer](#12-qué-no-hacer)
+- [13. Contribuciones](#13-contribuciones)
+- [14. Documentación relacionada](#14-documentación-relacionada)
+
+</details>
 
 ## 1. Flujo de trabajo
 
-```text
-necesidad
-  ↓
-análisis
-  ↓
-diseño
-  ↓
-implementación
-  ↓
-pruebas
-  ↓
-revisión
-  ↓
-commit
-```
+1. Necesidad
+2. Análisis
+3. Diseño
+4. Implementación
+5. Pruebas
+6. Revisión
+7. Commit
 
 Un componente nuevo no debe incorporarse sin responsabilidad y contrato definidos.
 
@@ -41,15 +54,11 @@ Una dependencia directa entre componentes es válida cuando forma parte del cont
 
 Ejemplos:
 
-```text
-Core → Planner
-Core → Executor
-Executor → PluginManager
-PluginManager → BasePlugin
-Core → EvidenceManager
-Core → RuleEngine
-Core → ReportManager
-```
+| Componente | Colabora con |
+| --- | --- |
+| `Core` | `Planner`, `Executor`, `EvidenceManager`, `RuleEngine`, `ReportManager` |
+| `Executor` | `PluginManager` |
+| `PluginManager` | `BasePlugin` |
 
 No se permiten:
 
@@ -224,7 +233,7 @@ Antes de proponer un cambio:
 
 ## 14. Documentación relacionada
 
-- [`ARCHITECTURE.md`](ARCHITECTURE.md)
-- [`STANDARDS.md`](STANDARDS.md)
-- [`SPECIFICATION.md`](SPECIFICATION.md)
-- [`INSTALL.md`](INSTALL.md)
+- [Arquitectura](ARCHITECTURE.md)
+- [Estándares](STANDARDS.md)
+- [Especificación](SPECIFICATION.md)
+- [Instalación](INSTALL.md)

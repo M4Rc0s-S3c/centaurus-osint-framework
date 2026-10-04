@@ -70,7 +70,13 @@ LLMManager / LLM #2`"]
     class C governor
 ```
 
-`RequestInterpreter` construye primero el Target de forma determinista y después solicita a LLM #1 la clasificación del Intent a partir de la misma entrada. Ambos se integran en `StructuredRequest`; el LLM no construye el Target. El bloque superior identifica al Core como componente de gobierno. Dentro del área de componentes coordinados, las flechas muestran el flujo principal de datos. El Core gobierna planificación, ejecución, procesamiento de conocimiento y persistencia. En el último grupo, `ReportManager` construye el informe, el Core lo persiste mediante `ReportStore` y `LLMManager` coordina la asistencia posterior. LLM #2 actúa después de la persistencia y su salida es grounded, efímera y fail-soft.
+`RequestInterpreter` construye primero el Target de forma determinista y después solicita a LLM #1 la clasificación del Intent a partir de la misma entrada. Ambos se integran en `StructuredRequest`; el LLM no construye el Target.
+
+El bloque superior identifica al Core como componente de gobierno. Dentro del área de componentes coordinados, las flechas muestran el flujo principal de datos.
+
+El Core gobierna planificación, ejecución, procesamiento de conocimiento y persistencia.
+
+En el último grupo, `ReportManager` construye el informe, el Core lo persiste mediante `ReportStore` y `LLMManager` coordina la asistencia posterior. LLM #2 actúa después de la persistencia y su salida es grounded, efímera y fail-soft.
 
 Consulta [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) para las responsabilidades de cada componente.
 
@@ -104,7 +110,7 @@ El repositorio incluye el Core, las definiciones Docker/Compose, locks de depend
 
 Procedimiento: [`DEPLOYMENT_GIT_DOCKER.md`](docs/DEPLOYMENT_GIT_DOCKER.md).
 
-## Windows
+### Windows
 
 Windows nativo puede utilizarse para desarrollo, ejecución del Core y flujos locales con Ollama.
 
@@ -148,9 +154,7 @@ Consulta [`STORAGE.md`](docs/STORAGE.md) para el modelo autoritativo de persiste
 
 El repositorio incluye la suite automatizada bajo:
 
-```text
-tests/
-```
+`tests/`
 
 En un entorno de desarrollo/pruebas preparado:
 
@@ -166,36 +170,36 @@ Elige los documentos según tu tarea; no es necesario leer todo el índice en or
 
 ### Empezar y usar
 
-- [`PROJECT.md`](docs/PROJECT.md) · [English](docs/PROJECT.en.md) - identidad del proyecto, alcance y modalidades de distribución.
-- [`INSTALL.md`](docs/INSTALL.md) · [English](docs/INSTALL.en.md) - despliegue e instalación.
-- [`USER_GUIDE.md`](docs/USER_GUIDE.md) · [English](docs/USER_GUIDE.en.md) - primera sesión, interpretación de resultados y resolución de incidencias.
-- [`TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) · [English](docs/TROUBLESHOOTING.en.md) - diagnóstico de incidencias en las distintas modalidades.
+- [Proyecto](docs/PROJECT.md) · [English](docs/PROJECT.en.md) - identidad del proyecto, alcance y modalidades de distribución.
+- [Instalación](docs/INSTALL.md) · [English](docs/INSTALL.en.md) - despliegue e instalación.
+- [Guía de uso](docs/USER_GUIDE.md) · [English](docs/USER_GUIDE.en.md) - primera sesión, interpretación de resultados y resolución de incidencias.
+- [Resolución de problemas](docs/TROUBLESHOOTING.md) · [English](docs/TROUBLESHOOTING.en.md) - diagnóstico de incidencias en las distintas modalidades.
 
 ### Desplegar y administrar
 
-- [`DEPLOYMENT_OVA.md`](docs/DEPLOYMENT_OVA.md) · [English](docs/DEPLOYMENT_OVA.en.md) - importación, uso y mantenimiento de la OVA.
-- [`DEPLOYMENT_USB.md`](docs/DEPLOYMENT_USB.md) · [English](docs/DEPLOYMENT_USB.en.md) - escritura de la imagen raw, arranque y persistencia.
-- [`DEPLOYMENT_GIT_DOCKER.md`](docs/DEPLOYMENT_GIT_DOCKER.md) · [English](docs/DEPLOYMENT_GIT_DOCKER.en.md) - despliegue desde código sobre Linux.
-- [`DEPLOYMENT_WINDOWS.md`](docs/DEPLOYMENT_WINDOWS.md) · [English](docs/DEPLOYMENT_WINDOWS.en.md) - preparación del Core local en Windows.
-- [`GPU_OLLAMA_DOCKER.md`](docs/GPU_OLLAMA_DOCKER.md) · [English](docs/GPU_OLLAMA_DOCKER.en.md) - aceleración opcional experimental, sin certificación GPU del proyecto.
-- [`CONFIGURATION.md`](docs/CONFIGURATION.md) · [English](docs/CONFIGURATION.en.md) - variables de runtime, valores por defecto y diferencias de despliegue.
+- [Despliegue OVA](docs/DEPLOYMENT_OVA.md) · [English](docs/DEPLOYMENT_OVA.en.md) - importación, uso y mantenimiento de la OVA.
+- [Despliegue USB](docs/DEPLOYMENT_USB.md) · [English](docs/DEPLOYMENT_USB.en.md) - escritura de la imagen raw, arranque y persistencia.
+- [Despliegue Git + Docker](docs/DEPLOYMENT_GIT_DOCKER.md) · [English](docs/DEPLOYMENT_GIT_DOCKER.en.md) - despliegue desde código sobre Linux.
+- [Despliegue Windows](docs/DEPLOYMENT_WINDOWS.md) · [English](docs/DEPLOYMENT_WINDOWS.en.md) - preparación del Core local en Windows.
+- [GPU experimental](docs/GPU_OLLAMA_DOCKER.md) · [English](docs/GPU_OLLAMA_DOCKER.en.md) - aceleración opcional experimental, sin certificación GPU del proyecto.
+- [Configuración](docs/CONFIGURATION.md) · [English](docs/CONFIGURATION.en.md) - variables de runtime, valores por defecto y diferencias de despliegue.
 
 ### Comprender la arquitectura
 
-- [`ARCHITECTURE.md`](docs/ARCHITECTURE.md) · [English](docs/ARCHITECTURE.en.md) - arquitectura del framework.
-- [`SPECIFICATION.md`](docs/SPECIFICATION.md) · [English](docs/SPECIFICATION.en.md) - especificación funcional y no funcional.
-- [`STORAGE.md`](docs/STORAGE.md) · [English](docs/STORAGE.en.md) - persistencia y trazabilidad.
-- [`RULES_AND_RULE_ENGINE.md`](docs/RULES_AND_RULE_ENGINE.md) · [English](docs/RULES_AND_RULE_ENGINE.en.md) - catálogo de reglas e interpretación de hallazgos.
-- [`SECURITY_ARCHITECTURE.md`](docs/SECURITY_ARCHITECTURE.md) · [English](docs/SECURITY_ARCHITECTURE.en.md) - límites de confianza, endurecimiento y tratamiento de fallos.
-- [`CORE_RUNTIME.md`](docs/CORE_RUNTIME.md) · [English](docs/CORE_RUNTIME.en.md) - ciclo de investigación, coordinación y resultados parciales.
-- [`LLM_ARCHITECTURE.md`](docs/LLM_ARCHITECTURE.md) · [English](docs/LLM_ARCHITECTURE.en.md) - roles, proyección de datos, validación y límites de la asistencia.
+- [Arquitectura](docs/ARCHITECTURE.md) · [English](docs/ARCHITECTURE.en.md) - arquitectura del framework.
+- [Especificación](docs/SPECIFICATION.md) · [English](docs/SPECIFICATION.en.md) - especificación funcional y no funcional.
+- [Persistencia y trazabilidad](docs/STORAGE.md) · [English](docs/STORAGE.en.md) - persistencia y trazabilidad.
+- [Reglas y motor de reglas](docs/RULES_AND_RULE_ENGINE.md) · [English](docs/RULES_AND_RULE_ENGINE.en.md) - catálogo de reglas e interpretación de hallazgos.
+- [Seguridad](docs/SECURITY_ARCHITECTURE.md) · [English](docs/SECURITY_ARCHITECTURE.en.md) - límites de confianza, endurecimiento y tratamiento de fallos.
+- [Ciclo del Core](docs/CORE_RUNTIME.md) · [English](docs/CORE_RUNTIME.en.md) - ciclo de investigación, coordinación y resultados parciales.
+- [Arquitectura LLM](docs/LLM_ARCHITECTURE.md) · [English](docs/LLM_ARCHITECTURE.en.md) - roles, proyección de datos, validación y límites de la asistencia.
 
 ### Desarrollar
 
-- [`STANDARDS.md`](docs/STANDARDS.md) · [English](docs/STANDARDS.en.md) - convenciones y estándares del proyecto.
-- [`DEVELOPMENT.md`](docs/DEVELOPMENT.md) · [English](docs/DEVELOPMENT.en.md) - flujo de desarrollo.
-- [`PLUGIN_SYSTEM.md`](docs/PLUGIN_SYSTEM.md) · [English](docs/PLUGIN_SYSTEM.en.md) - contrato, integración de capacidades y normalización de fuentes.
-- [`TESTING.md`](docs/TESTING.md) · [English](docs/TESTING.en.md) - niveles de prueba, evidencias y límites de validación.
+- [Estándares](docs/STANDARDS.md) · [English](docs/STANDARDS.en.md) - convenciones y estándares del proyecto.
+- [Desarrollo](docs/DEVELOPMENT.md) · [English](docs/DEVELOPMENT.en.md) - flujo de desarrollo.
+- [Sistema de plugins](docs/PLUGIN_SYSTEM.md) · [English](docs/PLUGIN_SYSTEM.en.md) - contrato, integración de capacidades y normalización de fuentes.
+- [Estrategia de pruebas](docs/TESTING.md) · [English](docs/TESTING.en.md) - niveles de prueba, evidencias y límites de validación.
 
 ## Release
 

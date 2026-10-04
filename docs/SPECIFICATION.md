@@ -1,6 +1,7 @@
 # Especificación funcional
 
 [Español](SPECIFICATION.md) | [English](SPECIFICATION.en.md)
+
 [Inicio](../README.md) · [Proyecto](PROJECT.md) · [Arquitectura](ARCHITECTURE.md) · [Instalación](INSTALL.md)
 
 ## 1. Propósito
@@ -198,7 +199,7 @@ Una degradación de LLM #2 no invalida un `Report` ya construido y persistido.
 
 ## 8. Documentación relacionada
 
-- [`PROJECT.md`](PROJECT.md)
-- [`ARCHITECTURE.md`](ARCHITECTURE.md)
-- [`STORAGE.md`](STORAGE.md)
-- [`INSTALL.md`](INSTALL.md)
+- [Proyecto](PROJECT.md)
+- [Arquitectura](ARCHITECTURE.md)
+- [Persistencia y trazabilidad](STORAGE.md)
+- [Instalación](INSTALL.md)

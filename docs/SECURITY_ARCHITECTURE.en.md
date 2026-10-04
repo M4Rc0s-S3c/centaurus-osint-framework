@@ -2,7 +2,7 @@
 
 [Español](SECURITY_ARCHITECTURE.md) | [English](SECURITY_ARCHITECTURE.en.md)
 
-[Home](../README.en.md) · [ARCHITECTURE.en.md](ARCHITECTURE.en.md) · [CONFIGURATION.en.md](CONFIGURATION.en.md)
+[Home](../README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Configuration](CONFIGURATION.en.md)
 
 ## 1. Scope and trust boundaries
 
@@ -16,7 +16,11 @@ Core owns the investigation lifecycle. Intent validation, Target construction, t
 
 LLM #1 interprets a request as an Intent constrained by a schema and permitted values. It has no authority to execute arbitrary tools, change the catalog or write findings. An invalid interpretation must stop that flow before investigation.
 
-LLM #2 operates after the deterministic report is persisted. It receives a controlled projection that excludes `Evidence.data`, retains relevant references and metadata and limits the supplied information. Invalid structure or mandatory factual content that fails grounding causes rejection of the LLM presentation. Structurally valid advisory items that fail semantic checks are omitted individually; the renderer reports those omissions. In both cases the persisted deterministic report remains intact. The detailed contract is documented in [`LLM_ARCHITECTURE.en.md`](LLM_ARCHITECTURE.en.md). These checks assess consistency with the supplied context; they do not independently verify source accuracy or guarantee the truth of every generated statement.
+LLM #2 operates after the deterministic report is persisted. It receives a controlled projection that excludes `Evidence.data`, retains relevant references and metadata and limits the supplied information.
+
+Invalid structure or mandatory factual content that fails grounding causes rejection of the LLM presentation. Structurally valid advisory items that fail semantic checks are omitted individually; the renderer reports those omissions. In both cases the persisted deterministic report remains intact. The detailed contract is documented in [`LLM_ARCHITECTURE.en.md`](LLM_ARCHITECTURE.en.md).
+
+These checks assess consistency with the supplied context; they do not independently verify source accuracy or guarantee the truth of every generated statement.
 
 JSON validation does not establish truth. These controls reduce the input surface and constrain response usage without claiming universal immunity to prompt injection or model errors. Assistance is ephemeral, non-authoritative and does not modify `report.json`.
 

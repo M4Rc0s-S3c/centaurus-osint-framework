@@ -2,7 +2,27 @@
 
 [Español](ARCHITECTURE.md) | [English](ARCHITECTURE.en.md)
 
-[Home](../README.en.md) · [Project](PROJECT.en.md) · [Specification](SPECIFICATION.en.md) · [Storage](STORAGE.en.md)
+[Home](../README.en.md) · [Project](PROJECT.en.md) · [Specification](SPECIFICATION.en.md) · [Storage and traceability](STORAGE.en.md)
+
+<details>
+<summary>On this page</summary>
+
+- [1. Purpose](#1-purpose)
+- [2. Structural principles](#2-structural-principles)
+- [3. Layers and concepts](#3-layers-and-concepts)
+- [4. Input boundary](#4-input-boundary)
+- [5. Functional flow](#5-functional-flow)
+- [6. Plugins and tools](#6-plugins-and-tools)
+- [7. RuleEngine and Findings](#7-ruleengine-and-findings)
+- [8. Reporting](#8-reporting)
+- [9. LLM roles](#9-llm-roles)
+- [10. Deployment boundary](#10-deployment-boundary)
+- [11. Appliance](#11-appliance)
+- [12. Distribution](#12-distribution)
+- [13. Architectural evolution](#13-architectural-evolution)
+- [14. Related documentation](#14-related-documentation)
+
+</details>
 
 ## 1. Purpose
 
@@ -26,25 +46,12 @@ Deterministic results, forward and reverse traceability, and modularity through 
 
 ## 3. Layers and concepts
 
-```text
-Analyst
-  ↓
-CLI / RequestInterpreter
-  ↓
-StructuredRequest
-  ↓
-Core
-  ├─ Planner → ExecutionPlan / ExecutionTask
-  ├─ Executor → PluginManager → Plugin
-  ├─ EvidenceManager
-  ├─ RuleEngine
-  ├─ ReportManager
-  ├─ LLMManager
-  └─ Persistence Layer / Stores
-
-Domain:
-Investigation · Target · Intent · Rule · Evidence · Finding · Report
-```
+| Layer | Flow and responsibilities |
+| --- | --- |
+| Input | Analyst → CLI / RequestInterpreter → StructuredRequest → Core |
+| Core | Planner → ExecutionPlan / ExecutionTask; Executor → PluginManager → Plugin |
+| Coordination | EvidenceManager · RuleEngine · ReportManager · LLMManager · Persistence Layer / Stores |
+| Domain | Investigation · Target · Intent · Rule · Evidence · Finding · Report |
 
 ### Domain
 
@@ -97,47 +104,24 @@ In the current implementation, `Investigation` stores `target`, `target_type` an
 
 ## 4. Input boundary
 
-```text
-Natural language
-  ↓
-RequestInterpreter
-  ├─ TargetFactory (deterministic)
-  └─ LLM #1 (Intent classification)
-  ↓
-StructuredRequest
-  ↓
-Core creates Investigation
-```
+| Step | Input boundary |
+| --- | --- |
+| 1 | Natural language enters `RequestInterpreter`. |
+| 2 | `TargetFactory` constructs Target deterministically; LLM #1 classifies Intent. |
+| 3 | `StructuredRequest` reaches Core, which creates `Investigation`. |
 
 The Core does not receive natural language directly and does not use the LLM to select tools.
 
 ## 5. Functional flow
 
-```text
-Investigation
-  ↓
-Planner → ExecutionPlan
-  ↓
-Executor iterates over ExecutionTask
-  ↓
-PluginManager resolves/invokes Plugin
-  ↓
-RawObservation
-  ↓ persist RAW
-Tool-specific normalization
-  ↓
-EvidenceManager → Evidence
-  ↓ persist Evidence
-RuleEngine + Rules → Finding(s)
-  ↓ persist Finding
-ReportManager → Report
-  ↓ persist Report
-report.json + report.md
-  ↓
-LLM #2
-  ↓
-ephemeral/non-authoritative presentation
-```
+| Phase | Flow coordinated by Core |
+| --- | --- |
+| 1 · Planning | Investigation → Planner → ExecutionPlan |
+| 2 · Acquisition | Executor / ExecutionTask → PluginManager → Plugin → RawObservation |
+| 3 · Normalization | Persist RAW → source-specific normalization / EvidenceManager → Evidence → persist Evidence |
+| 4 · Analysis | RuleEngine + Rules → Finding(s) → persist Findings |
+| 5 · Reporting | ReportManager → Report → persist report.json + report.md |
+| 6 · Assistance | LLM #2 → ephemeral, non-authoritative presentation |
 
 Tool failures are represented through `ExecutionFailure` and remain outside the Knowledge Pipeline.
 
@@ -147,17 +131,10 @@ A tool is integrated through the corresponding plugin contract.
 
 Main responsibilities:
 
-```text
-Plugin
-  ↓
-RawObservation
-  ↓
-Tool-specific normalizer
-  ↓
-EvidenceManager
-  ↓
-Evidence
-```
+| Responsibility | Component and output |
+| --- | --- |
+| Acquisition | Plugin → RawObservation |
+| Normalization | Source-specific normalizer / EvidenceManager → Evidence |
 
 A plugin must not introduce domain logic into the Core or `RuleEngine`.
 
@@ -261,11 +238,11 @@ The current rule catalog lives in code. Loading it from YAML, JSON, a registry o
 
 ## 14. Related documentation
 
-- [`PROJECT.en.md`](PROJECT.en.md)
-- [`SPECIFICATION.en.md`](SPECIFICATION.en.md)
-- [`STORAGE.en.md`](STORAGE.en.md)
-- [`STANDARDS.en.md`](STANDARDS.en.md)
-- [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)
-- [`CORE_RUNTIME.en.md`](CORE_RUNTIME.en.md)
-- [`PLUGIN_SYSTEM.en.md`](PLUGIN_SYSTEM.en.md)
-- [`LLM_ARCHITECTURE.en.md`](LLM_ARCHITECTURE.en.md)
+- [Project](PROJECT.en.md)
+- [Specification](SPECIFICATION.en.md)
+- [Storage and traceability](STORAGE.en.md)
+- [Standards](STANDARDS.en.md)
+- [Development](DEVELOPMENT.en.md)
+- [Core runtime](CORE_RUNTIME.en.md)
+- [Plugin system](PLUGIN_SYSTEM.en.md)
+- [LLM architecture](LLM_ARCHITECTURE.en.md)

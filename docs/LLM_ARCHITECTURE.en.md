@@ -2,7 +2,7 @@
 
 [Español](LLM_ARCHITECTURE.md) | [English](LLM_ARCHITECTURE.en.md)
 
-[Home](../README.en.md) · [`ARCHITECTURE.en.md`](ARCHITECTURE.en.md) · [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)
+[Home](../README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Development](DEVELOPMENT.en.md)
 
 ## 1. Two roles, deterministic authority
 

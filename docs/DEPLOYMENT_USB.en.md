@@ -2,7 +2,7 @@
 
 [Español](DEPLOYMENT_USB.md) | [English](DEPLOYMENT_USB.en.md)
 
-[Home](../README.en.md) · [INSTALL.en.md](INSTALL.en.md) · [USER_GUIDE.en.md](USER_GUIDE.en.md)
+[Home](../README.en.md) · [Installation](INSTALL.en.md) · [User guide](USER_GUIDE.en.md)
 
 ## 1. Scope and requirements
 
@@ -10,7 +10,7 @@
 
 The target computer must support x86-64 and UEFI boot. Reference validation used a Toshiba Z30-A with Intel I218-V Ethernet and the `e1000e` driver. That reference does not guarantee compatibility with every Ethernet adapter or GPU. The baseline uses CPU.
 
-**Networking requires a wired Ethernet connection and a compatible network adapter.** The distributed USB image has no Wi-Fi driver or Wi-Fi connection manager deployed; Wi-Fi is not a supported connection method in this distribution. Connect an Ethernet cable to a network with DHCP and access to the required OSINT sources.
+> **Important.** **Networking requires a wired Ethernet connection and a compatible network adapter.** The distributed USB image has no Wi-Fi driver or Wi-Fi connection manager deployed; Wi-Fi is not a supported connection method in this distribution. Connect an Ethernet cable to a network with DHCP and access to the required OSINT sources.
 
 The device must provide **at least `31457280000` actual bytes**. Check its capacity in bytes: a commercial “32 GB” label is not a substitute. Allow additional storage for the original image on the computer performing the write.
 
@@ -23,7 +23,12 @@ The device must provide **at least `31457280000` actual bytes**. Check its capac
 | File | `CENTAURUS-USB.img` |
 | Size in bytes | `31457280000` |
 | 512-byte sectors | `61440000` |
-| SHA-256 | `7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165` |
+
+**SHA-256**
+
+```text
+7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165
+```
 
 On Linux:
 
@@ -43,7 +48,7 @@ Do not continue if the size or hash differs. This verifies the download before w
 
 ## 3. Identify the destination
 
-**Writing the image overwrites the selected device's partition table and data.** Back up any content you need and identify the disk by model, serial number and capacity. Do not select it solely by drive letter or enumeration order.
+> **Important.** **Writing the image overwrites the selected device's partition table and data.** Back up any content you need and identify the disk by model, serial number and capacity. Do not select it solely by drive letter or enumeration order.
 
 On Linux, inspect the inventory without modifying it:
 
@@ -61,7 +66,9 @@ Select the **whole USB disk**, never a partition or the system disk. Disconnect 
 
 ## 4. Raw writing
 
-The project validation used **HDDRawCopy 2.6 on Windows** to write the physical medium. This identifies the historical validation procedure; it does not certify other versions or all hardware. In that tool, select **FILE** as the source, choose the verified image and then the previously identified physical USB device as the destination. The following sequence also applies to an equivalent raw writer, whose behavior must be checked for the selected environment.
+The project validation used **HDDRawCopy 2.6 on Windows** to write the physical medium. This identifies the historical validation procedure; it does not certify other versions or all hardware.
+
+In that tool, select **FILE** as the source, choose the verified image and then the previously identified physical USB device as the destination. The following sequence also applies to an equivalent raw writer, whose behavior must be checked for the selected environment.
 
 1. Open a raw-image writing tool that supports selecting a physical disk, with the required administrative privileges.
 2. Select `CENTAURUS-USB.img` as the source and recheck the destination's identity and capacity.
@@ -109,7 +116,7 @@ For case export, consistent backups and recovery checks, follow section 13 of [`
 
 ## 7. Related documentation
 
-- [`DEPLOYMENT_OVA.en.md`](DEPLOYMENT_OVA.en.md)
-- [`CONFIGURATION.en.md`](CONFIGURATION.en.md)
-- [`SECURITY_ARCHITECTURE.en.md`](SECURITY_ARCHITECTURE.en.md)
-- [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md)
+- [OVA deployment](DEPLOYMENT_OVA.en.md)
+- [Configuration](CONFIGURATION.en.md)
+- [Security](SECURITY_ARCHITECTURE.en.md)
+- [Troubleshooting](TROUBLESHOOTING.en.md)

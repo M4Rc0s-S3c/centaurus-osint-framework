@@ -2,13 +2,33 @@
 
 [Español](DEPLOYMENT_GIT_DOCKER.md) | [English](DEPLOYMENT_GIT_DOCKER.en.md)
 
-[Inicio](../README.md) · [INSTALL.md](INSTALL.md) · [USER_GUIDE.md](USER_GUIDE.md)
+[Inicio](../README.md) · [Instalación](INSTALL.md) · [Guía de uso](USER_GUIDE.md)
 
 Esta guía describe el despliegue desde código fuente sobre un host Linux. La OVA preconstruida es la distribución principal de CENTAURUS; consulta [`INSTALL.md`](INSTALL.md) para elegir modalidad.
 
 Utiliza una release/tag concreta para un despliegue reproducible. Release pública: [v1.0.0](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.0).
 
 Estas instrucciones se aplican a `v1.0.0`. El tag conserva documentación local anterior y el paquete Python utiliza una versión distinta; consulta el [alcance de release y documentación](../README.md#release). Mantén disponible la [guía actual en línea](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/blob/main/docs/DEPLOYMENT_GIT_DOCKER.md) al cambiar de tag.
+
+<details>
+<summary>En esta guía</summary>
+
+- [1. Requisitos](#1-requisitos)
+- [2. Arquitectura del despliegue](#2-arquitectura-del-despliegue)
+- [3. Obtener el código](#3-obtener-el-código)
+- [4. Qué no hacer](#4-qué-no-hacer)
+- [5. Directorio persistente](#5-directorio-persistente)
+- [6. Inicialización oficial](#6-inicialización-oficial)
+- [7. Cadena de suministro](#7-cadena-de-suministro)
+- [8. Modelo Ollama](#8-modelo-ollama)
+- [9. Arranque, uso y parada](#9-arranque-uso-y-parada)
+- [10. Workspace](#10-workspace)
+- [11. GPU opcional y experimental](#11-gpu-opcional-y-experimental)
+- [12. Verificación básica](#12-verificación-básica)
+- [13. Actualización](#13-actualización)
+- [14. Documentación relacionada](#14-documentación-relacionada)
+
+</details>
 
 ## 1. Requisitos
 
@@ -21,7 +41,9 @@ Utiliza un host Linux amd64/x86-64 para reproducir la plataforma de referencia, 
 - acceso a Internet durante la primera construcción/aprovisionamiento para obtener imágenes fijadas, dependencias y el modelo Ollama;
 - almacenamiento para imágenes Docker, caché de construcción, modelo y crecimiento del workspace de investigaciones.
 
-Como referencia de dimensionamiento del proyecto, **8 GiB de RAM y del orden de 30 GiB de almacenamiento** proporcionan margen razonable para la baseline CPU y datos de investigación. Son cifras orientativas, no límites comprobados por el bootstrap ni una garantía para cualquier carga. Reserva espacio adicional para construcciones repetidas, copias y resultados acumulados; las cargas de inferencia mayores pueden necesitar más memoria.
+Como referencia de dimensionamiento del proyecto, **8 GiB de RAM y del orden de 30 GiB de almacenamiento** proporcionan margen razonable para la baseline CPU y datos de investigación.
+
+Son cifras orientativas, no límites comprobados por el bootstrap ni una garantía para cualquier carga. Reserva espacio adicional para construcciones repetidas, copias y resultados acumulados; las cargas de inferencia mayores pueden necesitar más memoria.
 
 La inicialización se detiene si falla una comprobación previa. Sus comprobaciones iniciales son:
 
@@ -34,7 +56,7 @@ docker info
 docker compose version
 ```
 
-**Frontera administrativa:** pertenecer al grupo `docker` concede una capacidad elevada sobre el host. El acceso Docker pertenece al plano de administración del host; el socket no se monta dentro de `centaurus-core`. Este modelo de despliegue no sustituye el acceso restringido del analista en la appliance OVA/USB.
+> **Importante.** **Frontera administrativa:** pertenecer al grupo `docker` concede una capacidad elevada sobre el host. El acceso Docker pertenece al plano de administración del host; el socket no se monta dentro de `centaurus-core`. Este modelo de despliegue no sustituye el acceso restringido del analista en la appliance OVA/USB.
 
 No es necesario instalar Ollama en el host: se ejecuta en un contenedor. La GPU no es un requisito. Para el alcance de Windows nativo, consulta [`DEPLOYMENT_WINDOWS.md`](DEPLOYMENT_WINDOWS.md).
 
@@ -156,7 +178,9 @@ $CENTAURUS_DATA_ROOT/
 
 El `compose.env` generado contiene únicamente las rutas host de Ollama y workspace (`CENTAURUS_OLLAMA_HOST_DIR` y `CENTAURUS_WORKSPACE_HOST_DIR`) y se crea con modo `0600`. El bootstrap vuelve a generarlo; conserva los ajustes personalizados añadidos posteriormente antes de repetirlo.
 
-**Propiedad del workspace:** la inicialización ejecuta puntualmente la imagen como root para ajustar el propietario del directorio montado a `1000:1000`. El comando actual cambia ese directorio, no su contenido de forma recursiva. Por ello, `CENTAURUS_DATA_ROOT` debe apuntar a un directorio dedicado a CENTAURUS y no a una carpeta compartida con otros datos. Revisa los permisos de los ficheros existentes cuando reutilices un workspace.
+**Propiedad del workspace:** la inicialización ejecuta puntualmente la imagen como root para ajustar el propietario del directorio montado a `1000:1000`. El comando actual cambia ese directorio, no su contenido de forma recursiva.
+
+Por ello, `CENTAURUS_DATA_ROOT` debe apuntar a un directorio dedicado a CENTAURUS y no a una carpeta compartida con otros datos. Revisa los permisos de los ficheros existentes cuando reutilices un workspace.
 
 Configuración y ajustes: [`CONFIGURATION.md`](CONFIGURATION.md). Estructura de persistencia: [`STORAGE.md`](STORAGE.md).
 
@@ -197,7 +221,9 @@ El marcador final indica que el bootstrap ha terminado, incluida la comprobació
 
 ### 6.1. Paquete determinista de construcción del Core
 
-El bootstrap invoca `python3 scripts/create_core_build_bundle.py` y genera `dist/centaurus-core-build_v1.0.zip`. El paquete contiene Dockerfile, `pyproject.toml`, locks de runtime, lock de suministro y `src/`. Se extrae en un directorio temporal tras verificar las rutas del archivo. Docker construye desde ese paquete, en lugar del checkout completo; quedan fuera `.git`, tests, documentación y metadatos de construcción/caché Python. El empaquetado determinista no garantiza por sí solo imágenes Docker idénticas byte a byte.
+El bootstrap invoca `python3 scripts/create_core_build_bundle.py` y genera `dist/centaurus-core-build_v1.0.zip`. El paquete contiene Dockerfile, `pyproject.toml`, locks de runtime, lock de suministro y `src/`.
+
+Se extrae en un directorio temporal tras verificar las rutas del archivo. Docker construye desde ese paquete, en lugar del checkout completo; quedan fuera `.git`, tests, documentación y metadatos de construcción/caché Python. El empaquetado determinista no garantiza por sí solo imágenes Docker idénticas byte a byte.
 
 ### 6.2. Aislamiento de herramientas
 
@@ -332,9 +358,9 @@ No reutilices identidades o hashes de una versión anterior para declarar válid
 
 ## 14. Documentación relacionada
 
-- [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md)
-- [`CONFIGURATION.md`](CONFIGURATION.md)
-- [`STORAGE.md`](STORAGE.md)
-- [`SECURITY_ARCHITECTURE.md`](SECURITY_ARCHITECTURE.md)
-- [`DEVELOPMENT.md`](DEVELOPMENT.md)
-- [`USER_GUIDE.md`](USER_GUIDE.md)
+- [Resolución de problemas](TROUBLESHOOTING.md)
+- [Configuración](CONFIGURATION.md)
+- [Persistencia y trazabilidad](STORAGE.md)
+- [Seguridad](SECURITY_ARCHITECTURE.md)
+- [Desarrollo](DEVELOPMENT.md)
+- [Guía de uso](USER_GUIDE.md)

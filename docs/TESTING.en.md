@@ -2,7 +2,7 @@
 
 [Español](TESTING.md) | [English](TESTING.en.md)
 
-[Home](../README.en.md) · [`ARCHITECTURE.en.md`](ARCHITECTURE.en.md) · [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)
+[Home](../README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Development](DEVELOPMENT.en.md)
 
 ## 1. Purpose and preparation
 
@@ -25,14 +25,14 @@ Test doubles should sit at boundaries the test does not intend to validate. Repl
 
 | Area | Relevant checks | Suite references |
 | --- | --- | --- |
-| Input and capabilities | Deterministic Target, allowed Intent, catalog and rejection of invalid input. | [`test_request_input.py`](../tests/test_request_input.py), [`test_capabilities.py`](../tests/test_capabilities.py) |
-| Plugins and normalization | Parameters, representative RAW, acquisition errors and normalized representation. | [`test_plugin_manager.py`](../tests/test_plugin_manager.py), [`test_theharvester_normalizer.py`](../tests/test_theharvester_normalizer.py) |
-| Rules | Match/no-match, types, explicit absence, time and cross-source corroboration. | [`test_rule_engine.py`](../tests/test_rule_engine.py), [`test_exposure_rules.py`](../tests/test_exposure_rules.py) |
-| Core and execution | Sequence, plan validation, partial result, total failure and lifecycle authority. | [`test_core.py`](../tests/test_core.py), [`test_executor.py`](../tests/test_executor.py) |
-| Persistence | Separate artifacts, traceability, overwrite rejection and write failures. | [`test_persistence_extended.py`](../tests/test_persistence_extended.py), [`test_raw_observation_store.py`](../tests/test_raw_observation_store.py) |
-| LLM | Schema, references, minimized projection, factual rejection and advisory omissions. | [`test_llm.py`](../tests/test_llm.py), [`test_inference_profile.py`](../tests/test_inference_profile.py) |
-| Presentation and observability | Markdown report, exit codes, progress and logging. | [`test_report_markdown.py`](../tests/test_report_markdown.py), [`test_cli_app.py`](../tests/test_cli_app.py), [`test_runtime_progress.py`](../tests/test_runtime_progress.py) |
-| Distribution and host controls | Script, configuration, supply-chain and wrapper contracts. | [`test_linux_distribution.py`](../tests/test_linux_distribution.py), [`test_ova_runtime_broker.py`](../tests/test_ova_runtime_broker.py), [`test_ova_poweroff_helper.py`](../tests/test_ova_poweroff_helper.py) |
+| Input and capabilities | Deterministic Target, allowed Intent, catalog and rejection of invalid input. | [request input](../tests/test_request_input.py), [capabilities](../tests/test_capabilities.py) |
+| Plugins and normalization | Parameters, representative RAW, acquisition errors and normalized representation. | [plugin manager](../tests/test_plugin_manager.py), [theharvester normalizer](../tests/test_theharvester_normalizer.py) |
+| Rules | Match/no-match, types, explicit absence, time and cross-source corroboration. | [rule engine](../tests/test_rule_engine.py), [exposure rules](../tests/test_exposure_rules.py) |
+| Core and execution | Sequence, plan validation, partial result, total failure and lifecycle authority. | [core](../tests/test_core.py), [executor](../tests/test_executor.py) |
+| Persistence | Separate artifacts, traceability, overwrite rejection and write failures. | [persistence extended](../tests/test_persistence_extended.py), [raw observation store](../tests/test_raw_observation_store.py) |
+| LLM | Schema, references, minimized projection, factual rejection and advisory omissions. | [llm](../tests/test_llm.py), [inference profile](../tests/test_inference_profile.py) |
+| Presentation and observability | Markdown report, exit codes, progress and logging. | [report markdown](../tests/test_report_markdown.py), [cli app](../tests/test_cli_app.py), [runtime progress](../tests/test_runtime_progress.py) |
+| Distribution and host controls | Script, configuration, supply-chain and wrapper contracts. | [linux distribution](../tests/test_linux_distribution.py), [ova runtime broker](../tests/test_ova_runtime_broker.py), [ova poweroff helper](../tests/test_ova_poweroff_helper.py) |
 
 These are representative entry points, not an exhaustive list or a percentage-coverage claim.
 
@@ -68,7 +68,7 @@ Counts and metrics from historical closures describe their commit and platform. 
 
 ## 7. Related documentation
 
-- [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)
-- [`STANDARDS.en.md`](STANDARDS.en.md)
-- [`PLUGIN_SYSTEM.en.md`](PLUGIN_SYSTEM.en.md)
-- [`SECURITY_ARCHITECTURE.en.md`](SECURITY_ARCHITECTURE.en.md)
+- [Development](DEVELOPMENT.en.md)
+- [Standards](STANDARDS.en.md)
+- [Plugin system](PLUGIN_SYSTEM.en.md)
+- [Security](SECURITY_ARCHITECTURE.en.md)

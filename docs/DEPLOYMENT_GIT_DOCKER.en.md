@@ -2,13 +2,33 @@
 
 [Español](DEPLOYMENT_GIT_DOCKER.md) | [English](DEPLOYMENT_GIT_DOCKER.en.md)
 
-[Home](../README.en.md) · [INSTALL.en.md](INSTALL.en.md) · [USER_GUIDE.en.md](USER_GUIDE.en.md)
+[Home](../README.en.md) · [Installation](INSTALL.en.md) · [User guide](USER_GUIDE.en.md)
 
 This guide covers deployment from source on a Linux host. The prebuilt OVA is the main CENTAURUS distribution; see [`INSTALL.en.md`](INSTALL.en.md) to choose a deployment mode.
 
 Use a specific release/tag for a reproducible deployment. Public release: [v1.0.0](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.0).
 
 These instructions apply to `v1.0.0`. The tag retains older local documentation and the Python package uses a different version label; see the [release and documentation scope](../README.en.md#release). Keep the [current online guide](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/blob/main/docs/DEPLOYMENT_GIT_DOCKER.en.md) available when switching tags.
+
+<details>
+<summary>On this page</summary>
+
+- [1. Requirements](#1-requirements)
+- [2. Deployment architecture](#2-deployment-architecture)
+- [3. Obtain the code](#3-obtain-the-code)
+- [4. What not to do](#4-what-not-to-do)
+- [5. Persistent directory](#5-persistent-directory)
+- [6. Official initialization](#6-official-initialization)
+- [7. Supply chain](#7-supply-chain)
+- [8. Ollama model](#8-ollama-model)
+- [9. Startup, use and shutdown](#9-startup-use-and-shutdown)
+- [10. Workspace](#10-workspace)
+- [11. Optional experimental GPU](#11-optional-experimental-gpu)
+- [12. Basic verification](#12-basic-verification)
+- [13. Updating](#13-updating)
+- [14. Related documentation](#14-related-documentation)
+
+</details>
 
 ## 1. Requirements
 
@@ -34,7 +54,7 @@ docker info
 docker compose version
 ```
 
-**Administrative boundary:** access through the `docker` group grants powerful control over the host. Docker access belongs to host administration; the socket is not mounted inside `centaurus-core`. This deployment model does not replace the restricted analyst entry point of the OVA/USB appliance.
+> **Important.** **Administrative boundary:** access through the `docker` group grants powerful control over the host. Docker access belongs to host administration; the socket is not mounted inside `centaurus-core`. This deployment model does not replace the restricted analyst entry point of the OVA/USB appliance.
 
 Ollama does not need to be installed on the host: it runs in a container. GPU acceleration is not required. For native Windows scope, see [`DEPLOYMENT_WINDOWS.en.md`](DEPLOYMENT_WINDOWS.en.md).
 
@@ -197,7 +217,9 @@ The final marker means bootstrap completed, including its static capability smok
 
 ### 6.1. Deterministic Core build bundle
 
-Bootstrap invokes `python3 scripts/create_core_build_bundle.py` and produces `dist/centaurus-core-build_v1.0.zip`. The package contains the Dockerfile, `pyproject.toml`, runtime locks, supply-chain lock and `src/`. It is extracted into a temporary directory after checking archive paths. Docker builds from that package, rather than the whole checkout; `.git`, tests, documentation and Python build/cache metadata are excluded. Deterministic packaging does not by itself guarantee byte-identical Docker images.
+Bootstrap invokes `python3 scripts/create_core_build_bundle.py` and produces `dist/centaurus-core-build_v1.0.zip`. The package contains the Dockerfile, `pyproject.toml`, runtime locks, supply-chain lock and `src/`.
+
+It is extracted into a temporary directory after checking archive paths. Docker builds from that package, rather than the whole checkout; `.git`, tests, documentation and Python build/cache metadata are excluded. Deterministic packaging does not by itself guarantee byte-identical Docker images.
 
 ### 6.2. Tool isolation
 
@@ -332,9 +354,9 @@ Do not reuse identities or hashes from an older version to declare a newer one v
 
 ## 14. Related documentation
 
-- [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md)
-- [`CONFIGURATION.en.md`](CONFIGURATION.en.md)
-- [`STORAGE.en.md`](STORAGE.en.md)
-- [`SECURITY_ARCHITECTURE.en.md`](SECURITY_ARCHITECTURE.en.md)
-- [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)
-- [`USER_GUIDE.en.md`](USER_GUIDE.en.md)
+- [Troubleshooting](TROUBLESHOOTING.en.md)
+- [Configuration](CONFIGURATION.en.md)
+- [Storage and traceability](STORAGE.en.md)
+- [Security](SECURITY_ARCHITECTURE.en.md)
+- [Development](DEVELOPMENT.en.md)
+- [User guide](USER_GUIDE.en.md)

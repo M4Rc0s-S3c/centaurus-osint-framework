@@ -153,14 +153,14 @@ Users are responsible for complying with applicable law, source terms and organi
 
 ## 10. Related documentation
 
-- [`README.en.md`](../README.en.md)
-- [`INSTALL.en.md`](INSTALL.en.md)
-- [`USER_GUIDE.en.md`](USER_GUIDE.en.md)
-- [`ARCHITECTURE.en.md`](ARCHITECTURE.en.md)
-- [`SPECIFICATION.en.md`](SPECIFICATION.en.md)
-- [`STORAGE.en.md`](STORAGE.en.md)
-- [`STANDARDS.en.md`](STANDARDS.en.md)
-- [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)
+- [Home](../README.en.md)
+- [Installation](INSTALL.en.md)
+- [User guide](USER_GUIDE.en.md)
+- [Architecture](ARCHITECTURE.en.md)
+- [Specification](SPECIFICATION.en.md)
+- [Storage and traceability](STORAGE.en.md)
+- [Standards](STANDARDS.en.md)
+- [Development](DEVELOPMENT.en.md)
 
 ## 11. License
 

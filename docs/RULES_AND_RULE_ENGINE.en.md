@@ -2,7 +2,7 @@
 
 [Español](RULES_AND_RULE_ENGINE.md) | [English](RULES_AND_RULE_ENGINE.en.md)
 
-[Home](../README.en.md) · [USER_GUIDE.en.md](USER_GUIDE.en.md) · [ARCHITECTURE.en.md](ARCHITECTURE.en.md)
+[Home](../README.en.md) · [User guide](USER_GUIDE.en.md) · [Architecture](ARCHITECTURE.en.md)
 
 ## 1. Engine purpose
 
@@ -18,9 +18,9 @@ This does not guarantee that a source is accurate or that two live investigation
 
 ### Controlled example: corroboration with RL-014
 
-Suppose normalized Sublist3r evidence contains `api.example.com` and `www.example.com`, while crt.sh evidence contains `api.example.com` and `mail.example.com`. Evaluating `RL-014` alone produces one finding for `api.example.com`, observed in two distinct sources. It retains the rule and both supporting evidences.
-
-The other names do not meet this corroboration criterion. That does not prove that they do not exist or are safe. The example uses controlled data, not live observations of `example.com`. It illustrates how explicit criteria turn observations into a conclusion whose support can be reviewed through [`STORAGE.en.md`](STORAGE.en.md#9-traceability).
+> Suppose normalized Sublist3r evidence contains `api.example.com` and `www.example.com`, while crt.sh evidence contains `api.example.com` and `mail.example.com`. Evaluating `RL-014` alone produces one finding for `api.example.com`, observed in two distinct sources. It retains the rule and both supporting evidences.
+>
+> The other names do not meet this corroboration criterion. That does not prove that they do not exist or are safe. The example uses controlled data, not live observations of `example.com`. It illustrates how explicit criteria turn observations into a conclusion whose support can be reviewed through [`STORAGE.en.md`](STORAGE.en.md#9-traceability).
 
 ## 2. Production catalog
 
@@ -72,9 +72,14 @@ The catalog and its conditions are maintained in code. Semantic changes should e
 
 ## 6. References
 
+### Implementation
+
 - [`rule_engine.py`](../src/centaurus/rules/rule_engine.py)
 - [`catalog.py`](../src/centaurus/rules/catalog.py)
 - [`registration_rules.py`](../src/centaurus/rules/registration_rules.py)
 - [`dns_rules.py`](../src/centaurus/rules/dns_rules.py)
 - [`exposure_rules.py`](../src/centaurus/rules/exposure_rules.py)
-- [`STORAGE.en.md`](STORAGE.en.md)
+
+### Related documentation
+
+- [Storage and traceability](STORAGE.en.md)

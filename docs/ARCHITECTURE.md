@@ -1,7 +1,28 @@
 # Arquitectura de CENTAURUS
 
 [Español](ARCHITECTURE.md) | [English](ARCHITECTURE.en.md)
-[Inicio](../README.md) · [Proyecto](PROJECT.md) · [Especificación](SPECIFICATION.md) · [Persistencia](STORAGE.md)
+
+[Inicio](../README.md) · [Proyecto](PROJECT.md) · [Especificación](SPECIFICATION.md) · [Persistencia y trazabilidad](STORAGE.md)
+
+<details>
+<summary>En esta guía</summary>
+
+- [1. Propósito](#1-propósito)
+- [2. Principios estructurales](#2-principios-estructurales)
+- [3. Capas y conceptos](#3-capas-y-conceptos)
+- [4. Frontera de entrada](#4-frontera-de-entrada)
+- [5. Flujo funcional](#5-flujo-funcional)
+- [6. Plugins y herramientas](#6-plugins-y-herramientas)
+- [7. RuleEngine y Findings](#7-ruleengine-y-findings)
+- [8. Reporting](#8-reporting)
+- [9. Roles LLM](#9-roles-llm)
+- [10. Frontera de despliegue](#10-frontera-de-despliegue)
+- [11. Appliance](#11-appliance)
+- [12. Distribución](#12-distribución)
+- [13. Evolución arquitectónica](#13-evolución-arquitectónica)
+- [14. Documentación relacionada](#14-documentación-relacionada)
+
+</details>
 
 ## 1. Propósito
 
@@ -25,25 +46,12 @@ Los resultados deterministas, la trazabilidad directa e inversa y la modularidad
 
 ## 3. Capas y conceptos
 
-```text
-Analista
-  ↓
-CLI / RequestInterpreter
-  ↓
-StructuredRequest
-  ↓
-Core
-  ├─ Planner → ExecutionPlan / ExecutionTask
-  ├─ Executor → PluginManager → Plugin
-  ├─ EvidenceManager
-  ├─ RuleEngine
-  ├─ ReportManager
-  ├─ LLMManager
-  └─ Persistence Layer / Stores
-
-Dominio:
-Investigation · Target · Intent · Rule · Evidence · Finding · Report
-```
+| Capa | Recorrido y responsabilidades |
+| --- | --- |
+| Entrada | Analista → CLI / RequestInterpreter → StructuredRequest → Core |
+| Core | Planner → ExecutionPlan / ExecutionTask; Executor → PluginManager → Plugin |
+| Coordinación | EvidenceManager · RuleEngine · ReportManager · LLMManager · Persistence Layer / Stores |
+| Dominio | Investigation · Target · Intent · Rule · Evidence · Finding · Report |
 
 ### Dominio
 
@@ -96,47 +104,24 @@ En la implementación actual, `Investigation` guarda `target`, `target_type` e `
 
 ## 4. Frontera de entrada
 
-```text
-Lenguaje natural
-  ↓
-RequestInterpreter
-  ├─ TargetFactory (determinista)
-  └─ LLM #1 (clasificación de Intent)
-  ↓
-StructuredRequest
-  ↓
-Core crea Investigation
-```
+| Paso | Frontera de entrada |
+| --- | --- |
+| 1 | El lenguaje natural llega a `RequestInterpreter`. |
+| 2 | `TargetFactory` construye Target de forma determinista; LLM #1 clasifica Intent. |
+| 3 | `StructuredRequest` llega al Core, que crea `Investigation`. |
 
 El Core no recibe directamente lenguaje natural y no utiliza el LLM para seleccionar herramientas.
 
 ## 5. Flujo funcional
 
-```text
-Investigation
-  ↓
-Planner → ExecutionPlan
-  ↓
-Executor recorre ExecutionTask
-  ↓
-PluginManager resuelve/invoca Plugin
-  ↓
-RawObservation
-  ↓ persistencia RAW
-Normalización específica
-  ↓
-EvidenceManager → Evidence
-  ↓ persistencia Evidence
-RuleEngine + Rules → Finding(s)
-  ↓ persistencia Finding
-ReportManager → Report
-  ↓ persistencia Report
-report.json + report.md
-  ↓
-LLM #2
-  ↓
-presentación efímera/no autoritativa
-```
+| Fase | Recorrido coordinado por Core |
+| --- | --- |
+| 1 · Planificación | Investigation → Planner → ExecutionPlan |
+| 2 · Adquisición | Executor / ExecutionTask → PluginManager → Plugin → RawObservation |
+| 3 · Normalización | Persistir RAW → normalización específica / EvidenceManager → Evidence → persistir Evidence |
+| 4 · Análisis | RuleEngine + Rules → Finding(s) → persistir Findings |
+| 5 · Informe | ReportManager → Report → persistir report.json + report.md |
+| 6 · Asistencia | LLM #2 → presentación efímera y no autoritativa |
 
 Los fallos de herramientas se representan mediante `ExecutionFailure` y permanecen fuera del Knowledge Pipeline.
 
@@ -146,17 +131,10 @@ Una herramienta se integra mediante el contrato de plugin correspondiente.
 
 Responsabilidades principales:
 
-```text
-Plugin
-  ↓
-RawObservation
-  ↓
-Normalizador específico
-  ↓
-EvidenceManager
-  ↓
-Evidence
-```
+| Responsabilidad | Componente y salida |
+| --- | --- |
+| Adquisición | Plugin → RawObservation |
+| Normalización | Normalizador específico / EvidenceManager → Evidence |
 
 El plugin no debe introducir lógica de dominio en el Core ni en `RuleEngine`.
 
@@ -260,11 +238,11 @@ El catálogo de reglas actual reside en código. Cargarlo desde YAML, JSON, un r
 
 ## 14. Documentación relacionada
 
-- [`PROJECT.md`](PROJECT.md)
-- [`SPECIFICATION.md`](SPECIFICATION.md)
-- [`STORAGE.md`](STORAGE.md)
-- [`STANDARDS.md`](STANDARDS.md)
-- [`DEVELOPMENT.md`](DEVELOPMENT.md)
-- [`CORE_RUNTIME.md`](CORE_RUNTIME.md)
-- [`PLUGIN_SYSTEM.md`](PLUGIN_SYSTEM.md)
-- [`LLM_ARCHITECTURE.md`](LLM_ARCHITECTURE.md)
+- [Proyecto](PROJECT.md)
+- [Especificación](SPECIFICATION.md)
+- [Persistencia y trazabilidad](STORAGE.md)
+- [Estándares](STANDARDS.md)
+- [Desarrollo](DEVELOPMENT.md)
+- [Ciclo del Core](CORE_RUNTIME.md)
+- [Sistema de plugins](PLUGIN_SYSTEM.md)
+- [Arquitectura LLM](LLM_ARCHITECTURE.md)

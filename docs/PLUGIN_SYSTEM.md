@@ -2,7 +2,7 @@
 
 [Español](PLUGIN_SYSTEM.md) | [English](PLUGIN_SYSTEM.en.md)
 
-[Inicio](../README.md) · [`ARCHITECTURE.md`](ARCHITECTURE.md) · [`DEVELOPMENT.md`](DEVELOPMENT.md)
+[Inicio](../README.md) · [Arquitectura](ARCHITECTURE.md) · [Desarrollo](DEVELOPMENT.md)
 
 ## 1. Alcance y responsabilidades
 

@@ -2,9 +2,26 @@
 
 [Español](DEPLOYMENT_WINDOWS.md) | [English](DEPLOYMENT_WINDOWS.en.md)
 
-[Home](../README.en.md) · [`INSTALL.en.md`](INSTALL.en.md) · [`USER_GUIDE.en.md`](USER_GUIDE.en.md)
+[Home](../README.en.md) · [Installation](INSTALL.en.md) · [User guide](USER_GUIDE.en.md)
 
 These instructions apply to `v1.0.0`. The tag retains older local documentation and the Python package uses a different version label; see the [release and documentation scope](../README.en.md#release). Keep the [current online guide](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/blob/main/docs/DEPLOYMENT_WINDOWS.en.md) available when switching tags.
+
+<details>
+<summary>On this page</summary>
+
+- [1. Scope and limits](#1-scope-and-limits)
+- [2. Requirements and preparation](#2-requirements-and-preparation)
+- [3. Core installation](#3-core-installation)
+- [4. Launcher and offline checks](#4-launcher-and-offline-checks)
+- [5. Persistent workspace](#5-persistent-workspace)
+- [6. Local Ollama and configuration](#6-local-ollama-and-configuration)
+- [7. Tools and coverage](#7-tools-and-coverage)
+- [8. Session and functional validation](#8-session-and-functional-validation)
+- [9. Security and GPU](#9-security-and-gpu)
+- [10. Updates and removal](#10-updates-and-removal)
+- [11. Troubleshooting and references](#11-troubleshooting-and-references)
+
+</details>
 
 ## 1. Scope and limits
 
@@ -152,8 +169,8 @@ Uninstalling the package does not remove the workspace or Ollama and its models.
 
 Launcher, Python environment, permissions, Ollama and external-tool issues are covered in [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md).
 
-- [`USER_GUIDE.en.md`](USER_GUIDE.en.md)
-- [`CONFIGURATION.en.md`](CONFIGURATION.en.md)
-- [`STORAGE.en.md`](STORAGE.en.md)
-- [`SECURITY_ARCHITECTURE.en.md`](SECURITY_ARCHITECTURE.en.md)
-- [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)
+- [User guide](USER_GUIDE.en.md)
+- [Configuration](CONFIGURATION.en.md)
+- [Storage and traceability](STORAGE.en.md)
+- [Security](SECURITY_ARCHITECTURE.en.md)
+- [Development](DEVELOPMENT.en.md)

@@ -2,11 +2,11 @@
 
 [Español](GPU_OLLAMA_DOCKER.md) | [English](GPU_OLLAMA_DOCKER.en.md)
 
-[Inicio](../README.md) · [`DEPLOYMENT_GIT_DOCKER.md`](DEPLOYMENT_GIT_DOCKER.md) · [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md)
+[Inicio](../README.md) · [Despliegue Git + Docker](DEPLOYMENT_GIT_DOCKER.md) · [Resolución de problemas](TROUBLESHOOTING.md)
 
 ## 1. Estado y alcance
 
-**Guía experimental, sin certificación de hardware GPU por CENTAURUS.** La baseline distribuida sigue siendo CPU. El repositorio no incluye overlays GPU: los ejemplos siguientes son propuestas de configuración local que requieren preparación y validación en el host real. Publicar esta guía no implica que se hayan ejecutado esas pruebas.
+> **Experimental.** **Guía experimental, sin certificación de hardware GPU por CENTAURUS.** La baseline distribuida sigue siendo CPU. El repositorio no incluye overlays GPU: los ejemplos siguientes son propuestas de configuración local que requieren preparación y validación en el host real. Publicar esta guía no implica que se hayan ejecutado esas pruebas.
 
 | Variante | Estado en CENTAURUS |
 | --- | --- |

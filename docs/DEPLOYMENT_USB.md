@@ -2,7 +2,7 @@
 
 [Español](DEPLOYMENT_USB.md) | [English](DEPLOYMENT_USB.en.md)
 
-[Inicio](../README.md) · [INSTALL.md](INSTALL.md) · [USER_GUIDE.md](USER_GUIDE.md)
+[Inicio](../README.md) · [Instalación](INSTALL.md) · [Guía de uso](USER_GUIDE.md)
 
 ## 1. Alcance y requisitos
 
@@ -10,7 +10,7 @@
 
 El equipo de destino debe admitir x86-64 y arranque UEFI. La validación de referencia se realizó en un Toshiba Z30-A con Ethernet Intel I218-V y controlador `e1000e`. Esa referencia no garantiza compatibilidad con cualquier adaptador Ethernet o GPU. La baseline utiliza CPU.
 
-**Para disponer de red se necesita conexión por cable Ethernet y una tarjeta de red compatible.** La imagen USB distribuida no incorpora controlador ni gestor de conexiones Wi-Fi desplegados; Wi-Fi no es una vía de conexión soportada en esta distribución. Conecta el cable Ethernet a una red con DHCP y acceso a las fuentes OSINT necesarias.
+> **Importante.** **Para disponer de red se necesita conexión por cable Ethernet y una tarjeta de red compatible.** La imagen USB distribuida no incorpora controlador ni gestor de conexiones Wi-Fi desplegados; Wi-Fi no es una vía de conexión soportada en esta distribución. Conecta el cable Ethernet a una red con DHCP y acceso a las fuentes OSINT necesarias.
 
 El dispositivo debe disponer de **al menos `31457280000` bytes reales**. Comprueba su capacidad en bytes: la etiqueta comercial «32 GB» no sustituye esa comprobación. Conserva espacio adicional para guardar la imagen original en el equipo que realizará la escritura.
 
@@ -23,7 +23,12 @@ El dispositivo debe disponer de **al menos `31457280000` bytes reales**. Comprue
 | Fichero | `CENTAURUS-USB.img` |
 | Tamaño en bytes | `31457280000` |
 | Sectores de 512 bytes | `61440000` |
-| SHA-256 | `7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165` |
+
+**SHA-256**
+
+```text
+7bb1f954d478b1bf405ee5b74d8a55370aedb5901355e151ca6cdaa918cd0165
+```
 
 En Linux:
 
@@ -43,7 +48,7 @@ No continúes si tamaño o hash difieren. La verificación identifica la descarg
 
 ## 3. Identificar el destino
 
-**La escritura de la imagen sobrescribe la tabla de particiones y los datos del dispositivo seleccionado.** Respalda cualquier contenido que necesites conservar e identifica el disco por modelo, número de serie y capacidad. No lo selecciones únicamente por una letra de unidad o por el orden de aparición.
+> **Importante.** **La escritura de la imagen sobrescribe la tabla de particiones y los datos del dispositivo seleccionado.** Respalda cualquier contenido que necesites conservar e identifica el disco por modelo, número de serie y capacidad. No lo selecciones únicamente por una letra de unidad o por el orden de aparición.
 
 En Linux, consulta el inventario sin modificarlo:
 
@@ -61,7 +66,9 @@ Selecciona el **disco USB completo**, nunca una partición ni el disco del siste
 
 ## 4. Escritura raw
 
-La validación del proyecto utilizó **HDDRawCopy 2.6 en Windows** para escribir el medio físico. Esta referencia identifica el procedimiento validado históricamente; no certifica otras versiones ni cualquier hardware. En esa herramienta, selecciona **FILE** como origen, elige la imagen verificada y después el dispositivo USB físico previamente identificado como destino. La secuencia siguiente también se aplica a una herramienta raw equivalente, cuyo comportamiento debe comprobarse para el entorno elegido.
+La validación del proyecto utilizó **HDDRawCopy 2.6 en Windows** para escribir el medio físico. Esta referencia identifica el procedimiento validado históricamente; no certifica otras versiones ni cualquier hardware.
+
+En esa herramienta, selecciona **FILE** como origen, elige la imagen verificada y después el dispositivo USB físico previamente identificado como destino. La secuencia siguiente también se aplica a una herramienta raw equivalente, cuyo comportamiento debe comprobarse para el entorno elegido.
 
 1. Abre una herramienta de escritura de imágenes raw que permita seleccionar un disco físico, con los permisos administrativos necesarios.
 2. Selecciona `CENTAURUS-USB.img` como origen y vuelve a contrastar la identidad y capacidad del destino.
@@ -70,7 +77,9 @@ La validación del proyecto utilizó **HDDRawCopy 2.6 en Windows** para escribir
 5. Si la herramienta ofrece verificación posterior, ejecútala antes del primer arranque. En dispositivos mayores, compara la región escrita de longitud `31457280000` bytes, no el hash de todo el dispositivo.
 6. Expulsa el medio de forma segura. Si el sistema propone formatear particiones que no reconoce, cancela esa propuesta.
 
-Un dispositivo reutilizado y mayor que la imagen puede conservar metadatos de un particionado anterior fuera de la región sobrescrita, incluida una copia GPT al final físico. Su preparación requiere revisión administrativa previa, identificación inequívoca y respaldo. No aceptes reparaciones automáticas de GPT ni ampliaciones de particiones como parte de este procedimiento. El espacio adicional sin asignar no implica que el workspace se haya ampliado.
+Un dispositivo reutilizado y mayor que la imagen puede conservar metadatos de un particionado anterior fuera de la región sobrescrita, incluida una copia GPT al final físico. Su preparación requiere revisión administrativa previa, identificación inequívoca y respaldo.
+
+No aceptes reparaciones automáticas de GPT ni ampliaciones de particiones como parte de este procedimiento. El espacio adicional sin asignar no implica que el workspace se haya ampliado.
 
 ## 5. Primer arranque y uso
 
@@ -109,7 +118,7 @@ Para extraer casos, realizar copias consistentes y comprobar una recuperación, 
 
 ## 7. Documentación relacionada
 
-- [`DEPLOYMENT_OVA.md`](DEPLOYMENT_OVA.md)
-- [`CONFIGURATION.md`](CONFIGURATION.md)
-- [`SECURITY_ARCHITECTURE.md`](SECURITY_ARCHITECTURE.md)
-- [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md)
+- [Despliegue OVA](DEPLOYMENT_OVA.md)
+- [Configuración](CONFIGURATION.md)
+- [Seguridad](SECURITY_ARCHITECTURE.md)
+- [Resolución de problemas](TROUBLESHOOTING.md)

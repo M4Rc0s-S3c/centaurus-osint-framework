@@ -2,9 +2,26 @@
 
 [Español](DEPLOYMENT_WINDOWS.md) | [English](DEPLOYMENT_WINDOWS.en.md)
 
-[Inicio](../README.md) · [`INSTALL.md`](INSTALL.md) · [`USER_GUIDE.md`](USER_GUIDE.md)
+[Inicio](../README.md) · [Instalación](INSTALL.md) · [Guía de uso](USER_GUIDE.md)
 
 Estas instrucciones se aplican a `v1.0.0`. El tag conserva documentación local anterior y el paquete Python utiliza una versión distinta; consulta el [alcance de release y documentación](../README.md#release). Mantén disponible la [guía actual en línea](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/blob/main/docs/DEPLOYMENT_WINDOWS.md) al cambiar de tag.
+
+<details>
+<summary>En esta guía</summary>
+
+- [1. Alcance y límites](#1-alcance-y-límites)
+- [2. Requisitos y preparación](#2-requisitos-y-preparación)
+- [3. Instalación del Core](#3-instalación-del-core)
+- [4. Lanzador y comprobaciones sin red](#4-lanzador-y-comprobaciones-sin-red)
+- [5. Workspace persistente](#5-workspace-persistente)
+- [6. Ollama local y configuración](#6-ollama-local-y-configuración)
+- [7. Herramientas y cobertura](#7-herramientas-y-cobertura)
+- [8. Sesión y validación funcional](#8-sesión-y-validación-funcional)
+- [9. Seguridad y GPU](#9-seguridad-y-gpu)
+- [10. Actualización y retirada](#10-actualización-y-retirada)
+- [11. Resolución de problemas y referencias](#11-resolución-de-problemas-y-referencias)
+
+</details>
 
 ## 1. Alcance y límites
 
@@ -152,8 +169,8 @@ Desinstalar el paquete no elimina el workspace ni Ollama y sus modelos. Conserva
 
 Los problemas de lanzador, entorno Python, permisos, Ollama y herramientas externas se recogen en [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).
 
-- [`USER_GUIDE.md`](USER_GUIDE.md)
-- [`CONFIGURATION.md`](CONFIGURATION.md)
-- [`STORAGE.md`](STORAGE.md)
-- [`SECURITY_ARCHITECTURE.md`](SECURITY_ARCHITECTURE.md)
-- [`DEVELOPMENT.md`](DEVELOPMENT.md)
+- [Guía de uso](USER_GUIDE.md)
+- [Configuración](CONFIGURATION.md)
+- [Persistencia y trazabilidad](STORAGE.md)
+- [Seguridad](SECURITY_ARCHITECTURE.md)
+- [Desarrollo](DEVELOPMENT.md)

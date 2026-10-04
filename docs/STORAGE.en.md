@@ -4,6 +4,26 @@
 
 [Home](../README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Specification](SPECIFICATION.en.md)
 
+<details>
+<summary>On this page</summary>
+
+- [1. Principle](#1-principle)
+- [2. Persisted artifacts](#2-persisted-artifacts)
+- [3. Stores](#3-stores)
+- [4. Physical layout](#4-physical-layout)
+- [5. RAW naming convention](#5-raw-naming-convention)
+- [6. Report](#6-report)
+- [7. ExecutionFailure](#7-executionfailure)
+- [8. Immutability and accumulation](#8-immutability-and-accumulation)
+- [9. Traceability](#9-traceability)
+- [10. Workspace in Git + Docker](#10-workspace-in-git--docker)
+- [11. Data excluded from the repository](#11-data-excluded-from-the-repository)
+- [12. Technology](#12-technology)
+- [13. Export, backup and recovery](#13-export-backup-and-recovery)
+- [14. Related documentation](#14-related-documentation)
+
+</details>
+
 ## 1. Principle
 
 Persistence belongs to infrastructure and is coordinated by the Core.
@@ -57,45 +77,19 @@ A configured `<workspace>` is used below. `/workspace` is the reference path in 
             └── failures/
 ```
 
-### RAW
+<a id="raw"></a>
+<a id="evidence"></a>
+<a id="findings"></a>
+<a id="reports"></a>
+<a id="operational-failures"></a>
 
-RAW is materialized in:
-
-```text
-evidences/raw/
-```
-
-### Evidence
-
-Normalized Evidence is materialized in:
-
-```text
-evidences/normalized/
-```
-
-### Findings
-
-Findings are stored in:
-
-```text
-findings/
-```
-
-### Reports
-
-Reports are stored in:
-
-```text
-reports/
-```
-
-### Operational failures
-
-Failures are stored in:
-
-```text
-execution/failures/
-```
+| Directory relative to the case | Artifact |
+| --- | --- |
+| `evidences/raw/` | `RawObservation` |
+| `evidences/normalized/` | `Evidence` |
+| `findings/` | `Finding` |
+| `reports/` | `Report` |
+| `execution/failures/` | `ExecutionFailure` |
 
 ## 5. RAW naming convention
 
@@ -179,17 +173,13 @@ investigation_id
 
 Conceptual explanation chain:
 
-```text
-Report
-  ↓
-Finding
-  ↓
-Rule + Evidence
-  ↓
-source / collected_at
-  ↓
-correlatable original RAW
-```
+| Review order | Element |
+| --- | --- |
+| 1 | `Report` |
+| 2 | `Finding` |
+| 3 | `Rule` + `Evidence` |
+| 4 | `source` / `collected_at` |
+| 5 | Correlatable original RAW |
 
 ### Forward traceability: from observation to report
 
@@ -262,6 +252,6 @@ This procedure is operational guidance; it does not claim a new OVA/USB recovery
 
 ## 14. Related documentation
 
-- [`ARCHITECTURE.en.md`](ARCHITECTURE.en.md)
-- [`SPECIFICATION.en.md`](SPECIFICATION.en.md)
-- [`INSTALL.en.md`](INSTALL.en.md)
+- [Architecture](ARCHITECTURE.en.md)
+- [Specification](SPECIFICATION.en.md)
+- [Installation](INSTALL.en.md)

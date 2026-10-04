@@ -2,7 +2,7 @@
 
 [Español](CORE_RUNTIME.md) | [English](CORE_RUNTIME.en.md)
 
-[Inicio](../README.md) · [`ARCHITECTURE.md`](ARCHITECTURE.md) · [`DEVELOPMENT.md`](DEVELOPMENT.md)
+[Inicio](../README.md) · [Arquitectura](ARCHITECTURE.md) · [Desarrollo](DEVELOPMENT.md)
 
 ## 1. Autoridad y entrada
 
@@ -91,4 +91,4 @@ Los plugins se instancian por tarea. Los proveedores HTTP cierran los clientes q
 - [`planner.py`](../src/centaurus/planner/planner.py)
 - [`executor.py`](../src/centaurus/executor/executor.py)
 - [`report_store.py`](../src/centaurus/persistence/filesystem/report_store.py)
-- [`TESTING.md`](TESTING.md)
+- [Estrategia de pruebas](TESTING.md)

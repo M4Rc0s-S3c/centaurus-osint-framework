@@ -2,7 +2,7 @@
 
 [Español](CORE_RUNTIME.md) | [English](CORE_RUNTIME.en.md)
 
-[Home](../README.en.md) · [`ARCHITECTURE.en.md`](ARCHITECTURE.en.md) · [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)
+[Home](../README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Development](DEVELOPMENT.en.md)
 
 ## 1. Authority and input
 
@@ -91,4 +91,4 @@ Plugins are instantiated per task. HTTP providers close clients they create; an 
 - [`planner.py`](../src/centaurus/planner/planner.py)
 - [`executor.py`](../src/centaurus/executor/executor.py)
 - [`report_store.py`](../src/centaurus/persistence/filesystem/report_store.py)
-- [`TESTING.en.md`](TESTING.en.md)
+- [Testing strategy](TESTING.en.md)

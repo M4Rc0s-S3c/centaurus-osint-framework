@@ -2,7 +2,7 @@
 
 [Español](TESTING.md) | [English](TESTING.en.md)
 
-[Inicio](../README.md) · [`ARCHITECTURE.md`](ARCHITECTURE.md) · [`DEVELOPMENT.md`](DEVELOPMENT.md)
+[Inicio](../README.md) · [Arquitectura](ARCHITECTURE.md) · [Desarrollo](DEVELOPMENT.md)
 
 ## 1. Propósito y preparación
 
@@ -25,14 +25,14 @@ Los dobles deben situarse en las fronteras que la prueba no pretende validar. Su
 
 | Área | Comprobaciones relevantes | Referencias de la suite |
 | --- | --- | --- |
-| Entrada y capacidades | Target determinista, Intent permitido, catálogo y rechazo de entrada inválida. | [`test_request_input.py`](../tests/test_request_input.py), [`test_capabilities.py`](../tests/test_capabilities.py) |
-| Plugins y normalización | Parámetros, RAW representativo, errores de adquisición y representación normalizada. | [`test_plugin_manager.py`](../tests/test_plugin_manager.py), [`test_theharvester_normalizer.py`](../tests/test_theharvester_normalizer.py) |
-| Reglas | Coincidencia/no coincidencia, tipos, ausencia explícita, tiempos y corroboración entre fuentes. | [`test_rule_engine.py`](../tests/test_rule_engine.py), [`test_exposure_rules.py`](../tests/test_exposure_rules.py) |
-| Core y ejecución | Secuencia, validación del plan, resultado parcial, fallo total y autoridad del ciclo. | [`test_core.py`](../tests/test_core.py), [`test_executor.py`](../tests/test_executor.py) |
-| Persistencia | Artefactos separados, trazabilidad, rechazo de sobrescritura y fallos de escritura. | [`test_persistence_extended.py`](../tests/test_persistence_extended.py), [`test_raw_observation_store.py`](../tests/test_raw_observation_store.py) |
-| LLM | Esquema, referencias, proyección minimizada, rechazo factual y omisiones orientativas. | [`test_llm.py`](../tests/test_llm.py), [`test_inference_profile.py`](../tests/test_inference_profile.py) |
-| Presentación y observabilidad | Informe Markdown, códigos de salida, progreso y logging. | [`test_report_markdown.py`](../tests/test_report_markdown.py), [`test_cli_app.py`](../tests/test_cli_app.py), [`test_runtime_progress.py`](../tests/test_runtime_progress.py) |
-| Distribución y controles host | Contratos de scripts, configuración, suministro y wrappers. | [`test_linux_distribution.py`](../tests/test_linux_distribution.py), [`test_ova_runtime_broker.py`](../tests/test_ova_runtime_broker.py), [`test_ova_poweroff_helper.py`](../tests/test_ova_poweroff_helper.py) |
+| Entrada y capacidades | Target determinista, Intent permitido, catálogo y rechazo de entrada inválida. | [request input](../tests/test_request_input.py), [capabilities](../tests/test_capabilities.py) |
+| Plugins y normalización | Parámetros, RAW representativo, errores de adquisición y representación normalizada. | [plugin manager](../tests/test_plugin_manager.py), [theharvester normalizer](../tests/test_theharvester_normalizer.py) |
+| Reglas | Coincidencia/no coincidencia, tipos, ausencia explícita, tiempos y corroboración entre fuentes. | [rule engine](../tests/test_rule_engine.py), [exposure rules](../tests/test_exposure_rules.py) |
+| Core y ejecución | Secuencia, validación del plan, resultado parcial, fallo total y autoridad del ciclo. | [core](../tests/test_core.py), [executor](../tests/test_executor.py) |
+| Persistencia | Artefactos separados, trazabilidad, rechazo de sobrescritura y fallos de escritura. | [persistence extended](../tests/test_persistence_extended.py), [raw observation store](../tests/test_raw_observation_store.py) |
+| LLM | Esquema, referencias, proyección minimizada, rechazo factual y omisiones orientativas. | [llm](../tests/test_llm.py), [inference profile](../tests/test_inference_profile.py) |
+| Presentación y observabilidad | Informe Markdown, códigos de salida, progreso y logging. | [report markdown](../tests/test_report_markdown.py), [cli app](../tests/test_cli_app.py), [runtime progress](../tests/test_runtime_progress.py) |
+| Distribución y controles host | Contratos de scripts, configuración, suministro y wrappers. | [linux distribution](../tests/test_linux_distribution.py), [ova runtime broker](../tests/test_ova_runtime_broker.py), [ova poweroff helper](../tests/test_ova_poweroff_helper.py) |
 
 Son puntos de entrada representativos, no una lista exhaustiva ni una afirmación de cobertura porcentual.
 
@@ -68,7 +68,7 @@ Los recuentos y métricas de cierres históricos describen su commit y plataform
 
 ## 7. Documentación relacionada
 
-- [`DEVELOPMENT.md`](DEVELOPMENT.md)
-- [`STANDARDS.md`](STANDARDS.md)
-- [`PLUGIN_SYSTEM.md`](PLUGIN_SYSTEM.md)
-- [`SECURITY_ARCHITECTURE.md`](SECURITY_ARCHITECTURE.md)
+- [Desarrollo](DEVELOPMENT.md)
+- [Estándares](STANDARDS.md)
+- [Sistema de plugins](PLUGIN_SYSTEM.md)
+- [Seguridad](SECURITY_ARCHITECTURE.md)

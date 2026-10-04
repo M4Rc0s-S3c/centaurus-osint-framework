@@ -2,7 +2,7 @@
 
 [Español](PLUGIN_SYSTEM.md) | [English](PLUGIN_SYSTEM.en.md)
 
-[Home](../README.en.md) · [`ARCHITECTURE.en.md`](ARCHITECTURE.en.md) · [`DEVELOPMENT.en.md`](DEVELOPMENT.en.md)
+[Home](../README.en.md) · [Architecture](ARCHITECTURE.en.md) · [Development](DEVELOPMENT.en.md)
 
 ## 1. Scope and responsibilities
 

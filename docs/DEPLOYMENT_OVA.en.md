@@ -2,7 +2,7 @@
 
 [Español](DEPLOYMENT_OVA.md) | [English](DEPLOYMENT_OVA.en.md)
 
-[Home](../README.en.md) · [INSTALL.en.md](INSTALL.en.md) · [USER_GUIDE.en.md](USER_GUIDE.en.md)
+[Home](../README.en.md) · [Installation](INSTALL.en.md) · [User guide](USER_GUIDE.en.md)
 
 ## 1. Scope and requirements
 
@@ -35,7 +35,12 @@ Keep an original copy for future imports.
 | --- | --- |
 | File | `CENTAURUS-C4-FINAL.ova` |
 | Size in bytes | `11828618752` |
-| SHA-256 | `d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868` |
+
+**SHA-256**
+
+```text
+d8ed4bbbce29d604be59464594a06c1c06b62a4a8840f7cb4140a086ce679868
+```
 
 On Linux:
 
@@ -118,7 +123,7 @@ The command accepts zero arguments and requires fresh authentication. Wait for s
 
 ## 8. Related documentation
 
-- [`CONFIGURATION.en.md`](CONFIGURATION.en.md)
-- [`SECURITY_ARCHITECTURE.en.md`](SECURITY_ARCHITECTURE.en.md)
-- [`DEPLOYMENT_USB.en.md`](DEPLOYMENT_USB.en.md)
-- [`TROUBLESHOOTING.en.md`](TROUBLESHOOTING.en.md)
+- [Configuration](CONFIGURATION.en.md)
+- [Security](SECURITY_ARCHITECTURE.en.md)
+- [USB deployment](DEPLOYMENT_USB.en.md)
+- [Troubleshooting](TROUBLESHOOTING.en.md)

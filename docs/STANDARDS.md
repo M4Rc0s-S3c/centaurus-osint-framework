@@ -1,6 +1,7 @@
 # Estándares del proyecto
 
 [Español](STANDARDS.md) | [English](STANDARDS.en.md)
+
 [Inicio](../README.md) · [Arquitectura](ARCHITECTURE.md) · [Desarrollo](DEVELOPMENT.md)
 
 ## 1. Arquitectura
