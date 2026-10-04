@@ -203,13 +203,13 @@ Choose the documents for your task; you do not need to read the full index in or
 
 ## Release
 
-The deployment guides on `main` document the `v1.0.0` release and the OVA/USB artifacts identified in their respective guides. The `v1.0.0` tag retains an earlier documentation tree: switching to that tag does not bring the later guides into a local checkout. Use the [documentation on main](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/tree/main/docs) alongside the selected release, and record the documentation commit for an audit. GPU examples remain experimental.
+`v1.0.1` is a documentation-only release: it consolidates the Spanish and English guides and repository cleanup without changing application code, dependencies, scripts or Docker configuration relative to `v1.0.0`. The new tag includes `docs/`; the `v1.0.0` tag retains the earlier documentation tree. See the [v1.0.1 release notes](docs/RELEASE_NOTES_v1.0.1.en.md). OVA and USB remain the same previously distributed artifacts, with unchanged names, sizes and SHA-256 hashes in their deployment guides. They have not been rebuilt or revalidated for this release. GPU examples remain experimental.
 
-The release label `v1.0.0` is distinct from the Python package version: `pyproject.toml` declares `0.4.0-dev`, which packaging normalizes to `0.4.0.dev0`. Therefore, `centaurus --version` may display the package version rather than the release label. Identify a source deployment by its tag and full commit, and an appliance by its artifact hash; `--version` alone does not establish distribution identity.
+The release label `v1.0.1` is distinct from the Python package version: `pyproject.toml` declares `0.4.0-dev`, which packaging normalizes to `0.4.0.dev0`. Therefore, `centaurus --version` may display the package version rather than the release label. Identify a source deployment by its tag and full commit, and an appliance by its artifact hash; `--version` alone does not establish distribution identity.
 
 Current public release:
 
-**[v1.0.0](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.0)**
+**[v1.0.1](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.1)**
 
 The academic TFM delivery was frozen separately and remains reproducible from the source-delivery commit documented in the submitted materials. Subsequent repository changes limited to public documentation and licensing do not alter that frozen academic snapshot.
 

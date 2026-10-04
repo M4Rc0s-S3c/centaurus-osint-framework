@@ -203,13 +203,13 @@ Elige los documentos según tu tarea; no es necesario leer todo el índice en or
 
 ## Release
 
-Las guías de despliegue de `main` describen la release `v1.0.0` y los artefactos OVA/USB identificados en sus respectivas guías. El tag `v1.0.0` conserva un árbol documental anterior: seleccionarlo no incorpora las guías posteriores al checkout local. Consulta la [documentación de main](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/tree/main/docs) junto a la release elegida y registra el commit documental para una auditoría. Los ejemplos GPU siguen siendo experimentales.
+`v1.0.1` es una release exclusivamente documental: consolida las guías en español e inglés y la limpieza del repositorio sin modificar código de la aplicación, dependencias, scripts ni configuración Docker respecto a `v1.0.0`. El nuevo tag incluye `docs/`; el tag `v1.0.0` conserva el árbol documental anterior. Consulta las [notas de v1.0.1](docs/RELEASE_NOTES_v1.0.1.md). OVA y USB siguen siendo los mismos artefactos distribuidos previamente, con sus nombres, tamaños y SHA-256 originales en las guías de despliegue. No se han reconstruido ni revalidado para esta release. Los ejemplos GPU siguen siendo experimentales.
 
-La etiqueta de release `v1.0.0` es distinta de la versión del paquete Python: `pyproject.toml` declara `0.4.0-dev`, normalizada por el empaquetado como `0.4.0.dev0`. Por eso, `centaurus --version` puede mostrar la versión del paquete en lugar de la etiqueta de release. Identifica un despliegue desde fuentes por su tag y commit completo, y una appliance por el hash de su artefacto; `--version` no identifica por sí solo la distribución.
+La etiqueta de release `v1.0.1` es distinta de la versión del paquete Python: `pyproject.toml` declara `0.4.0-dev`, normalizada por el empaquetado como `0.4.0.dev0`. Por eso, `centaurus --version` puede mostrar la versión del paquete en lugar de la etiqueta de release. Identifica un despliegue desde fuentes por su tag y commit completo, y una appliance por el hash de su artefacto; `--version` no identifica por sí solo la distribución.
 
 Release pública actual:
 
-**[v1.0.0](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.0)**
+**[v1.0.1](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.1)**
 
 La entrega académica del TFM quedó congelada de forma independiente y continúa siendo reproducible desde el commit de entrega documentado en los materiales presentados. Los cambios posteriores del repositorio limitados a documentación pública y licencia no alteran esa fotografía académica congelada.
 

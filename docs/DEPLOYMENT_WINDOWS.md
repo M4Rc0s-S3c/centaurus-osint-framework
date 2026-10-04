@@ -4,7 +4,7 @@
 
 [Inicio](../README.md) · [Instalación](INSTALL.md) · [Guía de uso](USER_GUIDE.md)
 
-Estas instrucciones se aplican a `v1.0.0`. El tag conserva documentación local anterior y el paquete Python utiliza una versión distinta; consulta el [alcance de release y documentación](../README.md#release). Mantén disponible la [guía actual en línea](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/blob/main/docs/DEPLOYMENT_WINDOWS.md) al cambiar de tag.
+Estas instrucciones seleccionan `v1.0.1`, una release documental con el mismo código de aplicación y entradas de construcción que `v1.0.0`. Este tag incluye el árbol de guías actual. El paquete Python mantiene `0.4.0-dev` (`0.4.0.dev0` al instalarse); consulta el [alcance de release y documentación](../README.md#release) y las [notas de publicación](RELEASE_NOTES_v1.0.1.md). Seleccionar este tag no actualiza el software dentro de los artefactos OVA/USB existentes.
 
 <details>
 <summary>En esta guía</summary>
@@ -47,12 +47,12 @@ Con Git para Windows instalado, obtén la release pública y registra su commit:
 ```powershell
 git clone https://github.com/M4Rc0s-S3c/centaurus-osint-framework.git
 Set-Location centaurus-osint-framework
-git checkout --detach v1.0.0
+git checkout --detach v1.0.1
 git rev-parse HEAD
 git status --porcelain --untracked-files=all
 ```
 
-El último comando debe quedar sin salida. Como alternativa, descarga **Source code (zip)** desde la [release v1.0.0](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.0), extráelo y abre PowerShell en la raíz extraída. El ZIP de fuentes permite instalar el paquete nativo; no sustituye al checkout Git exigido por el bootstrap Linux.
+El último comando debe quedar sin salida. Como alternativa, descarga **Source code (zip)** desde la [release v1.0.1](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.1), extráelo y abre PowerShell en la raíz extraída. El ZIP de fuentes permite instalar el paquete nativo; no sustituye al checkout Git exigido por el bootstrap Linux.
 
 Ejecuta los pasos siguientes desde la raíz del repositorio, donde está `pyproject.toml`. Conserva la identidad del tag/commit o ZIP utilizado. No es necesario activar el entorno virtual ni cambiar la política de ejecución de PowerShell.
 

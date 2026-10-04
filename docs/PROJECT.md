@@ -10,7 +10,7 @@
 
 Su objetivo es proporcionar una plataforma reproducible para realizar evaluaciones pasivas de exposición pública, preservando la trazabilidad entre fuentes, evidencias, hallazgos e informes.
 
-La release pública actual es **[v1.0.0](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.0)**.
+La release pública actual es **[v1.0.1](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.1)**. Es una actualización exclusivamente documental; el paquete Python y los artefactos OVA/USB existentes conservan sus versiones e identidades anteriores. Consulta las [notas de publicación](RELEASE_NOTES_v1.0.1.md).
 
 ## 2. Objetivo
 

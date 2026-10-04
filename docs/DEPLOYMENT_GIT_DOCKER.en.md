@@ -6,9 +6,9 @@
 
 This guide covers deployment from source on a Linux host. The prebuilt OVA is the main CENTAURUS distribution; see [`INSTALL.en.md`](INSTALL.en.md) to choose a deployment mode.
 
-Use a specific release/tag for a reproducible deployment. Public release: [v1.0.0](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.0).
+Use a specific release/tag for a reproducible deployment. Public release: [v1.0.1](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.1).
 
-These instructions apply to `v1.0.0`. The tag retains older local documentation and the Python package uses a different version label; see the [release and documentation scope](../README.en.md#release). Keep the [current online guide](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/blob/main/docs/DEPLOYMENT_GIT_DOCKER.en.md) available when switching tags.
+These instructions select `v1.0.1`, a documentation-only release with the same application code and build inputs as `v1.0.0`. This tag includes the current guide tree. The Python package remains `0.4.0-dev` (`0.4.0.dev0` when installed); see the [release and documentation scope](../README.en.md#release) and [release notes](RELEASE_NOTES_v1.0.1.en.md). Selecting this tag does not upgrade the software inside existing OVA/USB artifacts.
 
 <details>
 <summary>On this page</summary>
@@ -114,7 +114,7 @@ git fetch --tags --prune
 To deploy the current public release:
 
 ```bash
-git checkout --detach v1.0.0
+git checkout --detach v1.0.1
 ```
 
 Verify:

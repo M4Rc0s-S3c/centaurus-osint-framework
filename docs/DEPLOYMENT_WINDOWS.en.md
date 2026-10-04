@@ -4,7 +4,7 @@
 
 [Home](../README.en.md) · [Installation](INSTALL.en.md) · [User guide](USER_GUIDE.en.md)
 
-These instructions apply to `v1.0.0`. The tag retains older local documentation and the Python package uses a different version label; see the [release and documentation scope](../README.en.md#release). Keep the [current online guide](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/blob/main/docs/DEPLOYMENT_WINDOWS.en.md) available when switching tags.
+These instructions select `v1.0.1`, a documentation-only release with the same application code and build inputs as `v1.0.0`. This tag includes the current guide tree. The Python package remains `0.4.0-dev` (`0.4.0.dev0` when installed); see the [release and documentation scope](../README.en.md#release) and [release notes](RELEASE_NOTES_v1.0.1.en.md). Selecting this tag does not upgrade the software inside existing OVA/USB artifacts.
 
 <details>
 <summary>On this page</summary>
@@ -47,12 +47,12 @@ With Git for Windows installed, obtain the public release and record its commit:
 ```powershell
 git clone https://github.com/M4Rc0s-S3c/centaurus-osint-framework.git
 Set-Location centaurus-osint-framework
-git checkout --detach v1.0.0
+git checkout --detach v1.0.1
 git rev-parse HEAD
 git status --porcelain --untracked-files=all
 ```
 
-The final command should produce no output. Alternatively, download **Source code (zip)** from the [v1.0.0 release](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.0), extract it and open PowerShell in the extracted root. A source ZIP supports native package installation; it does not replace the Git checkout required by the Linux bootstrap.
+The final command should produce no output. Alternatively, download **Source code (zip)** from the [v1.0.1 release](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.1), extract it and open PowerShell in the extracted root. A source ZIP supports native package installation; it does not replace the Git checkout required by the Linux bootstrap.
 
 Run the following steps from the repository root containing `pyproject.toml`. Retain the identity of the tag/commit or ZIP used. Neither virtual-environment activation nor a PowerShell execution-policy change is required.
 

@@ -10,7 +10,7 @@
 
 Its goal is to provide a reproducible platform for passive public-exposure assessments while preserving traceability from sources to evidence, findings and reports.
 
-Current public release: **[v1.0.0](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.0)**.
+Current public release: **[v1.0.1](https://github.com/M4Rc0s-S3c/centaurus-osint-framework/releases/tag/v1.0.1)**. This is a documentation-only update; the Python package and existing OVA/USB artifacts retain their previous versions and identities. See the [release notes](RELEASE_NOTES_v1.0.1.en.md).
 
 ## 2. Purpose
 
